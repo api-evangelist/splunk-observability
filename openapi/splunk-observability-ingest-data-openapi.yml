@@ -1,0 +1,739 @@
+openapi: 3.0.3
+info:
+  title: Splunk Observability Cloud — Send traces, metrics and events
+  version: 4.0.1
+  description: 'API for ingesting traces, datapoints, and event data.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the GET /incident, GET /incident/{id},
+    GET /alertmuting, and GET /alertmuting/{id} operations.
+
+    You have to have the Splunk Observability Cloud admin or power role to use the PUT /incident/clear, PUT /incident/{id}/clear,
+    POST /alertmuting,  PUT /alertmuting/{id}, DELETE /alertmuting/{id}, and PUT /alertmuting/{id}/unmute operations.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference
+      pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's.
+      Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset
+      path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://ingest.{REALM}.observability.splunkcloud.com/v2
+  description: Trace, data point, and event ingest API endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.
+paths:
+  /datapoint:
+    post:
+      summary: Send Metrics
+      description: 'Send data points to Splunk Observability Cloud. To learn more about
+
+        sending data points, see the topic Send Monitoring Metrics and Custom Events'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: Authentication token. Must be an ingest token
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+              - title: Gauge metrics
+                type: object
+                properties:
+                  <metric_type>:
+                    type: array
+                    items:
+                      title: Individual data point
+                      type: object
+                      required:
+                      - metric
+                      - value
+                      properties:
+                        metric:
+                          title: Measurable system characteristic
+                          type: string
+                          example: <metric_name>
+                          description: 'The name of a measurable, changing characteristic of the systems
+
+                            you''re monitoring. A metric and its optional dimensions define a
+
+                            metric timeseries (MTS).
+
+                            To see the metric name standards, refer to the
+
+                            Metric name standards section in the user documentation
+
+                            The API silently rejects metric names that don''t conform to the standards.'
+                        value:
+                          title: Measured value of a metric
+                          type: number
+                          example: 99.98751
+                          description: 'A value measured for the metric specified in the metric property.
+
+                            Metric values must be a signed integer, float, or numeric string in decimal or fixed-point notation.
+                            The system stores them as 64-bit integers.
+
+                            The API silently rejects metric values that don''t conform to these requirements.'
+                        timestamp:
+                          title: A user-assigned timestamp
+                          type: integer
+                          format: int64
+                          minimum: 0
+                          example: 1557225030000
+                          description: 'A user-assigned timestamp formatted in *nix time in milliseconds.
+
+                            Note: In the stream of data points you send to the API using
+
+                            the /datapoint API, any values of timestamp that you send must
+
+                            be in monotonically ascending order.'
+                        dimensions:
+                          title: Descriptive system characteristics
+                          type: object
+                          minProperties: 1
+                          maxProperties: 36
+                          additionalProperties: true
+                          description: 'A map of key-value pairs that describe a characteristic
+
+                            of the systems you''re monitoring. Dimension values don''t change
+
+                            over time, and you use them to identify the systems that provide
+
+                            data points for MTS. For example, you can use the dimension
+
+                            "hostname": "host1" to identify a server that''s providing data
+
+                            for the cpu.utilization metric.
+
+                            To mark a data point as "high-resolution", add "sf_hires": "1" as a dimension for the data point.
+
+                            To see the criteria for dimension names and values, refer to the
+
+                            Dimension name and value standards
+
+                            section in the user documentation.'
+                      description: 'An object that specifies a metric, value, and optional dimensions and
+
+                        timestamp for a data point. You can use the same format for gauge,
+
+                        counter, and cumulative counter metric types.'
+                example:
+                  gauge:
+                  - metric: gaugeMetricName
+                    value: 99.98751
+                    dimensions:
+                      service: petstore
+                    timestamp: 1557225030000
+                description: 'Contains an array of the data points that the API should save as
+
+                  gauge metrics.'
+              - title: Counter metrics
+                type: object
+                properties:
+                  counter:
+                    type: array
+                    items:
+                      title: Individual data point
+                      type: object
+                      required:
+                      - metric
+                      - value
+                      properties:
+                        metric:
+                          title: Measurable system characteristic
+                          type: string
+                          example: <metric_name>
+                          description: 'The name of a measurable, changing characteristic of the systems
+
+                            you''re monitoring. A metric and its optional dimensions define a
+
+                            metric timeseries (MTS).
+
+                            To see the metric name standards, refer to the
+
+                            Metric name standards section in the user documentation
+
+                            The API silently rejects metric names that don''t conform to the standards.'
+                        value:
+                          title: Measured value of a metric
+                          type: number
+                          example: 99.98751
+                          description: 'A value measured for the metric specified in the metric property.
+
+                            Metric values must be a signed integer, float, or numeric string in decimal or fixed-point notation.
+                            The system stores them as 64-bit integers.
+
+                            The API silently rejects metric values that don''t conform to these requirements.'
+                        timestamp:
+                          title: A user-assigned timestamp
+                          type: integer
+                          format: int64
+                          minimum: 0
+                          example: 1557225030000
+                          description: 'A user-assigned timestamp formatted in *nix time in milliseconds.
+
+                            Note: In the stream of data points you send to the API using
+
+                            the /datapoint API, any values of timestamp that you send must
+
+                            be in monotonically ascending order.'
+                        dimensions:
+                          title: Descriptive system characteristics
+                          type: object
+                          minProperties: 1
+                          maxProperties: 36
+                          additionalProperties: true
+                          description: 'A map of key-value pairs that describe a characteristic
+
+                            of the systems you''re monitoring. Dimension values don''t change
+
+                            over time, and you use them to identify the systems that provide
+
+                            data points for MTS. For example, you can use the dimension
+
+                            "hostname": "host1" to identify a server that''s providing data
+
+                            for the cpu.utilization metric.
+
+                            To mark a data point as "high-resolution", add "sf_hires": "1" as a dimension for the data point.
+
+                            To see the criteria for dimension names and values, refer to the
+
+                            Dimension name and value standards
+
+                            section in the user documentation.'
+                      description: 'An object that specifies a metric, value, and optional dimensions and
+
+                        timestamp for a data point. You can use the same format for gauge,
+
+                        counter, and cumulative counter metric types.'
+                example:
+                  counter:
+                  - metric: counterMetricName
+                    value: 99.98751
+                    dimensions:
+                      service: petstore
+                    timestamp: 1557225030000
+                description: 'Contains an array of the data points that Splunk Observability Cloud should save as
+
+                  counter metrics.'
+              - title: Cumulative counter metrics
+                type: object
+                properties:
+                  cumulative_counter:
+                    type: array
+                    items:
+                      title: Individual data point
+                      type: object
+                      required:
+                      - metric
+                      - value
+                      properties:
+                        metric:
+                          title: Measurable system characteristic
+                          type: string
+                          example: <metric_name>
+                          description: 'The name of a measurable, changing characteristic of the systems
+
+                            you''re monitoring. A metric and its optional dimensions define a
+
+                            metric timeseries (MTS).
+
+                            To see the metric name standards, refer to the
+
+                            Metric name standards section in the user documentation
+
+                            The API silently rejects metric names that don''t conform to the standards.'
+                        value:
+                          title: Measured value of a metric
+                          type: number
+                          example: 99.98751
+                          description: 'A value measured for the metric specified in the metric property.
+
+                            Metric values must be a signed integer, float, or numeric string in decimal or fixed-point notation.
+                            The system stores them as 64-bit integers.
+
+                            The API silently rejects metric values that don''t conform to these requirements.'
+                        timestamp:
+                          title: A user-assigned timestamp
+                          type: integer
+                          format: int64
+                          minimum: 0
+                          example: 1557225030000
+                          description: 'A user-assigned timestamp formatted in *nix time in milliseconds.
+
+                            Note: In the stream of data points you send to the API using
+
+                            the /datapoint API, any values of timestamp that you send must
+
+                            be in monotonically ascending order.'
+                        dimensions:
+                          title: Descriptive system characteristics
+                          type: object
+                          minProperties: 1
+                          maxProperties: 36
+                          additionalProperties: true
+                          description: 'A map of key-value pairs that describe a characteristic
+
+                            of the systems you''re monitoring. Dimension values don''t change
+
+                            over time, and you use them to identify the systems that provide
+
+                            data points for MTS. For example, you can use the dimension
+
+                            "hostname": "host1" to identify a server that''s providing data
+
+                            for the cpu.utilization metric.
+
+                            To mark a data point as "high-resolution", add "sf_hires": "1" as a dimension for the data point.
+
+                            To see the criteria for dimension names and values, refer to the
+
+                            Dimension name and value standards
+
+                            section in the user documentation.'
+                      description: 'An object that specifies a metric, value, and optional dimensions and
+
+                        timestamp for a data point. You can use the same format for gauge,
+
+                        counter, and cumulative counter metric types.'
+                example:
+                  cumulative_counter:
+                  - metric: cumulativeCounterMetricName
+                    value: 99.98751
+                    dimensions:
+                      service: petstore
+                    timestamp: 1557225030000
+                description: 'Contains an array of the data points that the API should save as
+
+                  cumulative counter metrics.'
+            examples:
+              Gauge metrics:
+                value:
+                  gauge:
+                  - dimensions:
+                      service: petstore
+                    metric: gaugeMetricName
+                    timestamp: 1557225030000
+                    value: 99.98751
+              Counter metrics:
+                value:
+                  counter:
+                  - dimensions:
+                      service: petstore
+                    metric: counterMetricName
+                    timestamp: 1557225030000
+                    value: 99.98751
+              Cumulative counter metrics:
+                value:
+                  cumulative_counter:
+                  - dimensions:
+                      service: petstore
+                    metric: cumulativeCounterMetricName
+                    timestamp: 1557225030000
+                    value: 99.98751
+      responses:
+        '200':
+          description: HTTP 200 response
+        '400':
+          description: HTTP 400 response
+        '401':
+          description: HTTP 401 response
+      security:
+      - SessionToken: []
+      tags:
+      - Send traces, metrics and events
+  /datapoint/otlp:
+    post:
+      summary: Send OTLP Metrics
+      description: 'Send metric data in OTLP format, serialized as Protobuf. Set your content type to "application/x-protobuf"
+        and post the protobuf file using this endpoint.
+
+        For more information on the OTLP metrics schema, see the metrics.proto file on GitHub.
+
+        To learn more about sending data points, see the topic Send Monitoring Metrics and Custom Events.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always "application/x-protobuf".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: Authentication token. Must be an ingest token
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/x-protobuf:
+            schema:
+              type: string
+              format: binary
+            examples:
+              example:
+                value: string
+      responses:
+        '200':
+          description: HTTP 200 response
+        '400':
+          description: HTTP 400 response
+        '401':
+          description: HTTP 401 response
+      security:
+      - SessionToken: []
+      tags:
+      - Send traces, metrics and events
+  /event:
+    post:
+      summary: Send Events
+      description: 'Sends events to Splunk Observability Cloud. Use this API for the following tasks:
+
+
+        Send custom events that Splunk Observability Cloud itself doesn''t detect, such as software deployments or
+
+        hardware changes. You can then correlate these events with changes detected in your metrics.
+
+        Send standard events that use the same format as Splunk Observability Cloud.
+
+
+        Note: The following field names differ between the GET v2/event/find operation and
+
+        the POST v2/event operation:
+
+
+        GET v2/event/find, field sf_eventType returns the information you send in POST v2/event
+
+        field eventType.
+
+        GET v2/event/find, field sf_eventCategory returns the information you send in POST v2/event
+
+        field category.
+
+
+        For more information, see Retrieve Events V2
+
+        in the API reference documentation.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: Authentication token. Must be an ingest token
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                required:
+                - eventType
+                properties:
+                  category:
+                    type: string
+                    enum:
+                    - USER_DEFINED
+                    - ALERT
+                    - AUDIT
+                    - JOB
+                    - COLLECTED
+                    - SERVICE_DISCOVERY
+                    - EXCEPTION
+                    description: 'A category that describes the event. The values are a set of enumerated types.
+
+                      Splunk Observability Cloud sets some values, while you can set others:
+
+
+                      USER_DEFINED: The default for events
+
+                      ALERT: Used by Splunk Observability Cloud to mark an event generated by
+
+                      a detector.
+
+                      AUDIT: Used by third-party integrations
+
+                      JOB: Event generated by an Splunk Observability Cloud or third-party
+
+                      background job
+
+                      COLLECTD: Generated by the Splunk Observability Cloud collectd integration
+
+                      SERVICE_DISCOVERY: Generated by third-party integrations
+
+                      EXCEPTION: A software exception occurred'
+                  eventType:
+                    type: string
+                    description: 'Your name for the event. The eventType field must conform to the following:
+
+
+                      Non-empty ASCII string with a length less than or equal to 256 characters.
+
+                      Can''t contain blanks (" ").
+
+                      To separate words, use underscores ("_") and dashes ("-").'
+                  dimensions:
+                    type: object
+                    description: "A map of key-value pairs that specify dimension names\nand values to associate with the\
+                      \ event. Splunk Observability Cloud assumes\nthat each value of eventType you send is associated with\n\
+                      a specific set of dimension names and values.\nSplunk Observability Cloud returns this map in the metadata\
+                      \ property\nreturned by the GET v2/event/find operation.\nTo learn more about dimensions in events,\
+                      \ see \nTo see the criteria for dimension names and values, refer to the\nDimension name and value standards\n\
+                      section in the user documentation."
+                  properties:
+                    type: object
+                    description: 'A map of key-value pairs. Use this map to send data to
+
+                      Splunk Observability Cloud.
+
+                      The criteria for properties are the same as the criteria for dimension names and values. To see the
+
+                      criteria, refer to the
+
+                      Dimension name and value standards
+
+                      section in the user documentation.'
+                  timestamp:
+                    type: integer
+                    format: int64
+                    minimum: 0
+                    example: 1556879430000
+                    description: The date and time of the event in *nix time in milliseconds
+                title: EventRequestObject
+                description: Specifies a single event.
+            examples:
+              default:
+                value:
+                - category: USER_DEFINED
+                  eventType: test_event
+                  dimensions:
+                    environment: production
+                    service: API
+                  properties:
+                    sha1: 1234567890abc
+                  timestamp: 1556793030000
+      responses:
+        '200':
+          description: HTTP 200 response
+      security:
+      - SessionToken: []
+      tags:
+      - Send traces, metrics and events
+  /trace:
+    post:
+      summary: SendTraces
+      description: Send traces to Splunk Observability Cloud. To learn more about sending traces, see the topic Send APM Traces.
+      parameters:
+      - name: Content-Type
+        in: header
+        description: 'Format of the request payload:
+
+
+          For Zipkin JSON1 and JSON2 data, use application/json
+
+          For Jaeger Thrift data, use application/x-thrift
+
+          For Splunk APM Protocol (SAPM), use application/x-protobuf
+
+
+          You can also POST to dedicated resources using the same parameters:
+
+
+          POST /v2/trace/signalfxv1 for Zipkin JSON1 and JSON2
+
+          POST /v2/trace/jaegerthrift for Jaeger Thrift
+
+          POST /v2/trace/sapm for Splunk APM Protocol (SAPM)'
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: Authentication token. Must be an ingest token
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+            examples:
+              example:
+                value: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Valid
+                  type: integer
+                  format: int64
+                  readOnly: true
+                  description: Successful response. Contains the number of valid spans received.
+                - title: Invalid
+                  type: object
+                  readOnly: true
+                  properties:
+                    reason:
+                      type: string
+                      description: Reason for the invalid spans
+                    spans:
+                      type: array
+                      items:
+                        type: string
+                        description: Span ID
+                      uniqueItems: true
+                      description: Array of invalid span IDs
+                  description: 'Contains key value pairs where the key describes why the spans are not
+
+                    valid and the value is an array of span IDs affected by the issue.'
+              examples:
+                Valid:
+                  value: 0
+                Invalid:
+                  value:
+                    reason: string
+                    spans:
+                    - string
+        '400':
+          description: HTTP 400 response
+        '401':
+          description: HTTP 401 response
+        '403':
+          description: HTTP 403 response
+        '429':
+          description: HTTP 429 response
+      security:
+      - SessionToken: []
+      tags:
+      - Send traces, metrics and events
+  /trace/otlp:
+    post:
+      summary: SendOTLPTraces
+      description: 'Send traces in OTLP format, serialized as Protobuf. Set your content type to "application/x-protobuf"
+        and post the protobuf file using this endpoint.
+
+        For more information on the OTLP trace schema, see the trace.proto file on GitHub.
+
+        To learn more about sending traces, see the topic Send APM Traces.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always "application/x-protobuf".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: Authentication token. Must be an ingest token
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/x-protobuf:
+            schema:
+              type: string
+              format: binary
+            examples:
+              example:
+                value: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Valid
+                  type: integer
+                  format: int64
+                  readOnly: true
+                  description: Successful response. Contains the number of valid spans received.
+                - title: Invalid
+                  type: object
+                  readOnly: true
+                  properties:
+                    reason:
+                      type: string
+                      description: Reason for the invalid spans
+                    spans:
+                      type: array
+                      items:
+                        type: string
+                        description: Span ID
+                      uniqueItems: true
+                      description: Array of invalid span IDs
+                  description: 'Contains key value pairs where the key describes why the spans are not
+
+                    valid and the value is an array of span IDs affected by the issue.'
+              examples:
+                Valid:
+                  value: 0
+                Invalid:
+                  value:
+                    reason: string
+                    spans:
+                    - string
+        '400':
+          description: HTTP 400 response
+        '401':
+          description: HTTP 401 response
+        '403':
+          description: HTTP 403 response
+        '429':
+          description: HTTP 429 response
+      security:
+      - SessionToken: []
+      tags:
+      - Send traces, metrics and events

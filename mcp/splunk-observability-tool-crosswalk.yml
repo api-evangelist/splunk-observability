@@ -1,0 +1,137 @@
+generated: '2026-08-19'
+method: derived
+source: >-
+  mcp/splunk-observability-mcp.yml (tool names + descriptions searched from Splunk's docs) bound
+  against the 48 OpenAPI documents in openapi/ (242 operations) reconstructed from Splunk's own
+  API reference payload.
+surfaces:
+  openapi:
+    path: openapi/
+    documents: 48
+    operations: 242
+    servers:
+      - https://api.{REALM}.observability.splunkcloud.com/v2
+      - https://ingest.{REALM}.observability.splunkcloud.com/v2
+      - https://backfill.{REALM}.observability.splunkcloud.com/v1
+      - https://stream.{REALM}.observability.splunkcloud.com/v2/signalflow
+    gated: false
+  mcp:
+    url: https://region-pdx10.api.scs.splunk.com/system/mcp-gateway/v1/
+    gated: true
+    note: tools/list returns HTTP 401 without a token, so input schemas were not observed.
+  graphql:
+    present: false
+note: >-
+  Splunk's OpenAPI operations carry human-sentence operationId values ("Retrieve Incidents",
+  "Retrieve Metadata MetricsQuery") rather than camelCase identifiers; the crosswalk quotes those
+  strings exactly as the specs carry them. Confidence is set from semantics, not from an observed
+  schema, because the live MCP schema is auth-gated.
+crosswalk:
+  - tool: get_metric_names
+    category: metrics
+    rest: ['Retrieve Metadata MetricsQuery']
+    spec: openapi/splunk-observability-metrics-metadata-openapi.yml
+    binding: rest
+    confidence: high
+    note: GET /metric takes a metric-name query and returns matching metric metadata.
+  - tool: get_metric_metadata
+    category: metrics
+    rest: ['Retrieve Metadata Metric Name', 'Retrieve Dimensions Query', 'Retrieve Metric Timeseries Metadata']
+    spec: openapi/splunk-observability-metrics-metadata-openapi.yml
+    binding: rest
+    confidence: medium
+    note: >-
+      Fans out. "dimensions, properties, and sample values" spans GET /metric/{name},
+      GET /dimension and GET /metrictimeseries; the tool composes them server-side.
+  - tool: execute_signalflow_program
+    category: signalflow
+    rest: ['Execute SignalFlow computation']
+    spec: openapi/splunk-observability-signalflow-openapi.yml
+    binding: rest
+    confidence: high
+    note: POST /v2/signalflow/execute — the same operation the rate-limits artifact records a job-start limit on.
+  - tool: get_apm_service_dependencies
+    category: apm
+    rest: ['Retrieve Dependencies by Service Name', 'Retrieve service topology']
+    spec: openapi/splunk-observability-apm-service-topology-openapi.yml
+    binding: rest
+    confidence: high
+  - tool: get_apm_trace_tool
+    category: apm
+    rest: ['getTraceSegmentTimestamps', 'getSegment', 'getLatestSegment']
+    spec: openapi/splunk-observability-trace-id-openapi.yml
+    binding: rest
+    confidence: high
+    note: Trace detail requires listing segment timestamps then fetching a segment; the tool composes both.
+  - tool: search_alerts_or_incidents
+    category: alerting
+    rest: ['Retrieve Incidents', 'Retrieve Incident ID', 'Retrieve Events Using Query', 'Retrieve Incidents Single Detector']
+    spec: openapi/splunk-observability-incidents-openapi.yml
+    binding: rest
+    confidence: medium
+    note: >-
+      "alerts or incidents" is broader than any single operation — GET /incident covers incidents,
+      GET /event/find and GET /detector/{id}/incidents cover detector-generated alerts.
+  - tool: get_apm_services
+    category: apm
+    rest: ['Retrieve service topology']
+    spec: openapi/splunk-observability-apm-service-topology-openapi.yml
+    binding: rest
+    confidence: low
+    note: >-
+      POST /apm/topology returns the service graph, from which a service list is derivable, but
+      Splunk publishes no dedicated list-services operation. Mapped by semantics only.
+mcp_only:
+  - tool: generate_signalflow_program
+    reason: >-
+      Natural-language-to-SignalFlow generation is a model capability of the AI Assistant. No REST
+      operation in any of the 48 specs generates a program; POST /v2/signalflow/execute only runs
+      one you already have.
+  - tool: get_apm_environments
+    reason: >-
+      No published REST operation lists APM environments. The environment appears as a filter on
+      other APM surfaces, not as its own resource.
+  - tool: get_apm_service_latency
+    reason: >-
+      Latency-breakdown-by-tag is a server-side aggregation. The published REST surface exposes it
+      only indirectly, through SignalFlow programs against APM MetricSets.
+  - tool: get_apm_service_errors_and_requests
+    reason: Same as get_apm_service_latency — an aggregation with no dedicated REST operation.
+  - tool: get_apm_exemplar_traces
+    reason: >-
+      Exemplar/sample trace selection has no REST operation; the trace_id API retrieves a trace you
+      already have an ID for.
+rest_only:
+  - capability: Charts, dashboards and dashboard groups
+    operations: 17
+    specs: [charts, dashboards, dashboard_groups]
+    note: The entire visualization CRUD surface has no MCP tool.
+  - capability: Detectors and muting rules
+    operations: 16
+    specs: [detectors, incidents]
+    note: >-
+      search_alerts_or_incidents reads incidents; creating, updating, enabling, disabling or
+      muting a detector is REST-only.
+  - capability: Synthetics
+    operations: 82
+    specs: [synthetics_* (20 documents)]
+    note: The single largest REST-only region — no synthetics tool exists on the MCP server.
+  - capability: Organization administration
+    operations: 32
+    specs: [organizations, teams, org_tokens, sessiontokens, roles, passwords]
+  - capability: Integrations and metric rulesets
+    operations: 13
+    specs: [integrations, metric_ruleset]
+  - capability: Data ingest and backfill
+    operations: 6
+    specs: [ingest_data, backfill]
+  - capability: SLOs, navigators, data links, automated archival, client inventory, audit events
+    operations: 34
+    specs: [slo, navigator, datalinks, automatedarchival, client_inventory, audit_events, apm_visibility_filters]
+coverage:
+  tools_named: 12
+  tools_bound_to_rest: 7
+  mcp_only: 5
+  rest_operations_total: 242
+  rest_operations_with_a_tool: 13
+  rest_operations_without_a_tool: 229

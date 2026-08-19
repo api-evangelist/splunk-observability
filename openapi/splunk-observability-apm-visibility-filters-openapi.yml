@@ -1,0 +1,890 @@
+openapi: 3.0.3
+info:
+  title: Splunk Observability Cloud — APM visibility filters
+  version: 3.0.1
+  description: 'APIs to manage visibility filters on indexed and unindexed span tags in Splunk APM. These filters identify
+    and hide span tag values that might contain sensitive data from everywhere in Splunk APM. Note that the tags are hidden
+    rather than purged; information is not purged from Splunk APM until it expires after the 8-day default retention period.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the GET /apm/visibility/filter
+    and GET /apm/visibility-filter/{FilterId} operations.
+
+    You have to have the Splunk Observability Cloud admin role to use the POST /apm/visibility-filter, DELETE /apm/visibility-filter/{FilterId},
+    and PUT /apm/visibility-filter/{FilterId}/enabled operations.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference
+      pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's.
+      Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset
+      path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2
+  description: Base API URL for the APM visibility filter endpoint
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.
+paths:
+  /apm/visibility-filter:
+    get:
+      summary: getAllVisibilityFilters
+      description: 'Gets a list of all visibility filters. To manage payload volume, this operation expects the following
+        parameters:
+
+
+        limit: Indicates how many results to return for the request
+
+        offset: Indicates the position in the list of filters at which to start returning values.
+
+
+        Note: Splunk Observability Cloud returns a maximum of 10,000 visibility filters, even if your organization contains
+        more than 10,000. To learn more, see the
+
+        Considerations for retrieve operations section in the developer guide.'
+      parameters:
+      - name: limit
+        in: query
+        description: Maximum number of filters to return in the response.
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      - name: offset
+        in: query
+        description: Position of filter from which to begin returning values.
+        required: true
+        schema:
+          type: integer
+          minimum: 0
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token. Must be a session token (User API access token) associated with an administrator.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    filterId:
+                      type: string
+                      example: 507f191e810c19729de860ea
+                      description: Unique ID that identifies a filter. Splunk APM adds this ID to a span affected by the filter.
+                    description:
+                      type: string
+                      example: Data blocked due to leak on 04/01/21
+                      description: User-readable string that describes the filter in detail. The string also appears as a
+                        tag in the span that's affected by the filter.
+                    startTime:
+                      type: string
+                      example: 2021-04-03T15:00:00+0000Z
+                      description: 'Start time of filter. Splunk APM applies the filter to spans received at or after this
+                        time. The value must be in ISO 8601 format or *nix time format in milliseconds, and the the value
+                        of startTime must be earlier than endTime; if these conditions aren''t met, the API returns an HTTP
+                        response code 400.
+
+                        Is it acceptable to specify startTime without endTime.'
+                    endTime:
+                      type: string
+                      nullable: true
+                      example: 2021-14-21T17:00:00+0000Z
+                      description: End time of filter; filter is applied to spans reported at or before this time. If a value
+                        is specified for startTime, the value specified in endTime must be later than startTime. This value
+                        must be in ISO 8601 format; if these conditions aren't met, the API returns an HTTP response code
+                        400.
+                    matcher:
+                      type: object
+                      additionalProperties: true
+                      example:
+                        sf_service: checkoutService
+                        sf_operation: readCartDetails
+                        buildId: '1234'
+                        http.method: GET
+                      description: A JSON object containing a map of key-value pairs that define the match criteria for this
+                        filter. The API attempts to match the keys to fields in the span. If it finds a match, the API then
+                        compares the value of the map entry to the value in the span. If all the entries in the map are a
+                        match to the span, the API applies the filter to the span. You can provide up to 50 key-value pairs,
+                        and you must provide the keys sf_service and sf_operation; if you exceed 50 pairs or you fail to provide
+                        the required keys and values, the API returns an HTTP response code 400.
+                    visibleTags:
+                      type: array
+                      items:
+                        type: string
+                      example: '["sf_environment", "sf_service", "sf_endpoint", "sf_operation", "sf_httpMethod", "sf_kind",
+                        "sf_workflow", "sf_error", "buildId", "environment"]
+
+                        '
+                      description: 'A JSON array that contains a list of tags, both indexed and unindexed, that you specify
+                        are safe to display in the Splunk APM UI. If you provide this field, you must include the following
+                        tags:
+
+                        sf_environment, sf_service, sf_endpoint, sf_operation, sf_httpMethod, sf_kind, sf_workflow, and sf_error.
+                        If these tags are missing, the API returns a HTTP response error code 400.
+
+                        A tag must not appear in both visibleTags and hiddenTags in the same request; if you violate this
+                        requirement, the API returns an HTTP response code 400.'
+                    hiddenTags:
+                      type: array
+                      items:
+                        type: string
+                      example:
+                      - status
+                      - user_name
+                      description: 'A JSON array that contains a list of tags, both indexed and unindexed, that you specify
+                        must not appear in Splunk APM.
+
+                        visibleTags is related to the hiddenTags field. A tag must not appear in visibleTags and hiddenTags
+                        in the same request; if you violate this requirement, the API returns an HTTP response code 400.'
+                    enabled:
+                      type: boolean
+                      nullable: true
+                      example: true
+                      description: A boolean flag you can use to enable or disable a filter. This value is set to true by
+                        default.
+                  title: ValidFilterResponseObject
+                  description: JSON object containing the body of a visibility filter in an API response.
+                title: ValidFilterListResponseObject
+                description: List of all visibility filters in organization.
+              examples:
+                example:
+                  value:
+                  - description: Data blocked due to leak on 04/01/21
+                    enabled: true
+                    endTime: 2021-14-21T17:00:00+0000Z
+                    filterId: 507f191e810c19729de860ea
+                    hiddenTags:
+                    - status
+                    - user_name
+                    matcher:
+                      buildId: '1234'
+                      http.method: GET
+                      sf_operation: readCartDetails
+                      sf_service: checkoutService
+                    startTime: 2021-04-03T15:00:00+0000Z
+                    visibleTags: '["sf_environment", "sf_service", "sf_endpoint", "sf_operation", "sf_httpMethod", "sf_kind",
+                      "sf_workflow", "sf_error", "buildId", "environment"]
+
+                      '
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    title: HTTP response code
+                    type: integer
+                    format: int64
+                    example: 400
+                    description: HTTP response code returned by the API. Always 400.
+                  message:
+                    title: 'Error message associated with HTTP response code 400
+
+                      '
+                    type: string
+                    enum:
+                    - limit is required
+                    - limit can't be larger than 1000
+                    - limit can't be negative
+                    - offset can't be negative
+                    description: 'Descriptive message returned by the API.
+
+                      Expected values:
+
+
+                      limit is required
+
+                      The query is missing the limit parameter.
+
+                      limit can''t be larger than 1000
+
+                      The limit parameter must be smaller than or equal to 1000.
+
+                      limit can''t be negative
+
+                      The limit parameter must be a positive number.
+
+                      offset can''t be negative
+
+                      The offset parameter must be a positive number.'
+              examples:
+                example:
+                  value:
+                    code: 400
+                    message: limit is required
+        '403':
+          description: HTTP 403 response
+      security:
+      - SessionToken: []
+      tags:
+      - APM visibility filters
+    post:
+      summary: createVisibilityFilter
+      description: 'Creates a filter and returns the filter ID.
+
+        Requirements
+
+        You have to have the Splunk Observability Cloud admin role to use the POST apm/visibility-filter operation.'
+      parameters:
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token. Must be a session token (User API access token) associated with an administrator.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  example: Private information blocked due to leak on 06/21/21
+                  description: User-readable string that describes the filter in detail. The string also appears as a tag
+                    in the span that's affected by the filter.
+                startTime:
+                  type: string
+                  example: 2021-06-21T15:00:00+0000Z
+                  description: 'Start time of filter. Splunk APM applies the filter to spans received at or after this time.
+                    The value must be in ISO 8601 format, and the the value of startTime must be earlier than endTime; if
+                    these conditions aren''t met, the API returns an HTTP response code 400.
+
+                    Is it acceptable to specify startTime without endTime.'
+                endTime:
+                  type: string
+                  nullable: true
+                  example: 2021-12-21T17:00:00+0000Z
+                  description: End time of filter; filter is applied to spans reported at or before this time. If a value
+                    is specified for startTime, the value specified in endTime must be later than startTime. This value must
+                    be in ISO 8601 or *nix time format in milliseconds; if these conditions aren't met, the API returns an
+                    HTTP response code 400.
+                matcher:
+                  type: object
+                  additionalProperties: true
+                  example:
+                    sf_service: paymentService
+                    sf_operation: enterCardInfo
+                    buildId: '2213'
+                    http.method: PUT
+                  description: A JSON object containing a map of key-value pairs that define the match criteria for this filter.
+                    The API attempts to match the keys to fields in the span. If it finds a match, the API then compares the
+                    value of the map entry to the value in the span. If all the entries in the map are a match to the span,
+                    the API applies the filter to the span. You can provide up to 50 key-value pairs, and you must provide
+                    the keys sf_service and sf_operation; if you exceed 50 pairs or you fail to provide the required keys
+                    and values, the API returns an HTTP response code 400.
+                visibleTags:
+                  type: array
+                  items:
+                    type: string
+                  example: '["sf_environment", "sf_service", "sf_endpoint", "sf_operation", "sf_httpMethod", "sf_kind", "sf_workflow",
+                    "sf_error", "buildId", "environment"]
+
+                    '
+                  description: 'A JSON array that contains a list of tags, both indexed and unindexed, that you specify are
+                    safe to display in the Splunk APM UI. If you provide this field, you must include the following tags:
+
+                    sf_environment, sf_service, sf_endpoint, sf_operation, sf_httpMethod, sf_kind, sf_workflow, and sf_error.
+                    If these tags are missing, the API returns a HTTP response error code 400.
+
+                    A tag must not appear in both visibleTags and hiddenTags in the same request; if you violate this requirement,
+                    the API returns an HTTP response code 400.'
+                hiddenTags:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                  - card_number
+                  - cvv
+                  - expiration_date
+                  description: 'A JSON array that contains a list of tags, both indexed and unindexed, that you specify must
+                    not appear in the Splunk APM UI.
+
+                    visibleTags is related to the hiddenTags field. A tag must not appear in visibleTags and hiddenTags in
+                    the same request; if you violate this requirement, the API returns an HTTP response code 400.'
+                enabled:
+                  type: boolean
+                  nullable: true
+                  example: true
+                  description: A boolean flag you can use to enable or disable a filter. This value is set to true by default.
+              title: ValidFilterRequestObject
+              description: 'JSON object specifying the field values of a visibility filter in an API request.
+
+                Note the following logic involving the related matcher, visibleTags, and hiddenTags fields:
+
+                When all three fields are present, visibleTags defines the list of span tags that Splunk APM leaves visible
+                in the span. Splunk APM hides any tags provided in the hiddenTags list, as well as any other not provided
+                in either list.
+
+                When only matcher and visibleTags are present, visibleTags defines  the list of span tags that Splunk APM
+                leaves visible in the span. All other tags in each affected span are hidden.
+
+                When only matcher and hiddenTags are present, hiddenTags defines  the list of span tags that Splunk APM hides
+                in the span. All other tags in each affected span are left visible.
+
+                When only matcher is present and both visibleTags and hiddenTags are absent, the set of field names in matcher
+                will define the list of visible tags. Splunk APM also leaves the following mandatory tags visible: sf_environment,
+                sf_service, sf_endpoint, sf_operation, sf_httpMethod, sf_kind, sf_workflow, and sf_error.'
+            examples:
+              example:
+                value:
+                  description: Private information blocked due to leak on 06/21/21
+                  enabled: true
+                  endTime: 2021-12-21T17:00:00+0000Z
+                  hiddenTags:
+                  - card_number
+                  - cvv
+                  - expiration_date
+                  matcher:
+                    buildId: '2213'
+                    http.method: PUT
+                    sf_operation: enterCardInfo
+                    sf_service: paymentService
+                  startTime: 2021-06-21T15:00:00+0000Z
+                  visibleTags: '["sf_environment", "sf_service", "sf_endpoint", "sf_operation", "sf_httpMethod", "sf_kind",
+                    "sf_workflow", "sf_error", "buildId", "environment"]
+
+                    '
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  filterId:
+                    type: string
+                    example: 507f191e810c19729de860ea
+                    description: Unique ID that identifies a filter. Splunk APM adds this ID to a span affected by the filter.
+                  description:
+                    type: string
+                    example: Data blocked due to leak on 04/01/21
+                    description: User-readable string that describes the filter in detail. The string also appears as a tag
+                      in the span that's affected by the filter.
+                  startTime:
+                    type: string
+                    example: 2021-04-03T15:00:00+0000Z
+                    description: 'Start time of filter. Splunk APM applies the filter to spans received at or after this time.
+                      The value must be in ISO 8601 format or *nix time format in milliseconds, and the the value of startTime
+                      must be earlier than endTime; if these conditions aren''t met, the API returns an HTTP response code
+                      400.
+
+                      Is it acceptable to specify startTime without endTime.'
+                  endTime:
+                    type: string
+                    nullable: true
+                    example: 2021-14-21T17:00:00+0000Z
+                    description: End time of filter; filter is applied to spans reported at or before this time. If a value
+                      is specified for startTime, the value specified in endTime must be later than startTime. This value
+                      must be in ISO 8601 format; if these conditions aren't met, the API returns an HTTP response code 400.
+                  matcher:
+                    type: object
+                    additionalProperties: true
+                    example:
+                      sf_service: checkoutService
+                      sf_operation: readCartDetails
+                      buildId: '1234'
+                      http.method: GET
+                    description: A JSON object containing a map of key-value pairs that define the match criteria for this
+                      filter. The API attempts to match the keys to fields in the span. If it finds a match, the API then
+                      compares the value of the map entry to the value in the span. If all the entries in the map are a match
+                      to the span, the API applies the filter to the span. You can provide up to 50 key-value pairs, and you
+                      must provide the keys sf_service and sf_operation; if you exceed 50 pairs or you fail to provide the
+                      required keys and values, the API returns an HTTP response code 400.
+                  visibleTags:
+                    type: array
+                    items:
+                      type: string
+                    example: '["sf_environment", "sf_service", "sf_endpoint", "sf_operation", "sf_httpMethod", "sf_kind",
+                      "sf_workflow", "sf_error", "buildId", "environment"]
+
+                      '
+                    description: 'A JSON array that contains a list of tags, both indexed and unindexed, that you specify
+                      are safe to display in the Splunk APM UI. If you provide this field, you must include the following
+                      tags:
+
+                      sf_environment, sf_service, sf_endpoint, sf_operation, sf_httpMethod, sf_kind, sf_workflow, and sf_error.
+                      If these tags are missing, the API returns a HTTP response error code 400.
+
+                      A tag must not appear in both visibleTags and hiddenTags in the same request; if you violate this requirement,
+                      the API returns an HTTP response code 400.'
+                  hiddenTags:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                    - status
+                    - user_name
+                    description: 'A JSON array that contains a list of tags, both indexed and unindexed, that you specify
+                      must not appear in Splunk APM.
+
+                      visibleTags is related to the hiddenTags field. A tag must not appear in visibleTags and hiddenTags
+                      in the same request; if you violate this requirement, the API returns an HTTP response code 400.'
+                  enabled:
+                    type: boolean
+                    nullable: true
+                    example: true
+                    description: A boolean flag you can use to enable or disable a filter. This value is set to true by default.
+                title: ValidFilterResponseObject
+                description: JSON object containing the body of a visibility filter in an API response.
+              examples:
+                example:
+                  value:
+                    description: Data blocked due to leak on 04/01/21
+                    enabled: true
+                    endTime: 2021-14-21T17:00:00+0000Z
+                    filterId: 507f191e810c19729de860ea
+                    hiddenTags:
+                    - status
+                    - user_name
+                    matcher:
+                      buildId: '1234'
+                      http.method: GET
+                      sf_operation: readCartDetails
+                      sf_service: checkoutService
+                    startTime: 2021-04-03T15:00:00+0000Z
+                    visibleTags: '["sf_environment", "sf_service", "sf_endpoint", "sf_operation", "sf_httpMethod", "sf_kind",
+                      "sf_workflow", "sf_error", "buildId", "environment"]
+
+                      '
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    title: HTTP response code
+                    type: integer
+                    format: int64
+                    example: 400
+                    description: HTTP response code returned by the API. Always 400
+                  message:
+                    title: Error message associated with HTTP response code 400
+                    type: string
+                    enum:
+                    - Do not send `filterId` while creating a `filter`.
+                    - '`matcher` is required'
+                    - '`matcher` must include `sf_service`'
+                    - '`matcher` must include `sf_operation`'
+                    - visibleTags must include `sf_environment`, `sf_endpoint`, `sf_error`, `sf_httpMethod`, `sf_kind`, `sf_operation`,
+                      `sf_workflow`
+                    - Cannot have more than 1000 filters.
+                    - description is required
+                    - description must not be longer than 256 characters
+                    - startTime must be before endTime
+                    - same tag present in visibleTags and hiddenTags
+                    - 'Unable to parse startTime=2021-06-14T00:00: Text ''2021-06-14T00:00'' could not be parsed at index
+                      16'
+                    - 'Unable to parse endTime=2021-06-30T00:00:0: Text ''2021-06-30T00:00:0'' could not be parsed at index
+                      16'
+                    description: 'Descriptive message returned by the API.
+
+                      Expected values:
+
+
+                      Do not send filterId while creating a filter.
+
+                      The request included a value for filterId, but this is not a user-set value. Splunk APM automatically
+                      generates the filterId for each filter.
+
+                      matcher is required
+
+                      The request failed to include the required matcher field.
+
+                      matcher must include sf_service
+
+                      The matcher object does not contain the required sf_service field.
+
+                      matcher must include sf_operation
+
+                      The matcher object does not contain the required sf_operation field.
+
+                      visibleTags must include sf_environment, sf_endpoint, sf_error, sf_httpMethod, sf_kind, sf_operation,
+                      sf_workflow
+
+                      Cannot have more than 1000 filters.
+
+                      The request would have exceeded the organization limit of 1000 filters.
+
+                      description is required
+
+                      The request did not contain the required description field.
+
+                      description must not be longer than 256 characters
+
+                      The filter description is longer than the 256-character limit.
+
+                      startTime must be before endTime
+
+                      The request included an startTime that falls after the included endTime.
+
+                      same tag present in visibleTags and hiddenTags
+
+                      The request contained the same tag name in the lists under the visibleTags and hiddenTags fields. A
+                      tag may only appear in one or the other.
+
+                      Unable to parse startTime=2021-06-14T00:00: Text ''2021-06-14T00:00'' could not be parsed at index 16
+
+                      The format of startTime is invalid.
+
+                      Unable to parse endTime=2021-06-30T00:00:0: Text ''2021-06-30T00:00:0'' could not be parsed at index
+                      16
+
+                      The format of endTime is invalid.'
+              examples:
+                example:
+                  value:
+                    code: 400
+                    message: Do not send `filterId` while creating a `filter`.
+        '403':
+          description: HTTP 403 response
+      security:
+      - SessionToken: []
+      tags:
+      - APM visibility filters
+  /apm/visibility-filter/{FilterId}:
+    get:
+      summary: getIndividualVisibilityFilter
+      description: 'Gets an individual visibility filter based on the filter ID.
+
+        Requirements
+
+        You have to have the Splunk Observability Cloud admin, power, or read_only role to use the GET /apm/visibility-filter/{FilterId}
+        operation.'
+      parameters:
+      - name: FilterId
+        in: path
+        description: Filter ID of the visibility filter you want to retrieve.
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token. Must be a session token (User API access token) associated with an administrator.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  filterId:
+                    type: string
+                    example: 507f191e810c19729de860ea
+                    description: Unique ID that identifies a filter. Splunk APM adds this ID to a span affected by the filter.
+                  description:
+                    type: string
+                    example: Data blocked due to leak on 04/01/21
+                    description: User-readable string that describes the filter in detail. The string also appears as a tag
+                      in the span that's affected by the filter.
+                  startTime:
+                    type: string
+                    example: 2021-04-03T15:00:00+0000Z
+                    description: 'Start time of filter. Splunk APM applies the filter to spans received at or after this time.
+                      The value must be in ISO 8601 format or *nix time format in milliseconds, and the the value of startTime
+                      must be earlier than endTime; if these conditions aren''t met, the API returns an HTTP response code
+                      400.
+
+                      Is it acceptable to specify startTime without endTime.'
+                  endTime:
+                    type: string
+                    nullable: true
+                    example: 2021-14-21T17:00:00+0000Z
+                    description: End time of filter; filter is applied to spans reported at or before this time. If a value
+                      is specified for startTime, the value specified in endTime must be later than startTime. This value
+                      must be in ISO 8601 format; if these conditions aren't met, the API returns an HTTP response code 400.
+                  matcher:
+                    type: object
+                    additionalProperties: true
+                    example:
+                      sf_service: checkoutService
+                      sf_operation: readCartDetails
+                      buildId: '1234'
+                      http.method: GET
+                    description: A JSON object containing a map of key-value pairs that define the match criteria for this
+                      filter. The API attempts to match the keys to fields in the span. If it finds a match, the API then
+                      compares the value of the map entry to the value in the span. If all the entries in the map are a match
+                      to the span, the API applies the filter to the span. You can provide up to 50 key-value pairs, and you
+                      must provide the keys sf_service and sf_operation; if you exceed 50 pairs or you fail to provide the
+                      required keys and values, the API returns an HTTP response code 400.
+                  visibleTags:
+                    type: array
+                    items:
+                      type: string
+                    example: '["sf_environment", "sf_service", "sf_endpoint", "sf_operation", "sf_httpMethod", "sf_kind",
+                      "sf_workflow", "sf_error", "buildId", "environment"]
+
+                      '
+                    description: 'A JSON array that contains a list of tags, both indexed and unindexed, that you specify
+                      are safe to display in the Splunk APM UI. If you provide this field, you must include the following
+                      tags:
+
+                      sf_environment, sf_service, sf_endpoint, sf_operation, sf_httpMethod, sf_kind, sf_workflow, and sf_error.
+                      If these tags are missing, the API returns a HTTP response error code 400.
+
+                      A tag must not appear in both visibleTags and hiddenTags in the same request; if you violate this requirement,
+                      the API returns an HTTP response code 400.'
+                  hiddenTags:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                    - status
+                    - user_name
+                    description: 'A JSON array that contains a list of tags, both indexed and unindexed, that you specify
+                      must not appear in Splunk APM.
+
+                      visibleTags is related to the hiddenTags field. A tag must not appear in visibleTags and hiddenTags
+                      in the same request; if you violate this requirement, the API returns an HTTP response code 400.'
+                  enabled:
+                    type: boolean
+                    nullable: true
+                    example: true
+                    description: A boolean flag you can use to enable or disable a filter. This value is set to true by default.
+                title: ValidFilterResponseObject
+                description: JSON object containing the body of a visibility filter in an API response.
+              examples:
+                example:
+                  value:
+                    description: Data blocked due to leak on 04/01/21
+                    enabled: true
+                    endTime: 2021-14-21T17:00:00+0000Z
+                    filterId: 507f191e810c19729de860ea
+                    hiddenTags:
+                    - status
+                    - user_name
+                    matcher:
+                      buildId: '1234'
+                      http.method: GET
+                      sf_operation: readCartDetails
+                      sf_service: checkoutService
+                    startTime: 2021-04-03T15:00:00+0000Z
+                    visibleTags: '["sf_environment", "sf_service", "sf_endpoint", "sf_operation", "sf_httpMethod", "sf_kind",
+                      "sf_workflow", "sf_error", "buildId", "environment"]
+
+                      '
+        '403':
+          description: HTTP 403 response
+        '404':
+          description: HTTP 404 response
+      security:
+      - SessionToken: []
+      tags:
+      - APM visibility filters
+    delete:
+      summary: deleteVisibilityFilter
+      description: 'Performs a hard delete on the filter associated with the filter ID.
+
+        Requirements
+
+        You have to have the Splunk Observability Cloud admin role to use the DELETE apm/visibility-filter/{FilterId} operation.'
+      parameters:
+      - name: FilterId
+        in: path
+        description: Filter ID of the visibility filter you want to delete.
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token. Must be a session token (User API access token) associated with an administrator.
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: HTTP 204 response
+        '403':
+          description: HTTP 403 response
+        '404':
+          description: HTTP 404 response
+      security:
+      - SessionToken: []
+      tags:
+      - APM visibility filters
+  /apm/visibility-filter/{FilterId}/enabled:
+    put:
+      summary: enableVisibilityFilter
+      description: 'Enables or disables the filter associated with the filter ID.
+
+        Requirements
+
+        You have to have the Splunk Observability Cloud admin role to use the PUT apm/visibility-filter/{FilterId}/enabled
+        operation.'
+      parameters:
+      - name: FilterId
+        in: path
+        description: Filter ID of the visibility filter you want to enable or disable.
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token. Must be a session token (User API access token) associated with an administrator.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: boolean
+              example: true
+              description: Boolean indicating whether whether you want to enable or disable the specified visibility filter.
+                'true' to enable filter; 'false' to disable.
+            examples:
+              example:
+                value: true
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  filterId:
+                    type: string
+                    example: 507f191e810c19729de860ea
+                    description: Unique ID that identifies a filter. Splunk APM adds this ID to a span affected by the filter.
+                  description:
+                    type: string
+                    example: Data blocked due to leak on 04/01/21
+                    description: User-readable string that describes the filter in detail. The string also appears as a tag
+                      in the span that's affected by the filter.
+                  startTime:
+                    type: string
+                    example: 2021-04-03T15:00:00+0000Z
+                    description: 'Start time of filter. Splunk APM applies the filter to spans received at or after this time.
+                      The value must be in ISO 8601 format or *nix time format in milliseconds, and the the value of startTime
+                      must be earlier than endTime; if these conditions aren''t met, the API returns an HTTP response code
+                      400.
+
+                      Is it acceptable to specify startTime without endTime.'
+                  endTime:
+                    type: string
+                    nullable: true
+                    example: 2021-14-21T17:00:00+0000Z
+                    description: End time of filter; filter is applied to spans reported at or before this time. If a value
+                      is specified for startTime, the value specified in endTime must be later than startTime. This value
+                      must be in ISO 8601 format; if these conditions aren't met, the API returns an HTTP response code 400.
+                  matcher:
+                    type: object
+                    additionalProperties: true
+                    example:
+                      sf_service: checkoutService
+                      sf_operation: readCartDetails
+                      buildId: '1234'
+                      http.method: GET
+                    description: A JSON object containing a map of key-value pairs that define the match criteria for this
+                      filter. The API attempts to match the keys to fields in the span. If it finds a match, the API then
+                      compares the value of the map entry to the value in the span. If all the entries in the map are a match
+                      to the span, the API applies the filter to the span. You can provide up to 50 key-value pairs, and you
+                      must provide the keys sf_service and sf_operation; if you exceed 50 pairs or you fail to provide the
+                      required keys and values, the API returns an HTTP response code 400.
+                  visibleTags:
+                    type: array
+                    items:
+                      type: string
+                    example: '["sf_environment", "sf_service", "sf_endpoint", "sf_operation", "sf_httpMethod", "sf_kind",
+                      "sf_workflow", "sf_error", "buildId", "environment"]
+
+                      '
+                    description: 'A JSON array that contains a list of tags, both indexed and unindexed, that you specify
+                      are safe to display in the Splunk APM UI. If you provide this field, you must include the following
+                      tags:
+
+                      sf_environment, sf_service, sf_endpoint, sf_operation, sf_httpMethod, sf_kind, sf_workflow, and sf_error.
+                      If these tags are missing, the API returns a HTTP response error code 400.
+
+                      A tag must not appear in both visibleTags and hiddenTags in the same request; if you violate this requirement,
+                      the API returns an HTTP response code 400.'
+                  hiddenTags:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                    - status
+                    - user_name
+                    description: 'A JSON array that contains a list of tags, both indexed and unindexed, that you specify
+                      must not appear in Splunk APM.
+
+                      visibleTags is related to the hiddenTags field. A tag must not appear in visibleTags and hiddenTags
+                      in the same request; if you violate this requirement, the API returns an HTTP response code 400.'
+                  enabled:
+                    type: boolean
+                    nullable: true
+                    example: true
+                    description: A boolean flag you can use to enable or disable a filter. This value is set to true by default.
+                title: ValidFilterResponseObject
+                description: JSON object containing the body of a visibility filter in an API response.
+              examples:
+                example:
+                  value:
+                    description: Data blocked due to leak on 04/01/21
+                    enabled: true
+                    endTime: 2021-14-21T17:00:00+0000Z
+                    filterId: 507f191e810c19729de860ea
+                    hiddenTags:
+                    - status
+                    - user_name
+                    matcher:
+                      buildId: '1234'
+                      http.method: GET
+                      sf_operation: readCartDetails
+                      sf_service: checkoutService
+                    startTime: 2021-04-03T15:00:00+0000Z
+                    visibleTags: '["sf_environment", "sf_service", "sf_endpoint", "sf_operation", "sf_httpMethod", "sf_kind",
+                      "sf_workflow", "sf_error", "buildId", "environment"]
+
+                      '
+        '400':
+          description: HTTP 400 response
+        '403':
+          description: HTTP 403 response
+        '404':
+          description: HTTP 404 response
+      security:
+      - SessionToken: []
+      tags:
+      - APM visibility filters

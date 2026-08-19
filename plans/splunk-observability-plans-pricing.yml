@@ -1,0 +1,99 @@
+generated: '2026-08-19'
+method: searched
+source: https://www.splunk.com/en_us/products/pricing/observability.html
+currency: USD
+billing_period: annual
+plan_count: 10
+note: >-
+  Splunk publishes list prices for Splunk Observability Cloud on a public page — unusual for an
+  enterprise observability vendor. Pricing is per HOST for the bundles and the infrastructure/APM
+  products, and per volume for RUM and Synthetics. None of it is API-metered: there is no API call
+  price, no request quota, and no published API overage. An agent calling this API is billed for
+  the hosts and sessions it is watching, not for the calls it makes; the only per-call limits are
+  the org-token rate limits in rate-limits/splunk-observability-rate-limits.yml.
+plans:
+  - name: Infrastructure
+    tier: bundle
+    price: 15
+    unit: per host per month
+    billing_period: annual
+    includes:
+      - Infrastructure Monitoring
+      - Log Observer Connect
+      - Network Explorer
+      - Synthetic Uptime Monitoring
+      - Incident Intelligence
+      - Database Monitoring
+      - Secure Application
+    free_trial: true
+  - name: App & Infrastructure
+    tier: bundle
+    price: 60
+    unit: per host per month
+    billing_period: annual
+    includes:
+      - Everything in Infrastructure
+      - APM with Always On Profiling
+      - Synthetic API Monitoring
+    free_trial: true
+  - name: End-to-End
+    tier: bundle
+    price: 75
+    unit: per host per month
+    billing_period: annual
+    includes:
+      - Everything in App & Infrastructure
+      - Real User Monitoring
+      - Synthetic Browser Monitoring
+    free_trial: true
+  - name: Infrastructure Monitoring
+    tier: standalone
+    price: 15
+    unit: per host per month
+    billing_period: annual
+    free_trial: true
+  - name: Application Performance Monitoring (APM)
+    tier: standalone
+    price: 55
+    unit: per host per month
+    billing_period: annual
+    includes: [NoSample tracing, streaming analytics, service maps, business workflows]
+    free_trial: true
+  - name: Real User Monitoring (RUM)
+    tier: standalone
+    price: 14
+    unit: per 10,000 sessions
+    billing_period: usage
+    free_trial: true
+  - name: Synthetic Monitoring
+    tier: standalone
+    price: 1
+    unit: per 10,000 uptime requests
+    billing_period: usage
+    includes: [browser tests, API tests, uptime tests, lighthouse scores]
+    free_trial: true
+  - name: Database Monitoring
+    tier: add-on
+    price: 75
+    unit: per database instance per month
+    billing_period: annual
+    includes: [slow query analysis, execution plans, correlation with application traces]
+  - name: Secure Application
+    tier: add-on
+    price: 22
+    unit: per host per month
+    billing_period: annual
+    includes: [vulnerability detection, risk prioritization, security notifications]
+  - name: Splunk On-Call
+    tier: adjacent
+    price: 5
+    unit: per user per month (up to 10 seats)
+    billing_period: annual
+    includes: [incident management, mobile response, integrations, cross-team collaboration]
+    free_trial: true
+    note: Sold alongside Observability Cloud; incident response rather than telemetry.
+excluded:
+  - name: Splunk AppDynamics
+    note: Priced per vCPU on the same page but a separate product line, not Splunk Observability Cloud.
+  - name: Splunk IT Service Intelligence
+    note: Contact-sales, workload or ingest pricing; a Splunk platform product, not Observability Cloud.

@@ -1,0 +1,3170 @@
+openapi: 3.0.3
+info:
+  title: Splunk Observability Cloud — Dashboard groups
+  version: 3.5.0
+  description: 'API for creating a new dashboard group, retrieving the properties of one or more dashboard groups, updating
+    the properties of a single dashboard group, making a clone of a dashboard to a group, adding a mirrored dashboard to a
+    group, and deleting a dashboard group.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You must have the Splunk Observability Cloud admin or power role to use the POST /dashboardgroup POST /dashboardgroup/{id}/dashboard,
+    PUT /dashboardgroup/{id}, and DELETE /dashboardgroup/{id} endpoints.
+
+    You must have the Splunk Observability Cloud admin, power, or read_only role to use the GET /dashboardgroup and GET /dashboardgroup/{id}
+    endpoints.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference
+      pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's.
+      Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset
+      path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2
+  description: Endpoint URL for Dashboard Groups API
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.
+paths:
+  /dashboardgroup:
+    get:
+      summary: Retrieve Dashboard Groups Using Query
+      description: 'Retrieves the properties of one or more dashboard groups, based on
+
+        search criteria you specify in the endpoint URL. If you don''t specify
+
+        any parameters, you receive the first 50 groups to which the user
+
+        associated with the auth token has access. Endpoint parameters also
+
+        control the point in the result set at which the system starts returning
+
+        groups, and the number of groups to return.
+
+        Note: Splunk Observability Cloud returns a maximum of 10,000 dashboard groups, even if your organization contains
+        more than 10,000. To learn more, see the
+
+        Considerations for retrieve operations section in the developer guide.'
+      parameters:
+      - name: dashboardId
+        in: query
+        description: 'Search string that will find existing dashboard groups that contain
+
+          a dashboard with this dashboard ID.'
+        schema:
+          type: string
+      - name: excludeCustom
+        in: query
+        description: 'Value that filters dashboard groups. If the value is set to true,
+
+          only built-in dashboard groups will be returned.'
+        schema:
+          type: boolean
+          default: false
+      - name: limit
+        in: query
+        description: 'The maximum number of dashboard groups to return from the overall
+
+          result set. If the value isn''t valid, the system defaults to 50
+
+          groups.'
+        schema:
+          type: integer
+          format: int32
+      - name: name
+        in: query
+        description: 'Search string that the API compares to existing dashboard group
+
+          names. A match occurs if the string matches any part of the name.
+
+          For example, the query specification name="per" matches the
+
+          following (ellipses represent other parts of the name):
+
+
+          "...dropped per day..."
+
+          "...95th percentile"
+
+          "personal disk usage..."
+
+
+          If you specify name="", the system ignores the search string.
+
+          The string can only contain ASCII characters.'
+        schema:
+          type: string
+      - name: offset
+        in: query
+        description: '0-based index of the point in the overall result set where the API
+
+          starts returning dashboard groups. If the offset value is greater
+
+          than the size of the query results, you don''t receive any results.'
+        schema:
+          type: integer
+          format: int32
+      - name: teamId
+        in: query
+        description: 'Search string that will find existing dashboard groups associated with
+
+          this team ID.'
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    title: Number of matching dashboard groups
+                    type: integer
+                    format: int32
+                    description: 'Success
+
+                      Note: If the request is well-formed but the API can''t find any
+
+                      matching dashboard groups, the API still returns 200. In this
+
+                      case, the count property is set to 0, and the results
+
+                      array is empty.'
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        authorizedWriters:
+                          title: Organizations and teams with write permission for an object
+                          type: object
+                          properties:
+                            teams:
+                              type: array
+                              items:
+                                type: string
+                              description: 'List of team IDs that have write access to the group, in the form of
+
+                                a JSON array'
+                            users:
+                              type: array
+                              items:
+                                type: string
+                              description: Array of user IDs that have write access to the group
+                          description: 'Set of organizations and teams that have write permission for the
+
+                            dashboard group, in the form of a JSON object. If your organization has
+
+                            the write permissions feature enabled, you can use this object to
+
+                            specify the user and team IDs that have write access to the dashboard
+
+                            group'
+                        created:
+                          type: integer
+                          format: int64
+                          title: DashboardgroupCreated
+                          description: 'The dashboard group creation date and time, in the form of a Unix time
+
+                            value.
+
+                            The system sets this value, and you can''t modify it.'
+                        creator:
+                          type: string
+                          title: DashboardgroupCreator
+                          description: 'User ID of the user that created the dashboard group.
+
+                            If the system created this dashboard group, the value is "AAAAAAAAAA".
+
+                            The system sets this value, and you can''t modify it.'
+                        dashboardConfigs:
+                          title: List of dashboard configurations
+                          type: array
+                          items:
+                            title: Dashboard configuration in a dashboard group
+                            type: object
+                            required:
+                            - dashboardId
+                            properties:
+                              configId:
+                                title: Unique identifier for a dashboard configuration
+                                type: string
+                                readOnly: true
+                                description: 'ID of a dashboard configuration associated
+
+                                  with the dashboard group
+
+                                  Note: This property is read-only.'
+                              dashboardId:
+                                title: Dashboard ID
+                                type: string
+                                readOnly: false
+                                description: 'ID of a dashboard. In a dashboard group,
+
+                                  dashboard IDs track the dashboards associated with the group.
+
+                                  If you try to update the ID of an existing configuration entry or use a
+
+                                  non-existent ID, the system returns HTTP error code 400.'
+                              descriptionOverride:
+                                title: Override for a dashboard description
+                                type: string
+                                format: UTF-8
+                                maxLength: 1024
+                                readOnly: false
+                                description: String that provides a description override for a mirrored dashboard
+                              filtersOverride:
+                                title: Override for the filters associated with a dashboard
+                                type: object
+                                properties:
+                                  sources:
+                                    title: List of dashboard filter overrides
+                                    type: array
+                                    items:
+                                      title: A single dashboard filter override
+                                      type: object
+                                      properties:
+                                        NOT:
+                                          type: boolean
+                                          default: false
+                                          description: 'Controls evaluation of the comparison between the property
+
+                                            property and the values in the value array. If NOT is false,
+
+                                            Splunk Observability Cloud tests <VALUE_OF_PROPERTY> = <VALUE_n>; otherwise,
+
+                                            Splunk Observability Cloud tests <VALUE_OF_PROPERTY> != <VALUE_n>.'
+                                        property:
+                                          type: string
+                                          description: 'Name of a dimension or custom property for one of the metrics
+
+                                            displayed in the charts for the mirrored dashboard. Splunk Observability Cloud
+
+                                            compares the contents of the dimension or property to the values in
+
+                                            values.'
+                                        values:
+                                          type: array
+                                          items:
+                                            type: string
+                                          description: 'List of values that Splunk Observability Cloud evaluates against the
+                                            value of
+
+                                            property. If values contains a single element, the evaluation is
+
+                                            <VALUE_OF_PROPERTY> = <VALUE[0]> (or if NOT is set to true,
+
+                                            <VALUE_OF_PROPERTY> != <VALUE[0]>.
+
+                                            If values contains more than one element, the evaluation expands
+
+                                            to (<VALUE_OF_PROPERTY> = <VALUE[0]>) OR (<VALUE_OF_PROPERTY> = <VALUE[1]>) OR
+                                            ... , and the
+
+                                            result is true if the value of property is equal to any of the
+
+                                            values in value.
+
+                                            If NOT is set to true, the result is false if property is
+
+                                            equal to one of the values in value, regardless of the other
+
+                                            values.'
+                                      description: 'Dashboard filter override that''s part of the set of filter overrides
+                                        for
+
+                                        a mirrored dashboard, in the form of a JSON object.'
+                                    description: 'List of filter overrides, in the form of a JSON array. The array has the
+
+                                      same format as the filters.sources array in the request body of
+
+                                      POST /dashboard.
+
+                                      FilterSources provides filter overrides for a mirrored dashboard.
+
+                                      To specify filter overrides, use one of these options for the value of
+
+                                      sources:
+
+
+                                      List of filters: The mirror uses this list of filter overrides.
+
+                                      null: The mirror uses the filters from the dashboard being mirrored.
+
+                                      \"\" or [ ] (empty string or empty array): Splunk Observability Cloud clears
+
+                                      filtersOverride.sources, and the override disables all of the
+
+                                      dashboard filters.'
+                                  variables:
+                                    title: List of dashboard variable filters
+                                    type: array
+                                    items:
+                                      title: A single dashboard variable override
+                                      type: object
+                                      properties:
+                                        preferredSuggestions:
+                                          description: 'List of values that overrides the preferred suggestions for the
+
+                                            dashboard variable identified by property.
+
+                                            You can''t override this value.'
+                                        property:
+                                          type: string
+                                          description: 'Name of a dimension or custom property that''s already defined as
+                                            a
+
+                                            dashboard variable in the dashboard being mirrored. You can''t
+
+                                            override this value.'
+                                        value:
+                                          type: array
+                                          items:
+                                            type: string
+                                          description: 'List of values that override the value associated with property
+
+                                            in the dashboard being mirrored.
+
+                                            To specify value overrides, use one of these options:
+
+
+                                            One or more values: The mirrored dashboard compares this list of
+
+                                            values to property.
+
+                                            null: The mirror uses value from the dashboard being mirrored.
+
+                                            \"\" or [ ] (empty string or empty array): Splunk Observability Cloud
+
+                                            clears the contents of value.
+
+
+                                            Splunk Observability Cloud evaluates the elements of value against property. If
+
+                                            value contains a single element, the evaluation is
+
+                                            <VALUE_OF_PROPERTY> = <VALUE[0]>.
+
+                                            If values contains more than one element, the evaluation expands to
+
+                                            (<VALUE_OF_PROPERTY> = <VALUE[0]>) OR (<VALUE_OF_PROPERTY> = <VALUE[1]>) OR ...
+                                            ,
+
+                                            and the result is true if the value of property is equal to any of the
+
+                                            values in value.'
+                                      description: 'Dashboard variable definition that''s part of the overrides for a
+
+                                        mirrored dashboard, in the form of a JSON object. You can''t add a
+
+                                        definition or change a definition name (the value of property).'
+                                    description: 'List of dashboard variables overrides for a mirrored dashboard, in the
+
+                                      form of a JSON array. filtersOverride.variables has the same format
+
+                                      as the filters.variables array in the request body of
+
+                                      POST /dashboard.'
+                                description: 'Filter and dashboard variable overrides for the mirrored dashboard, in
+
+                                  the form of a JSON object.'
+                              nameOverride:
+                                title: Override for a dashboard name
+                                description: 'String that overrides the name of the dashboard specified in
+
+                                  dashboardId. This property is primarily intended to provide a unique
+
+                                  name for a mirrored dashboard.'
+                            description: 'Entry in the dashboard group''s list of dashboard configurations,
+
+                              formatted as a JSON object
+
+                              Dashboard configurations store override
+
+                              properties. When you create a mirrored dashboard, Splunk Observability Cloud adds two
+
+                              dashboard configurations:
+
+
+                              Configuration for the dashboard being mirrored
+
+                              Configuration for the mirror'
+                          description: 'List of dashboard configurations associated with the dashboard group,
+
+                            in the form of a JSON array of JSON objects. In the UI, Splunk Observability Cloud
+
+                            uses the set of configurations for a group to determine which dashboards
+
+                            to display for the group.'
+                        dashboardId:
+                          type: string
+                          title: DashboardgroupDashboardId
+                          description: The ID of the dashboard that the dashboard group contains.
+                        dashboards:
+                          title: List of dashboards to add to the dashboard group
+                          type: array
+                          items:
+                            type: string
+                            description: 'Dashboard ID of an existing dashboard. If this
+
+                              dashboard already belongs to a dashboard group, the system rejects the
+
+                              request.'
+                          description: 'List of dashboards, in the form of a JSON array of dashboard IDs. The
+
+                            system adds the specified dashboards to the dashboard group you''re
+
+                            creating. If you omit the property, the system creates a new dashboard
+
+                            and assigns it to the new dashboard group.'
+                        description:
+                          type: string
+                          format: UTF-8
+                          maxLength: 1024
+                          title: DashboardgroupDescription
+                          description: 'Description of the dashboard group. This value appears in the tooltip
+
+                            for the dashboard group on the Dashboards page in the UI. For this
+
+                            value, you can use up to 1024 UTF-8 characters.'
+                        id:
+                          type: string
+                          title: DashboardgroupId
+                          description: ID for this dashboard group.
+                        lastUpdated:
+                          type: integer
+                          format: int64
+                          title: DashboardgroupLastUpdated
+                          description: 'The last time the dashboard group was updated, in *nix time in milliseconds.
+
+                            The system sets this value, and you can''t modify it.'
+                        lastUpdatedBy:
+                          type: string
+                          title: DashboardgroupLastUpdatedBy
+                          description: 'ID of the last user who updated the dashboard group.
+
+                            If the last update was by the system, the value is "AAAAAAAAAA". This
+
+                            value is read-only.'
+                        name:
+                          type: string
+                          minLength: 1
+                          title: DashboardgroupName
+                          description: 'Name of the dashboard group. This value identifies the dashboard group
+
+                            in the UI. It appears on the dashboards page and in the catalog. It
+
+                            also appears at the top left corner of the screen whenever you''re
+
+                            viewing a dashboard that the group contains.'
+                        teamId:
+                          type: string
+                          title: DashboardgroupTeamId
+                          description: ID of the team that the dashboard group belongs to.
+                        teams:
+                          type: array
+                          items:
+                            type: string
+                            description: Team ID
+                          title: DashboardgroupTeams
+                          description: 'List of existing teams, in the form of a JSON array of team IDs. The
+
+                            dashboard group appears on the team landing page for any team in the
+
+                            list.'
+                        permissions:
+                          title: Permission configuration for the dashboard
+                          type: object
+                          properties:
+                            acl:
+                              type: array
+                              items:
+                                title: An access control layer
+                                type: object
+                                properties:
+                                  actions:
+                                    type: array
+                                    items:
+                                      type: string
+                                      enum:
+                                      - READ
+                                      - WRITE
+                                    description: Action the user, team, or organization can take with the dashboard group.
+                                  principalType:
+                                    type: string
+                                    enum:
+                                    - USER
+                                    - TEAM
+                                    - ORG
+                                    description: Clarify whether this permission configuration is for a user, a team, or an
+                                      organization.
+                                  principalId:
+                                    type: string
+                                    description: ID of the user, team, or organization for which you're granting permissions.
+                                description: A permission configuration for a user, team, or organization.
+                              description: 'List of permission configurations.
+
+                                Use this list to specify read and write permissions for your dashboard group.'
+                            parent:
+                              type: string
+                              description: 'The parent property is null by default for dashboard groups and can''t be changed.
+
+                                When configured for a dashboard, parent is the ID of the dashboard group you want your dashboard
+                                to inherit permissions from.'
+                          description: Read and write permission configuration to specify which user, team, and organization
+                            can view and/or edit your dashboard group.
+                    description: 'List of dashboard groups, in the form of a JSON array of JSON
+
+                      objects
+
+                      The size of results and the value of count are not
+
+                      necessarily equal:
+
+
+                      If you don''t specify limit or offset:
+
+                      If count > 50, then sizeOf(results) = 50; otherwise
+
+                      sizeOf(results) = count.
+
+                      If you only specify limit:
+
+                      If count > limit then sizeOf(results) = limit; otherwise
+
+                      sizeOf(results) = count.
+
+                      If you specify limit and offset:
+
+                      If count > (offset + limit) then sizeOf(results) = limit;
+
+                      otherwise, sizeOf(results) = limit.'
+              examples:
+                example:
+                  value:
+                    count: 0
+                    results:
+                    - authorizedWriters:
+                        teams:
+                        - string
+                        users:
+                        - string
+                      created: 0
+                      creator: string
+                      dashboardConfigs:
+                      - configId: string
+                        dashboardId: string
+                        descriptionOverride: string
+                        filtersOverride:
+                          sources:
+                          - NOT: true
+                            property: string
+                            values:
+                            - string
+                          variables:
+                          - property: string
+                            value:
+                            - string
+                      dashboardId: string
+                      dashboards:
+                      - string
+                      description: string
+                      id: string
+                      lastUpdated: 0
+                      lastUpdatedBy: string
+                      name: string
+                      permissions:
+                        acl:
+                        - actions:
+                          - READ
+                          principalId: string
+                          principalType: USER
+                        parent: string
+                      teamId: string
+                      teams:
+                      - string
+      security:
+      - SessionToken: []
+      tags:
+      - Dashboard groups
+    post:
+      summary: Create Single Dashboard Group
+      description: 'Creates a dashboard group using the properties specified in the request
+
+        body. If your organization has the write permissions feature
+
+        enabled, you can use the authorizedWriters property to specify the
+
+        users and teams who have permission to edit or delete the group or its
+
+        dashboards.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - name
+              properties:
+                authorizedWriters:
+                  title: Organizations and teams with write permission for an object
+                  type: object
+                  properties:
+                    teams:
+                      type: array
+                      items:
+                        type: string
+                      description: 'List of team IDs that have write access to the group, in the form of
+
+                        a JSON array'
+                    users:
+                      type: array
+                      items:
+                        type: string
+                      description: Array of user IDs that have write access to the group
+                  description: 'Set of organizations and teams that have write permission for the
+
+                    dashboard group, in the form of a JSON object. If your organization has
+
+                    the write permissions feature enabled, you can use this object to
+
+                    specify the user and team IDs that have write access to the dashboard
+
+                    group'
+                dashboards:
+                  title: List of dashboards to add to the dashboard group
+                  type: array
+                  items:
+                    type: string
+                    description: 'Dashboard ID of an existing dashboard. If this
+
+                      dashboard already belongs to a dashboard group, the system rejects the
+
+                      request.'
+                  description: 'List of dashboards, in the form of a JSON array of dashboard IDs. The
+
+                    system adds the specified dashboards to the dashboard group you''re
+
+                    creating. If you omit the property, the system creates a new dashboard
+
+                    and assigns it to the new dashboard group.'
+                dashboardConfigs:
+                  title: List of dashboard configurations
+                  type: array
+                  items:
+                    title: Dashboard configuration in a dashboard group
+                    type: object
+                    required:
+                    - dashboardId
+                    properties:
+                      configId:
+                        title: Unique identifier for a dashboard configuration
+                        type: string
+                        readOnly: true
+                        description: 'ID of a dashboard configuration associated
+
+                          with the dashboard group
+
+                          Note: This property is read-only.'
+                      dashboardId:
+                        title: Dashboard ID
+                        type: string
+                        readOnly: false
+                        description: 'ID of a dashboard. In a dashboard group,
+
+                          dashboard IDs track the dashboards associated with the group.
+
+                          If you try to update the ID of an existing configuration entry or use a
+
+                          non-existent ID, the system returns HTTP error code 400.'
+                      descriptionOverride:
+                        title: Override for a dashboard description
+                        type: string
+                        format: UTF-8
+                        maxLength: 1024
+                        readOnly: false
+                        description: String that provides a description override for a mirrored dashboard
+                      filtersOverride:
+                        title: Override for the filters associated with a dashboard
+                        type: object
+                        properties:
+                          sources:
+                            title: List of dashboard filter overrides
+                            type: array
+                            items:
+                              title: A single dashboard filter override
+                              type: object
+                              properties:
+                                NOT:
+                                  type: boolean
+                                  default: false
+                                  description: 'Controls evaluation of the comparison between the property
+
+                                    property and the values in the value array. If NOT is false,
+
+                                    Splunk Observability Cloud tests <VALUE_OF_PROPERTY> = <VALUE_n>; otherwise,
+
+                                    Splunk Observability Cloud tests <VALUE_OF_PROPERTY> != <VALUE_n>.'
+                                property:
+                                  type: string
+                                  description: 'Name of a dimension or custom property for one of the metrics
+
+                                    displayed in the charts for the mirrored dashboard. Splunk Observability Cloud
+
+                                    compares the contents of the dimension or property to the values in
+
+                                    values.'
+                                values:
+                                  type: array
+                                  items:
+                                    type: string
+                                  description: 'List of values that Splunk Observability Cloud evaluates against the value
+                                    of
+
+                                    property. If values contains a single element, the evaluation is
+
+                                    <VALUE_OF_PROPERTY> = <VALUE[0]> (or if NOT is set to true,
+
+                                    <VALUE_OF_PROPERTY> != <VALUE[0]>.
+
+                                    If values contains more than one element, the evaluation expands
+
+                                    to (<VALUE_OF_PROPERTY> = <VALUE[0]>) OR (<VALUE_OF_PROPERTY> = <VALUE[1]>) OR ... , and
+                                    the
+
+                                    result is true if the value of property is equal to any of the
+
+                                    values in value.
+
+                                    If NOT is set to true, the result is false if property is
+
+                                    equal to one of the values in value, regardless of the other
+
+                                    values.'
+                              description: 'Dashboard filter override that''s part of the set of filter overrides for
+
+                                a mirrored dashboard, in the form of a JSON object.'
+                            description: 'List of filter overrides, in the form of a JSON array. The array has the
+
+                              same format as the filters.sources array in the request body of
+
+                              POST /dashboard.
+
+                              FilterSources provides filter overrides for a mirrored dashboard.
+
+                              To specify filter overrides, use one of these options for the value of
+
+                              sources:
+
+
+                              List of filters: The mirror uses this list of filter overrides.
+
+                              null: The mirror uses the filters from the dashboard being mirrored.
+
+                              \"\" or [ ] (empty string or empty array): Splunk Observability Cloud clears
+
+                              filtersOverride.sources, and the override disables all of the
+
+                              dashboard filters.'
+                          variables:
+                            title: List of dashboard variable filters
+                            type: array
+                            items:
+                              title: A single dashboard variable override
+                              type: object
+                              properties:
+                                preferredSuggestions:
+                                  description: 'List of values that overrides the preferred suggestions for the
+
+                                    dashboard variable identified by property.
+
+                                    You can''t override this value.'
+                                property:
+                                  type: string
+                                  description: 'Name of a dimension or custom property that''s already defined as a
+
+                                    dashboard variable in the dashboard being mirrored. You can''t
+
+                                    override this value.'
+                                value:
+                                  type: array
+                                  items:
+                                    type: string
+                                  description: 'List of values that override the value associated with property
+
+                                    in the dashboard being mirrored.
+
+                                    To specify value overrides, use one of these options:
+
+
+                                    One or more values: The mirrored dashboard compares this list of
+
+                                    values to property.
+
+                                    null: The mirror uses value from the dashboard being mirrored.
+
+                                    \"\" or [ ] (empty string or empty array): Splunk Observability Cloud
+
+                                    clears the contents of value.
+
+
+                                    Splunk Observability Cloud evaluates the elements of value against property. If
+
+                                    value contains a single element, the evaluation is
+
+                                    <VALUE_OF_PROPERTY> = <VALUE[0]>.
+
+                                    If values contains more than one element, the evaluation expands to
+
+                                    (<VALUE_OF_PROPERTY> = <VALUE[0]>) OR (<VALUE_OF_PROPERTY> = <VALUE[1]>) OR ... ,
+
+                                    and the result is true if the value of property is equal to any of the
+
+                                    values in value.'
+                              description: 'Dashboard variable definition that''s part of the overrides for a
+
+                                mirrored dashboard, in the form of a JSON object. You can''t add a
+
+                                definition or change a definition name (the value of property).'
+                            description: 'List of dashboard variables overrides for a mirrored dashboard, in the
+
+                              form of a JSON array. filtersOverride.variables has the same format
+
+                              as the filters.variables array in the request body of
+
+                              POST /dashboard.'
+                        description: 'Filter and dashboard variable overrides for the mirrored dashboard, in
+
+                          the form of a JSON object.'
+                      nameOverride:
+                        title: Override for a dashboard name
+                        description: 'String that overrides the name of the dashboard specified in
+
+                          dashboardId. This property is primarily intended to provide a unique
+
+                          name for a mirrored dashboard.'
+                    description: 'Entry in the dashboard group''s list of dashboard configurations,
+
+                      formatted as a JSON object
+
+                      Dashboard configurations store override
+
+                      properties. When you create a mirrored dashboard, Splunk Observability Cloud adds two
+
+                      dashboard configurations:
+
+
+                      Configuration for the dashboard being mirrored
+
+                      Configuration for the mirror'
+                  description: 'List of dashboard configurations associated with the dashboard group,
+
+                    in the form of a JSON array of JSON objects. In the UI, Splunk Observability Cloud
+
+                    uses the set of configurations for a group to determine which dashboards
+
+                    to display for the group.'
+                description:
+                  type: string
+                  format: UTF-8
+                  maxLength: 1024
+                  title: DashboardgroupDescription
+                  description: 'Description of the dashboard group. This value appears in the tooltip
+
+                    for the dashboard group on the Dashboards page in the UI. For this
+
+                    value, you can use up to 1024 UTF-8 characters.'
+                name:
+                  type: string
+                  minLength: 1
+                  title: DashboardgroupName
+                  description: 'Name of the dashboard group. This value identifies the dashboard group
+
+                    in the UI. It appears on the dashboards page and in the catalog. It
+
+                    also appears at the top left corner of the screen whenever you''re
+
+                    viewing a dashboard that the group contains.'
+                teams:
+                  type: array
+                  items:
+                    type: string
+                    description: Team ID
+                  title: DashboardgroupTeams
+                  description: 'List of existing teams, in the form of a JSON array of team IDs. The
+
+                    dashboard group appears on the team landing page for any team in the
+
+                    list.'
+                permissions:
+                  title: Permission configuration for the dashboard
+                  type: object
+                  properties:
+                    acl:
+                      type: array
+                      items:
+                        title: An access control layer
+                        type: object
+                        properties:
+                          actions:
+                            type: array
+                            items:
+                              type: string
+                              enum:
+                              - READ
+                              - WRITE
+                            description: Action the user, team, or organization can take with the dashboard group.
+                          principalType:
+                            type: string
+                            enum:
+                            - USER
+                            - TEAM
+                            - ORG
+                            description: Clarify whether this permission configuration is for a user, a team, or an organization.
+                          principalId:
+                            type: string
+                            description: ID of the user, team, or organization for which you're granting permissions.
+                        description: A permission configuration for a user, team, or organization.
+                      description: 'List of permission configurations.
+
+                        Use this list to specify read and write permissions for your dashboard group.'
+                    parent:
+                      type: string
+                      description: 'The parent property is null by default for dashboard groups and can''t be changed.
+
+                        When configured for a dashboard, parent is the ID of the dashboard group you want your dashboard to
+                        inherit permissions from.'
+                  description: Read and write permission configuration to specify which user, team, and organization can view
+                    and/or edit your dashboard group.
+            examples:
+              example:
+                value:
+                  authorizedWriters:
+                    teams:
+                    - string
+                    users:
+                    - string
+                  dashboardConfigs:
+                  - configId: string
+                    dashboardId: string
+                    descriptionOverride: string
+                    filtersOverride:
+                      sources:
+                      - NOT: true
+                        property: string
+                        values:
+                        - string
+                      variables:
+                      - property: string
+                        value:
+                        - string
+                  dashboards:
+                  - string
+                  description: string
+                  name: string
+                  permissions:
+                    acl:
+                    - actions:
+                      - READ
+                      principalId: string
+                      principalType: USER
+                    parent: string
+                  teams:
+                  - string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authorizedWriters:
+                    title: Organizations and teams with write permission for an object
+                    type: object
+                    properties:
+                      teams:
+                        type: array
+                        items:
+                          type: string
+                        description: 'List of team IDs that have write access to the group, in the form of
+
+                          a JSON array'
+                      users:
+                        type: array
+                        items:
+                          type: string
+                        description: Array of user IDs that have write access to the group
+                    description: 'Set of organizations and teams that have write permission for the
+
+                      dashboard group, in the form of a JSON object. If your organization has
+
+                      the write permissions feature enabled, you can use this object to
+
+                      specify the user and team IDs that have write access to the dashboard
+
+                      group'
+                  created:
+                    type: integer
+                    format: int64
+                    title: DashboardgroupCreated
+                    description: 'The dashboard group creation date and time, in the form of a Unix time
+
+                      value.
+
+                      The system sets this value, and you can''t modify it.'
+                  creator:
+                    type: string
+                    title: DashboardgroupCreator
+                    description: 'User ID of the user that created the dashboard group.
+
+                      If the system created this dashboard group, the value is "AAAAAAAAAA".
+
+                      The system sets this value, and you can''t modify it.'
+                  dashboards:
+                    title: List of dashboards to add to the dashboard group
+                    type: array
+                    items:
+                      type: string
+                      description: 'Dashboard ID of an existing dashboard. If this
+
+                        dashboard already belongs to a dashboard group, the system rejects the
+
+                        request.'
+                    description: 'List of dashboards, in the form of a JSON array of dashboard IDs. The
+
+                      system adds the specified dashboards to the dashboard group you''re
+
+                      creating. If you omit the property, the system creates a new dashboard
+
+                      and assigns it to the new dashboard group.'
+                  dashboardConfigs:
+                    title: List of dashboard configurations
+                    type: array
+                    items:
+                      title: Dashboard configuration in a dashboard group
+                      type: object
+                      required:
+                      - dashboardId
+                      properties:
+                        configId:
+                          title: Unique identifier for a dashboard configuration
+                          type: string
+                          readOnly: true
+                          description: 'ID of a dashboard configuration associated
+
+                            with the dashboard group
+
+                            Note: This property is read-only.'
+                        dashboardId:
+                          title: Dashboard ID
+                          type: string
+                          readOnly: false
+                          description: 'ID of a dashboard. In a dashboard group,
+
+                            dashboard IDs track the dashboards associated with the group.
+
+                            If you try to update the ID of an existing configuration entry or use a
+
+                            non-existent ID, the system returns HTTP error code 400.'
+                        descriptionOverride:
+                          title: Override for a dashboard description
+                          type: string
+                          format: UTF-8
+                          maxLength: 1024
+                          readOnly: false
+                          description: String that provides a description override for a mirrored dashboard
+                        filtersOverride:
+                          title: Override for the filters associated with a dashboard
+                          type: object
+                          properties:
+                            sources:
+                              title: List of dashboard filter overrides
+                              type: array
+                              items:
+                                title: A single dashboard filter override
+                                type: object
+                                properties:
+                                  NOT:
+                                    type: boolean
+                                    default: false
+                                    description: 'Controls evaluation of the comparison between the property
+
+                                      property and the values in the value array. If NOT is false,
+
+                                      Splunk Observability Cloud tests <VALUE_OF_PROPERTY> = <VALUE_n>; otherwise,
+
+                                      Splunk Observability Cloud tests <VALUE_OF_PROPERTY> != <VALUE_n>.'
+                                  property:
+                                    type: string
+                                    description: 'Name of a dimension or custom property for one of the metrics
+
+                                      displayed in the charts for the mirrored dashboard. Splunk Observability Cloud
+
+                                      compares the contents of the dimension or property to the values in
+
+                                      values.'
+                                  values:
+                                    type: array
+                                    items:
+                                      type: string
+                                    description: 'List of values that Splunk Observability Cloud evaluates against the value
+                                      of
+
+                                      property. If values contains a single element, the evaluation is
+
+                                      <VALUE_OF_PROPERTY> = <VALUE[0]> (or if NOT is set to true,
+
+                                      <VALUE_OF_PROPERTY> != <VALUE[0]>.
+
+                                      If values contains more than one element, the evaluation expands
+
+                                      to (<VALUE_OF_PROPERTY> = <VALUE[0]>) OR (<VALUE_OF_PROPERTY> = <VALUE[1]>) OR ... ,
+                                      and the
+
+                                      result is true if the value of property is equal to any of the
+
+                                      values in value.
+
+                                      If NOT is set to true, the result is false if property is
+
+                                      equal to one of the values in value, regardless of the other
+
+                                      values.'
+                                description: 'Dashboard filter override that''s part of the set of filter overrides for
+
+                                  a mirrored dashboard, in the form of a JSON object.'
+                              description: 'List of filter overrides, in the form of a JSON array. The array has the
+
+                                same format as the filters.sources array in the request body of
+
+                                POST /dashboard.
+
+                                FilterSources provides filter overrides for a mirrored dashboard.
+
+                                To specify filter overrides, use one of these options for the value of
+
+                                sources:
+
+
+                                List of filters: The mirror uses this list of filter overrides.
+
+                                null: The mirror uses the filters from the dashboard being mirrored.
+
+                                \"\" or [ ] (empty string or empty array): Splunk Observability Cloud clears
+
+                                filtersOverride.sources, and the override disables all of the
+
+                                dashboard filters.'
+                            variables:
+                              title: List of dashboard variable filters
+                              type: array
+                              items:
+                                title: A single dashboard variable override
+                                type: object
+                                properties:
+                                  preferredSuggestions:
+                                    description: 'List of values that overrides the preferred suggestions for the
+
+                                      dashboard variable identified by property.
+
+                                      You can''t override this value.'
+                                  property:
+                                    type: string
+                                    description: 'Name of a dimension or custom property that''s already defined as a
+
+                                      dashboard variable in the dashboard being mirrored. You can''t
+
+                                      override this value.'
+                                  value:
+                                    type: array
+                                    items:
+                                      type: string
+                                    description: 'List of values that override the value associated with property
+
+                                      in the dashboard being mirrored.
+
+                                      To specify value overrides, use one of these options:
+
+
+                                      One or more values: The mirrored dashboard compares this list of
+
+                                      values to property.
+
+                                      null: The mirror uses value from the dashboard being mirrored.
+
+                                      \"\" or [ ] (empty string or empty array): Splunk Observability Cloud
+
+                                      clears the contents of value.
+
+
+                                      Splunk Observability Cloud evaluates the elements of value against property. If
+
+                                      value contains a single element, the evaluation is
+
+                                      <VALUE_OF_PROPERTY> = <VALUE[0]>.
+
+                                      If values contains more than one element, the evaluation expands to
+
+                                      (<VALUE_OF_PROPERTY> = <VALUE[0]>) OR (<VALUE_OF_PROPERTY> = <VALUE[1]>) OR ... ,
+
+                                      and the result is true if the value of property is equal to any of the
+
+                                      values in value.'
+                                description: 'Dashboard variable definition that''s part of the overrides for a
+
+                                  mirrored dashboard, in the form of a JSON object. You can''t add a
+
+                                  definition or change a definition name (the value of property).'
+                              description: 'List of dashboard variables overrides for a mirrored dashboard, in the
+
+                                form of a JSON array. filtersOverride.variables has the same format
+
+                                as the filters.variables array in the request body of
+
+                                POST /dashboard.'
+                          description: 'Filter and dashboard variable overrides for the mirrored dashboard, in
+
+                            the form of a JSON object.'
+                        nameOverride:
+                          title: Override for a dashboard name
+                          description: 'String that overrides the name of the dashboard specified in
+
+                            dashboardId. This property is primarily intended to provide a unique
+
+                            name for a mirrored dashboard.'
+                      description: 'Entry in the dashboard group''s list of dashboard configurations,
+
+                        formatted as a JSON object
+
+                        Dashboard configurations store override
+
+                        properties. When you create a mirrored dashboard, Splunk Observability Cloud adds two
+
+                        dashboard configurations:
+
+
+                        Configuration for the dashboard being mirrored
+
+                        Configuration for the mirror'
+                    description: 'List of dashboard configurations associated with the dashboard group,
+
+                      in the form of a JSON array of JSON objects. In the UI, Splunk Observability Cloud
+
+                      uses the set of configurations for a group to determine which dashboards
+
+                      to display for the group.'
+                  description:
+                    type: string
+                    format: UTF-8
+                    maxLength: 1024
+                    title: DashboardgroupDescription
+                    description: 'Description of the dashboard group. This value appears in the tooltip
+
+                      for the dashboard group on the Dashboards page in the UI. For this
+
+                      value, you can use up to 1024 UTF-8 characters.'
+                  id:
+                    type: string
+                    title: DashboardgroupId
+                    description: ID for this dashboard group.
+                  lastUpdated:
+                    type: integer
+                    format: int64
+                    title: DashboardgroupLastUpdated
+                    description: 'The last time the dashboard group was updated, in *nix time in milliseconds.
+
+                      The system sets this value, and you can''t modify it.'
+                  lastUpdatedBy:
+                    type: string
+                    title: DashboardgroupLastUpdatedBy
+                    description: 'ID of the last user who updated the dashboard group.
+
+                      If the last update was by the system, the value is "AAAAAAAAAA". This
+
+                      value is read-only.'
+                  name:
+                    type: string
+                    minLength: 1
+                    title: DashboardgroupName
+                    description: 'Name of the dashboard group. This value identifies the dashboard group
+
+                      in the UI. It appears on the dashboards page and in the catalog. It
+
+                      also appears at the top left corner of the screen whenever you''re
+
+                      viewing a dashboard that the group contains.'
+                  teams:
+                    type: array
+                    items:
+                      type: string
+                      description: Team ID
+                    title: DashboardgroupTeams
+                    description: 'List of existing teams, in the form of a JSON array of team IDs. The
+
+                      dashboard group appears on the team landing page for any team in the
+
+                      list.'
+                  permissions:
+                    title: Permission configuration for the dashboard
+                    type: object
+                    properties:
+                      acl:
+                        type: array
+                        items:
+                          title: An access control layer
+                          type: object
+                          properties:
+                            actions:
+                              type: array
+                              items:
+                                type: string
+                                enum:
+                                - READ
+                                - WRITE
+                              description: Action the user, team, or organization can take with the dashboard group.
+                            principalType:
+                              type: string
+                              enum:
+                              - USER
+                              - TEAM
+                              - ORG
+                              description: Clarify whether this permission configuration is for a user, a team, or an organization.
+                            principalId:
+                              type: string
+                              description: ID of the user, team, or organization for which you're granting permissions.
+                          description: A permission configuration for a user, team, or organization.
+                        description: 'List of permission configurations.
+
+                          Use this list to specify read and write permissions for your dashboard group.'
+                      parent:
+                        type: string
+                        description: 'The parent property is null by default for dashboard groups and can''t be changed.
+
+                          When configured for a dashboard, parent is the ID of the dashboard group you want your dashboard
+                          to inherit permissions from.'
+                    description: Read and write permission configuration to specify which user, team, and organization can
+                      view and/or edit your dashboard group.
+              examples:
+                example:
+                  value:
+                    authorizedWriters:
+                      teams:
+                      - string
+                      users:
+                      - string
+                    created: 0
+                    creator: string
+                    dashboardConfigs:
+                    - configId: string
+                      dashboardId: string
+                      descriptionOverride: string
+                      filtersOverride:
+                        sources:
+                        - NOT: true
+                          property: string
+                          values:
+                          - string
+                        variables:
+                        - property: string
+                          value:
+                          - string
+                    dashboards:
+                    - string
+                    description: string
+                    id: string
+                    lastUpdated: 0
+                    lastUpdatedBy: string
+                    name: string
+                    permissions:
+                      acl:
+                      - actions:
+                        - READ
+                        principalId: string
+                        principalType: USER
+                      parent: string
+                    teams:
+                    - string
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    description: HTTP response code. Always '400'
+                  message:
+                    type: string
+                    description: Error explanation
+              examples:
+                example:
+                  value:
+                    code: 0
+                    message: string
+      security:
+      - SessionToken: []
+      tags:
+      - Dashboard groups
+  /dashboardgroup/{id}:
+    get:
+      summary: Retrieve Dashboard Group Using ID
+      description: 'Retrieves the dashboard group specified by the dashboard group ID in the
+
+        {id} path parameter.'
+      parameters:
+      - name: id
+        in: path
+        description: ID of an existing dashboard group.
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authorizedWriters:
+                    title: Organizations and teams with write permission for an object
+                    type: object
+                    properties:
+                      teams:
+                        type: array
+                        items:
+                          type: string
+                        description: 'List of team IDs that have write access to the group, in the form of
+
+                          a JSON array'
+                      users:
+                        type: array
+                        items:
+                          type: string
+                        description: Array of user IDs that have write access to the group
+                    description: 'Set of organizations and teams that have write permission for the
+
+                      dashboard group, in the form of a JSON object. If your organization has
+
+                      the write permissions feature enabled, you can use this object to
+
+                      specify the user and team IDs that have write access to the dashboard
+
+                      group'
+                  created:
+                    type: integer
+                    format: int64
+                    title: DashboardgroupCreated
+                    description: 'The dashboard group creation date and time, in the form of a Unix time
+
+                      value.
+
+                      The system sets this value, and you can''t modify it.'
+                  creator:
+                    type: string
+                    title: DashboardgroupCreator
+                    description: 'User ID of the user that created the dashboard group.
+
+                      If the system created this dashboard group, the value is "AAAAAAAAAA".
+
+                      The system sets this value, and you can''t modify it.'
+                  dashboards:
+                    title: List of dashboards to add to the dashboard group
+                    type: array
+                    items:
+                      type: string
+                      description: 'Dashboard ID of an existing dashboard. If this
+
+                        dashboard already belongs to a dashboard group, the system rejects the
+
+                        request.'
+                    description: 'List of dashboards, in the form of a JSON array of dashboard IDs. The
+
+                      system adds the specified dashboards to the dashboard group you''re
+
+                      creating. If you omit the property, the system creates a new dashboard
+
+                      and assigns it to the new dashboard group.'
+                  dashboardConfigs:
+                    title: List of dashboard configurations
+                    type: array
+                    items:
+                      title: Dashboard configuration in a dashboard group
+                      type: object
+                      required:
+                      - dashboardId
+                      properties:
+                        configId:
+                          title: Unique identifier for a dashboard configuration
+                          type: string
+                          readOnly: true
+                          description: 'ID of a dashboard configuration associated
+
+                            with the dashboard group
+
+                            Note: This property is read-only.'
+                        dashboardId:
+                          title: Dashboard ID
+                          type: string
+                          readOnly: false
+                          description: 'ID of a dashboard. In a dashboard group,
+
+                            dashboard IDs track the dashboards associated with the group.
+
+                            If you try to update the ID of an existing configuration entry or use a
+
+                            non-existent ID, the system returns HTTP error code 400.'
+                        descriptionOverride:
+                          title: Override for a dashboard description
+                          type: string
+                          format: UTF-8
+                          maxLength: 1024
+                          readOnly: false
+                          description: String that provides a description override for a mirrored dashboard
+                        filtersOverride:
+                          title: Override for the filters associated with a dashboard
+                          type: object
+                          properties:
+                            sources:
+                              title: List of dashboard filter overrides
+                              type: array
+                              items:
+                                title: A single dashboard filter override
+                                type: object
+                                properties:
+                                  NOT:
+                                    type: boolean
+                                    default: false
+                                    description: 'Controls evaluation of the comparison between the property
+
+                                      property and the values in the value array. If NOT is false,
+
+                                      Splunk Observability Cloud tests <VALUE_OF_PROPERTY> = <VALUE_n>; otherwise,
+
+                                      Splunk Observability Cloud tests <VALUE_OF_PROPERTY> != <VALUE_n>.'
+                                  property:
+                                    type: string
+                                    description: 'Name of a dimension or custom property for one of the metrics
+
+                                      displayed in the charts for the mirrored dashboard. Splunk Observability Cloud
+
+                                      compares the contents of the dimension or property to the values in
+
+                                      values.'
+                                  values:
+                                    type: array
+                                    items:
+                                      type: string
+                                    description: 'List of values that Splunk Observability Cloud evaluates against the value
+                                      of
+
+                                      property. If values contains a single element, the evaluation is
+
+                                      <VALUE_OF_PROPERTY> = <VALUE[0]> (or if NOT is set to true,
+
+                                      <VALUE_OF_PROPERTY> != <VALUE[0]>.
+
+                                      If values contains more than one element, the evaluation expands
+
+                                      to (<VALUE_OF_PROPERTY> = <VALUE[0]>) OR (<VALUE_OF_PROPERTY> = <VALUE[1]>) OR ... ,
+                                      and the
+
+                                      result is true if the value of property is equal to any of the
+
+                                      values in value.
+
+                                      If NOT is set to true, the result is false if property is
+
+                                      equal to one of the values in value, regardless of the other
+
+                                      values.'
+                                description: 'Dashboard filter override that''s part of the set of filter overrides for
+
+                                  a mirrored dashboard, in the form of a JSON object.'
+                              description: 'List of filter overrides, in the form of a JSON array. The array has the
+
+                                same format as the filters.sources array in the request body of
+
+                                POST /dashboard.
+
+                                FilterSources provides filter overrides for a mirrored dashboard.
+
+                                To specify filter overrides, use one of these options for the value of
+
+                                sources:
+
+
+                                List of filters: The mirror uses this list of filter overrides.
+
+                                null: The mirror uses the filters from the dashboard being mirrored.
+
+                                \"\" or [ ] (empty string or empty array): Splunk Observability Cloud clears
+
+                                filtersOverride.sources, and the override disables all of the
+
+                                dashboard filters.'
+                            variables:
+                              title: List of dashboard variable filters
+                              type: array
+                              items:
+                                title: A single dashboard variable override
+                                type: object
+                                properties:
+                                  preferredSuggestions:
+                                    description: 'List of values that overrides the preferred suggestions for the
+
+                                      dashboard variable identified by property.
+
+                                      You can''t override this value.'
+                                  property:
+                                    type: string
+                                    description: 'Name of a dimension or custom property that''s already defined as a
+
+                                      dashboard variable in the dashboard being mirrored. You can''t
+
+                                      override this value.'
+                                  value:
+                                    type: array
+                                    items:
+                                      type: string
+                                    description: 'List of values that override the value associated with property
+
+                                      in the dashboard being mirrored.
+
+                                      To specify value overrides, use one of these options:
+
+
+                                      One or more values: The mirrored dashboard compares this list of
+
+                                      values to property.
+
+                                      null: The mirror uses value from the dashboard being mirrored.
+
+                                      \"\" or [ ] (empty string or empty array): Splunk Observability Cloud
+
+                                      clears the contents of value.
+
+
+                                      Splunk Observability Cloud evaluates the elements of value against property. If
+
+                                      value contains a single element, the evaluation is
+
+                                      <VALUE_OF_PROPERTY> = <VALUE[0]>.
+
+                                      If values contains more than one element, the evaluation expands to
+
+                                      (<VALUE_OF_PROPERTY> = <VALUE[0]>) OR (<VALUE_OF_PROPERTY> = <VALUE[1]>) OR ... ,
+
+                                      and the result is true if the value of property is equal to any of the
+
+                                      values in value.'
+                                description: 'Dashboard variable definition that''s part of the overrides for a
+
+                                  mirrored dashboard, in the form of a JSON object. You can''t add a
+
+                                  definition or change a definition name (the value of property).'
+                              description: 'List of dashboard variables overrides for a mirrored dashboard, in the
+
+                                form of a JSON array. filtersOverride.variables has the same format
+
+                                as the filters.variables array in the request body of
+
+                                POST /dashboard.'
+                          description: 'Filter and dashboard variable overrides for the mirrored dashboard, in
+
+                            the form of a JSON object.'
+                        nameOverride:
+                          title: Override for a dashboard name
+                          description: 'String that overrides the name of the dashboard specified in
+
+                            dashboardId. This property is primarily intended to provide a unique
+
+                            name for a mirrored dashboard.'
+                      description: 'Entry in the dashboard group''s list of dashboard configurations,
+
+                        formatted as a JSON object
+
+                        Dashboard configurations store override
+
+                        properties. When you create a mirrored dashboard, Splunk Observability Cloud adds two
+
+                        dashboard configurations:
+
+
+                        Configuration for the dashboard being mirrored
+
+                        Configuration for the mirror'
+                    description: 'List of dashboard configurations associated with the dashboard group,
+
+                      in the form of a JSON array of JSON objects. In the UI, Splunk Observability Cloud
+
+                      uses the set of configurations for a group to determine which dashboards
+
+                      to display for the group.'
+                  description:
+                    type: string
+                    format: UTF-8
+                    maxLength: 1024
+                    title: DashboardgroupDescription
+                    description: 'Description of the dashboard group. This value appears in the tooltip
+
+                      for the dashboard group on the Dashboards page in the UI. For this
+
+                      value, you can use up to 1024 UTF-8 characters.'
+                  id:
+                    type: string
+                    title: DashboardgroupId
+                    description: ID for this dashboard group.
+                  lastUpdated:
+                    type: integer
+                    format: int64
+                    title: DashboardgroupLastUpdated
+                    description: 'The last time the dashboard group was updated, in *nix time in milliseconds.
+
+                      The system sets this value, and you can''t modify it.'
+                  lastUpdatedBy:
+                    type: string
+                    title: DashboardgroupLastUpdatedBy
+                    description: 'ID of the last user who updated the dashboard group.
+
+                      If the last update was by the system, the value is "AAAAAAAAAA". This
+
+                      value is read-only.'
+                  name:
+                    type: string
+                    minLength: 1
+                    title: DashboardgroupName
+                    description: 'Name of the dashboard group. This value identifies the dashboard group
+
+                      in the UI. It appears on the dashboards page and in the catalog. It
+
+                      also appears at the top left corner of the screen whenever you''re
+
+                      viewing a dashboard that the group contains.'
+                  teams:
+                    type: array
+                    items:
+                      type: string
+                      description: Team ID
+                    title: DashboardgroupTeams
+                    description: 'List of existing teams, in the form of a JSON array of team IDs. The
+
+                      dashboard group appears on the team landing page for any team in the
+
+                      list.'
+                  permissions:
+                    title: Permission configuration for the dashboard
+                    type: object
+                    properties:
+                      acl:
+                        type: array
+                        items:
+                          title: An access control layer
+                          type: object
+                          properties:
+                            actions:
+                              type: array
+                              items:
+                                type: string
+                                enum:
+                                - READ
+                                - WRITE
+                              description: Action the user, team, or organization can take with the dashboard group.
+                            principalType:
+                              type: string
+                              enum:
+                              - USER
+                              - TEAM
+                              - ORG
+                              description: Clarify whether this permission configuration is for a user, a team, or an organization.
+                            principalId:
+                              type: string
+                              description: ID of the user, team, or organization for which you're granting permissions.
+                          description: A permission configuration for a user, team, or organization.
+                        description: 'List of permission configurations.
+
+                          Use this list to specify read and write permissions for your dashboard group.'
+                      parent:
+                        type: string
+                        description: 'The parent property is null by default for dashboard groups and can''t be changed.
+
+                          When configured for a dashboard, parent is the ID of the dashboard group you want your dashboard
+                          to inherit permissions from.'
+                    description: Read and write permission configuration to specify which user, team, and organization can
+                      view and/or edit your dashboard group.
+              examples:
+                example:
+                  value:
+                    authorizedWriters:
+                      teams:
+                      - string
+                      users:
+                      - string
+                    created: 0
+                    creator: string
+                    dashboardConfigs:
+                    - configId: string
+                      dashboardId: string
+                      descriptionOverride: string
+                      filtersOverride:
+                        sources:
+                        - NOT: true
+                          property: string
+                          values:
+                          - string
+                        variables:
+                        - property: string
+                          value:
+                          - string
+                    dashboards:
+                    - string
+                    description: string
+                    id: string
+                    lastUpdated: 0
+                    lastUpdatedBy: string
+                    name: string
+                    permissions:
+                      acl:
+                      - actions:
+                        - READ
+                        principalId: string
+                        principalType: USER
+                      parent: string
+                    teams:
+                    - string
+      security:
+      - SessionToken: []
+      tags:
+      - Dashboard groups
+    put:
+      summary: Update Single Dashboard Group
+      description: 'Updates the dashboard group specified by the {id} path parameter,
+
+        using the properties specified in the request body
+
+        This operation has overwrite semantics. Values you specify in the
+
+        request body overwrite existing properties. The API either removes or
+
+        resets properties that you don''t specify. Some values you can specify
+
+        for mirrored dashboard overrides have special meaning:
+
+
+        Arrays you specify for to the authorizedWriters, dashboards,
+
+        dashboardConfigs, and teams array properties overwrite the
+
+        existing arrays.
+
+        To add an element to an array, retrieve the existing dashboard group,
+
+        copy the array, insert into the copy the element you want to add,
+
+        and send the copy in your PUT request.
+
+        To add a dashboard mirror, update the dashboardConfigs array
+
+        with a dashboardConfig that contains an existing dashboard ID.
+
+        If the write permissions feature is enabled for your organization,
+
+        the user ID associated with the request''s auth token must have write
+
+        permission for the group.'
+      parameters:
+      - name: id
+        in: path
+        description: ID of the dashboard group you want to update
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                authorizedWriters:
+                  title: Organizations and teams with write permission for an object
+                  type: object
+                  properties:
+                    teams:
+                      type: array
+                      items:
+                        type: string
+                      description: 'List of team IDs that have write access to the group, in the form of
+
+                        a JSON array'
+                    users:
+                      type: array
+                      items:
+                        type: string
+                      description: Array of user IDs that have write access to the group
+                  description: 'Set of organizations and teams that have write permission for the
+
+                    dashboard group, in the form of a JSON object. If your organization has
+
+                    the write permissions feature enabled, you can use this object to
+
+                    specify the user and team IDs that have write access to the dashboard
+
+                    group'
+                dashboards:
+                  title: List of dashboards to add to the dashboard group
+                  type: array
+                  items:
+                    type: string
+                    description: 'Dashboard ID of an existing dashboard. If this
+
+                      dashboard already belongs to a dashboard group, the system rejects the
+
+                      request.'
+                  description: 'List of dashboards, in the form of a JSON array of dashboard IDs. The
+
+                    system adds the specified dashboards to the dashboard group you''re
+
+                    creating. If you omit the property, the system creates a new dashboard
+
+                    and assigns it to the new dashboard group.'
+                dashboardConfigs:
+                  title: List of dashboard configurations
+                  type: array
+                  items:
+                    title: Dashboard configuration in a dashboard group
+                    type: object
+                    required:
+                    - dashboardId
+                    properties:
+                      configId:
+                        title: Unique identifier for a dashboard configuration
+                        type: string
+                        readOnly: true
+                        description: 'ID of a dashboard configuration associated
+
+                          with the dashboard group
+
+                          Note: This property is read-only.'
+                      dashboardId:
+                        title: Dashboard ID
+                        type: string
+                        readOnly: false
+                        description: 'ID of a dashboard. In a dashboard group,
+
+                          dashboard IDs track the dashboards associated with the group.
+
+                          If you try to update the ID of an existing configuration entry or use a
+
+                          non-existent ID, the system returns HTTP error code 400.'
+                      descriptionOverride:
+                        title: Override for a dashboard description
+                        type: string
+                        format: UTF-8
+                        maxLength: 1024
+                        readOnly: false
+                        description: String that provides a description override for a mirrored dashboard
+                      filtersOverride:
+                        title: Override for the filters associated with a dashboard
+                        type: object
+                        properties:
+                          sources:
+                            title: List of dashboard filter overrides
+                            type: array
+                            items:
+                              title: A single dashboard filter override
+                              type: object
+                              properties:
+                                NOT:
+                                  type: boolean
+                                  default: false
+                                  description: 'Controls evaluation of the comparison between the property
+
+                                    property and the values in the value array. If NOT is false,
+
+                                    Splunk Observability Cloud tests <VALUE_OF_PROPERTY> = <VALUE_n>; otherwise,
+
+                                    Splunk Observability Cloud tests <VALUE_OF_PROPERTY> != <VALUE_n>.'
+                                property:
+                                  type: string
+                                  description: 'Name of a dimension or custom property for one of the metrics
+
+                                    displayed in the charts for the mirrored dashboard. Splunk Observability Cloud
+
+                                    compares the contents of the dimension or property to the values in
+
+                                    values.'
+                                values:
+                                  type: array
+                                  items:
+                                    type: string
+                                  description: 'List of values that Splunk Observability Cloud evaluates against the value
+                                    of
+
+                                    property. If values contains a single element, the evaluation is
+
+                                    <VALUE_OF_PROPERTY> = <VALUE[0]> (or if NOT is set to true,
+
+                                    <VALUE_OF_PROPERTY> != <VALUE[0]>.
+
+                                    If values contains more than one element, the evaluation expands
+
+                                    to (<VALUE_OF_PROPERTY> = <VALUE[0]>) OR (<VALUE_OF_PROPERTY> = <VALUE[1]>) OR ... , and
+                                    the
+
+                                    result is true if the value of property is equal to any of the
+
+                                    values in value.
+
+                                    If NOT is set to true, the result is false if property is
+
+                                    equal to one of the values in value, regardless of the other
+
+                                    values.'
+                              description: 'Dashboard filter override that''s part of the set of filter overrides for
+
+                                a mirrored dashboard, in the form of a JSON object.'
+                            description: 'List of filter overrides, in the form of a JSON array. The array has the
+
+                              same format as the filters.sources array in the request body of
+
+                              POST /dashboard.
+
+                              FilterSources provides filter overrides for a mirrored dashboard.
+
+                              To specify filter overrides, use one of these options for the value of
+
+                              sources:
+
+
+                              List of filters: The mirror uses this list of filter overrides.
+
+                              null: The mirror uses the filters from the dashboard being mirrored.
+
+                              \"\" or [ ] (empty string or empty array): Splunk Observability Cloud clears
+
+                              filtersOverride.sources, and the override disables all of the
+
+                              dashboard filters.'
+                          variables:
+                            title: List of dashboard variable filters
+                            type: array
+                            items:
+                              title: A single dashboard variable override
+                              type: object
+                              properties:
+                                preferredSuggestions:
+                                  description: 'List of values that overrides the preferred suggestions for the
+
+                                    dashboard variable identified by property.
+
+                                    You can''t override this value.'
+                                property:
+                                  type: string
+                                  description: 'Name of a dimension or custom property that''s already defined as a
+
+                                    dashboard variable in the dashboard being mirrored. You can''t
+
+                                    override this value.'
+                                value:
+                                  type: array
+                                  items:
+                                    type: string
+                                  description: 'List of values that override the value associated with property
+
+                                    in the dashboard being mirrored.
+
+                                    To specify value overrides, use one of these options:
+
+
+                                    One or more values: The mirrored dashboard compares this list of
+
+                                    values to property.
+
+                                    null: The mirror uses value from the dashboard being mirrored.
+
+                                    \"\" or [ ] (empty string or empty array): Splunk Observability Cloud
+
+                                    clears the contents of value.
+
+
+                                    Splunk Observability Cloud evaluates the elements of value against property. If
+
+                                    value contains a single element, the evaluation is
+
+                                    <VALUE_OF_PROPERTY> = <VALUE[0]>.
+
+                                    If values contains more than one element, the evaluation expands to
+
+                                    (<VALUE_OF_PROPERTY> = <VALUE[0]>) OR (<VALUE_OF_PROPERTY> = <VALUE[1]>) OR ... ,
+
+                                    and the result is true if the value of property is equal to any of the
+
+                                    values in value.'
+                              description: 'Dashboard variable definition that''s part of the overrides for a
+
+                                mirrored dashboard, in the form of a JSON object. You can''t add a
+
+                                definition or change a definition name (the value of property).'
+                            description: 'List of dashboard variables overrides for a mirrored dashboard, in the
+
+                              form of a JSON array. filtersOverride.variables has the same format
+
+                              as the filters.variables array in the request body of
+
+                              POST /dashboard.'
+                        description: 'Filter and dashboard variable overrides for the mirrored dashboard, in
+
+                          the form of a JSON object.'
+                      nameOverride:
+                        title: Override for a dashboard name
+                        description: 'String that overrides the name of the dashboard specified in
+
+                          dashboardId. This property is primarily intended to provide a unique
+
+                          name for a mirrored dashboard.'
+                    description: 'Entry in the dashboard group''s list of dashboard configurations,
+
+                      formatted as a JSON object
+
+                      Dashboard configurations store override
+
+                      properties. When you create a mirrored dashboard, Splunk Observability Cloud adds two
+
+                      dashboard configurations:
+
+
+                      Configuration for the dashboard being mirrored
+
+                      Configuration for the mirror'
+                  description: 'List of dashboard configurations associated with the dashboard group,
+
+                    in the form of a JSON array of JSON objects. In the UI, Splunk Observability Cloud
+
+                    uses the set of configurations for a group to determine which dashboards
+
+                    to display for the group.'
+                description:
+                  type: string
+                  format: UTF-8
+                  maxLength: 1024
+                  title: DashboardgroupDescription
+                  description: 'Description of the dashboard group. This value appears in the tooltip
+
+                    for the dashboard group on the Dashboards page in the UI. For this
+
+                    value, you can use up to 1024 UTF-8 characters.'
+                name:
+                  type: string
+                  minLength: 1
+                  title: DashboardgroupName
+                  description: 'Name of the dashboard group. This value identifies the dashboard group
+
+                    in the UI. It appears on the dashboards page and in the catalog. It
+
+                    also appears at the top left corner of the screen whenever you''re
+
+                    viewing a dashboard that the group contains.'
+                teams:
+                  type: array
+                  items:
+                    type: string
+                    description: Team ID
+                  title: DashboardgroupTeams
+                  description: 'List of existing teams, in the form of a JSON array of team IDs. The
+
+                    dashboard group appears on the team landing page for any team in the
+
+                    list.'
+                permissions:
+                  title: Permission configuration for the dashboard
+                  type: object
+                  properties:
+                    acl:
+                      type: array
+                      items:
+                        title: An access control layer
+                        type: object
+                        properties:
+                          actions:
+                            type: array
+                            items:
+                              type: string
+                              enum:
+                              - READ
+                              - WRITE
+                            description: Action the user, team, or organization can take with the dashboard group.
+                          principalType:
+                            type: string
+                            enum:
+                            - USER
+                            - TEAM
+                            - ORG
+                            description: Clarify whether this permission configuration is for a user, a team, or an organization.
+                          principalId:
+                            type: string
+                            description: ID of the user, team, or organization for which you're granting permissions.
+                        description: A permission configuration for a user, team, or organization.
+                      description: 'List of permission configurations.
+
+                        Use this list to specify read and write permissions for your dashboard group.'
+                    parent:
+                      type: string
+                      description: 'The parent property is null by default for dashboard groups and can''t be changed.
+
+                        When configured for a dashboard, parent is the ID of the dashboard group you want your dashboard to
+                        inherit permissions from.'
+                  description: Read and write permission configuration to specify which user, team, and organization can view
+                    and/or edit your dashboard group.
+            examples:
+              example:
+                value:
+                  authorizedWriters:
+                    teams:
+                    - string
+                    users:
+                    - string
+                  dashboardConfigs:
+                  - configId: string
+                    dashboardId: string
+                    descriptionOverride: string
+                    filtersOverride:
+                      sources:
+                      - NOT: true
+                        property: string
+                        values:
+                        - string
+                      variables:
+                      - property: string
+                        value:
+                        - string
+                  dashboards:
+                  - string
+                  description: string
+                  name: string
+                  permissions:
+                    acl:
+                    - actions:
+                      - READ
+                      principalId: string
+                      principalType: USER
+                    parent: string
+                  teams:
+                  - string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authorizedWriters:
+                    title: Organizations and teams with write permission for an object
+                    type: object
+                    properties:
+                      teams:
+                        type: array
+                        items:
+                          type: string
+                        description: 'List of team IDs that have write access to the group, in the form of
+
+                          a JSON array'
+                      users:
+                        type: array
+                        items:
+                          type: string
+                        description: Array of user IDs that have write access to the group
+                    description: 'Set of organizations and teams that have write permission for the
+
+                      dashboard group, in the form of a JSON object. If your organization has
+
+                      the write permissions feature enabled, you can use this object to
+
+                      specify the user and team IDs that have write access to the dashboard
+
+                      group'
+                  created:
+                    type: integer
+                    format: int64
+                    title: DashboardgroupCreated
+                    description: 'The dashboard group creation date and time, in the form of a Unix time
+
+                      value.
+
+                      The system sets this value, and you can''t modify it.'
+                  creator:
+                    type: string
+                    title: DashboardgroupCreator
+                    description: 'User ID of the user that created the dashboard group.
+
+                      If the system created this dashboard group, the value is "AAAAAAAAAA".
+
+                      The system sets this value, and you can''t modify it.'
+                  dashboards:
+                    title: List of dashboards to add to the dashboard group
+                    type: array
+                    items:
+                      type: string
+                      description: 'Dashboard ID of an existing dashboard. If this
+
+                        dashboard already belongs to a dashboard group, the system rejects the
+
+                        request.'
+                    description: 'List of dashboards, in the form of a JSON array of dashboard IDs. The
+
+                      system adds the specified dashboards to the dashboard group you''re
+
+                      creating. If you omit the property, the system creates a new dashboard
+
+                      and assigns it to the new dashboard group.'
+                  dashboardConfigs:
+                    title: List of dashboard configurations
+                    type: array
+                    items:
+                      title: Dashboard configuration in a dashboard group
+                      type: object
+                      required:
+                      - dashboardId
+                      properties:
+                        configId:
+                          title: Unique identifier for a dashboard configuration
+                          type: string
+                          readOnly: true
+                          description: 'ID of a dashboard configuration associated
+
+                            with the dashboard group
+
+                            Note: This property is read-only.'
+                        dashboardId:
+                          title: Dashboard ID
+                          type: string
+                          readOnly: false
+                          description: 'ID of a dashboard. In a dashboard group,
+
+                            dashboard IDs track the dashboards associated with the group.
+
+                            If you try to update the ID of an existing configuration entry or use a
+
+                            non-existent ID, the system returns HTTP error code 400.'
+                        descriptionOverride:
+                          title: Override for a dashboard description
+                          type: string
+                          format: UTF-8
+                          maxLength: 1024
+                          readOnly: false
+                          description: String that provides a description override for a mirrored dashboard
+                        filtersOverride:
+                          title: Override for the filters associated with a dashboard
+                          type: object
+                          properties:
+                            sources:
+                              title: List of dashboard filter overrides
+                              type: array
+                              items:
+                                title: A single dashboard filter override
+                                type: object
+                                properties:
+                                  NOT:
+                                    type: boolean
+                                    default: false
+                                    description: 'Controls evaluation of the comparison between the property
+
+                                      property and the values in the value array. If NOT is false,
+
+                                      Splunk Observability Cloud tests <VALUE_OF_PROPERTY> = <VALUE_n>; otherwise,
+
+                                      Splunk Observability Cloud tests <VALUE_OF_PROPERTY> != <VALUE_n>.'
+                                  property:
+                                    type: string
+                                    description: 'Name of a dimension or custom property for one of the metrics
+
+                                      displayed in the charts for the mirrored dashboard. Splunk Observability Cloud
+
+                                      compares the contents of the dimension or property to the values in
+
+                                      values.'
+                                  values:
+                                    type: array
+                                    items:
+                                      type: string
+                                    description: 'List of values that Splunk Observability Cloud evaluates against the value
+                                      of
+
+                                      property. If values contains a single element, the evaluation is
+
+                                      <VALUE_OF_PROPERTY> = <VALUE[0]> (or if NOT is set to true,
+
+                                      <VALUE_OF_PROPERTY> != <VALUE[0]>.
+
+                                      If values contains more than one element, the evaluation expands
+
+                                      to (<VALUE_OF_PROPERTY> = <VALUE[0]>) OR (<VALUE_OF_PROPERTY> = <VALUE[1]>) OR ... ,
+                                      and the
+
+                                      result is true if the value of property is equal to any of the
+
+                                      values in value.
+
+                                      If NOT is set to true, the result is false if property is
+
+                                      equal to one of the values in value, regardless of the other
+
+                                      values.'
+                                description: 'Dashboard filter override that''s part of the set of filter overrides for
+
+                                  a mirrored dashboard, in the form of a JSON object.'
+                              description: 'List of filter overrides, in the form of a JSON array. The array has the
+
+                                same format as the filters.sources array in the request body of
+
+                                POST /dashboard.
+
+                                FilterSources provides filter overrides for a mirrored dashboard.
+
+                                To specify filter overrides, use one of these options for the value of
+
+                                sources:
+
+
+                                List of filters: The mirror uses this list of filter overrides.
+
+                                null: The mirror uses the filters from the dashboard being mirrored.
+
+                                \"\" or [ ] (empty string or empty array): Splunk Observability Cloud clears
+
+                                filtersOverride.sources, and the override disables all of the
+
+                                dashboard filters.'
+                            variables:
+                              title: List of dashboard variable filters
+                              type: array
+                              items:
+                                title: A single dashboard variable override
+                                type: object
+                                properties:
+                                  preferredSuggestions:
+                                    description: 'List of values that overrides the preferred suggestions for the
+
+                                      dashboard variable identified by property.
+
+                                      You can''t override this value.'
+                                  property:
+                                    type: string
+                                    description: 'Name of a dimension or custom property that''s already defined as a
+
+                                      dashboard variable in the dashboard being mirrored. You can''t
+
+                                      override this value.'
+                                  value:
+                                    type: array
+                                    items:
+                                      type: string
+                                    description: 'List of values that override the value associated with property
+
+                                      in the dashboard being mirrored.
+
+                                      To specify value overrides, use one of these options:
+
+
+                                      One or more values: The mirrored dashboard compares this list of
+
+                                      values to property.
+
+                                      null: The mirror uses value from the dashboard being mirrored.
+
+                                      \"\" or [ ] (empty string or empty array): Splunk Observability Cloud
+
+                                      clears the contents of value.
+
+
+                                      Splunk Observability Cloud evaluates the elements of value against property. If
+
+                                      value contains a single element, the evaluation is
+
+                                      <VALUE_OF_PROPERTY> = <VALUE[0]>.
+
+                                      If values contains more than one element, the evaluation expands to
+
+                                      (<VALUE_OF_PROPERTY> = <VALUE[0]>) OR (<VALUE_OF_PROPERTY> = <VALUE[1]>) OR ... ,
+
+                                      and the result is true if the value of property is equal to any of the
+
+                                      values in value.'
+                                description: 'Dashboard variable definition that''s part of the overrides for a
+
+                                  mirrored dashboard, in the form of a JSON object. You can''t add a
+
+                                  definition or change a definition name (the value of property).'
+                              description: 'List of dashboard variables overrides for a mirrored dashboard, in the
+
+                                form of a JSON array. filtersOverride.variables has the same format
+
+                                as the filters.variables array in the request body of
+
+                                POST /dashboard.'
+                          description: 'Filter and dashboard variable overrides for the mirrored dashboard, in
+
+                            the form of a JSON object.'
+                        nameOverride:
+                          title: Override for a dashboard name
+                          description: 'String that overrides the name of the dashboard specified in
+
+                            dashboardId. This property is primarily intended to provide a unique
+
+                            name for a mirrored dashboard.'
+                      description: 'Entry in the dashboard group''s list of dashboard configurations,
+
+                        formatted as a JSON object
+
+                        Dashboard configurations store override
+
+                        properties. When you create a mirrored dashboard, Splunk Observability Cloud adds two
+
+                        dashboard configurations:
+
+
+                        Configuration for the dashboard being mirrored
+
+                        Configuration for the mirror'
+                    description: 'List of dashboard configurations associated with the dashboard group,
+
+                      in the form of a JSON array of JSON objects. In the UI, Splunk Observability Cloud
+
+                      uses the set of configurations for a group to determine which dashboards
+
+                      to display for the group.'
+                  description:
+                    type: string
+                    format: UTF-8
+                    maxLength: 1024
+                    title: DashboardgroupDescription
+                    description: 'Description of the dashboard group. This value appears in the tooltip
+
+                      for the dashboard group on the Dashboards page in the UI. For this
+
+                      value, you can use up to 1024 UTF-8 characters.'
+                  id:
+                    type: string
+                    title: DashboardgroupId
+                    description: ID for this dashboard group.
+                  lastUpdated:
+                    type: integer
+                    format: int64
+                    title: DashboardgroupLastUpdated
+                    description: 'The last time the dashboard group was updated, in *nix time in milliseconds.
+
+                      The system sets this value, and you can''t modify it.'
+                  lastUpdatedBy:
+                    type: string
+                    title: DashboardgroupLastUpdatedBy
+                    description: 'ID of the last user who updated the dashboard group.
+
+                      If the last update was by the system, the value is "AAAAAAAAAA". This
+
+                      value is read-only.'
+                  name:
+                    type: string
+                    minLength: 1
+                    title: DashboardgroupName
+                    description: 'Name of the dashboard group. This value identifies the dashboard group
+
+                      in the UI. It appears on the dashboards page and in the catalog. It
+
+                      also appears at the top left corner of the screen whenever you''re
+
+                      viewing a dashboard that the group contains.'
+                  teams:
+                    type: array
+                    items:
+                      type: string
+                      description: Team ID
+                    title: DashboardgroupTeams
+                    description: 'List of existing teams, in the form of a JSON array of team IDs. The
+
+                      dashboard group appears on the team landing page for any team in the
+
+                      list.'
+                  permissions:
+                    title: Permission configuration for the dashboard
+                    type: object
+                    properties:
+                      acl:
+                        type: array
+                        items:
+                          title: An access control layer
+                          type: object
+                          properties:
+                            actions:
+                              type: array
+                              items:
+                                type: string
+                                enum:
+                                - READ
+                                - WRITE
+                              description: Action the user, team, or organization can take with the dashboard group.
+                            principalType:
+                              type: string
+                              enum:
+                              - USER
+                              - TEAM
+                              - ORG
+                              description: Clarify whether this permission configuration is for a user, a team, or an organization.
+                            principalId:
+                              type: string
+                              description: ID of the user, team, or organization for which you're granting permissions.
+                          description: A permission configuration for a user, team, or organization.
+                        description: 'List of permission configurations.
+
+                          Use this list to specify read and write permissions for your dashboard group.'
+                      parent:
+                        type: string
+                        description: 'The parent property is null by default for dashboard groups and can''t be changed.
+
+                          When configured for a dashboard, parent is the ID of the dashboard group you want your dashboard
+                          to inherit permissions from.'
+                    description: Read and write permission configuration to specify which user, team, and organization can
+                      view and/or edit your dashboard group.
+              examples:
+                example:
+                  value:
+                    authorizedWriters:
+                      teams:
+                      - string
+                      users:
+                      - string
+                    created: 0
+                    creator: string
+                    dashboardConfigs:
+                    - configId: string
+                      dashboardId: string
+                      descriptionOverride: string
+                      filtersOverride:
+                        sources:
+                        - NOT: true
+                          property: string
+                          values:
+                          - string
+                        variables:
+                        - property: string
+                          value:
+                          - string
+                    dashboards:
+                    - string
+                    description: string
+                    id: string
+                    lastUpdated: 0
+                    lastUpdatedBy: string
+                    name: string
+                    permissions:
+                      acl:
+                      - actions:
+                        - READ
+                        principalId: string
+                        principalType: USER
+                      parent: string
+                    teams:
+                    - string
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    description: HTTP response code. Always '400'
+                  message:
+                    type: string
+                    description: Error explanation
+              examples:
+                example:
+                  value:
+                    code: 0
+                    message: string
+      security:
+      - SessionToken: []
+      tags:
+      - Dashboard groups
+    delete:
+      summary: Delete Single Dashboard Group
+      description: 'Deletes the dashboard group specified by the {id} path parameter.
+
+        Dashboards associated with the group are affected as follows:
+
+
+        If the mirrored dashboard feature isn''t available in your organization:
+
+        Deleting the dashboard group deletes all the dashboards associated with
+
+        the group.
+
+
+        If the mirrored dashboard feature is available in your organization:
+
+        If dashboards in the group are mirrored in other groups, then deleting
+
+        the dashboard group doesn''t delete the dashboards.
+
+        If dashboards in the group aren''t mirrored in other groups, then
+
+        deleting the dashboard group deletes the dashboards.'
+      parameters:
+      - name: id
+        in: path
+        description: ID of an existing dashboard group.
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: 'Format of the request payload. The only allowed value is
+
+          "application/json".'
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+      security:
+      - SessionToken: []
+      tags:
+      - Dashboard groups
+  /dashboardgroup/{id}/dashboard:
+    post:
+      summary: Clone Dashboard to Group
+      description: 'Note: This operation doesn''t create a mirrored dashboard. Use
+
+        PUT dashboardgroup/{id} to add a mirrored dashboard to a
+
+        group.
+
+        Creates a new v2 dashboard from an existing dashboard and
+
+        associates it with the dashboard group specified by the {id} path
+
+        parameter. The new dashboard is an exact copy of the existing dashboard,
+
+        but you can change its name, description, and filters by specifying them
+
+        in your request.
+
+        If the write permissions feature is available in
+
+        your organization, you need to have write permission for the dashboard
+
+        group into which you''re cloning the dashboard.
+
+        If you don''t have write permissions for the dashboard you''re cloning,
+
+        Splunk Observability Cloud sets the dashboard permissions on the cloned dashboard so that
+
+        any user can edit it.'
+      parameters:
+      - name: id
+        in: path
+        description: ID of an existing dashboard group
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - sourceDashboard
+              properties:
+                description:
+                  type: string
+                  title: DashboardDescription
+                  description: Description of a cloned dashboard
+                filters:
+                  title: Filters to apply to all the charts of the cloned dashboard
+                  type: object
+                  properties:
+                    sources:
+                      type: array
+                      items:
+                        title: Filter to apply to charts in a dashboard
+                        type: object
+                        required:
+                        - property
+                        - value
+                        properties:
+                          NOT:
+                            type: boolean
+                            default: false
+                            description: 'Flag that indicates how the filter should operate. If true, data
+
+                              that matches the criteria is excluded from charts; otherwise, data
+
+                              that matches the criteria is included.'
+                          property:
+                            type: string
+                            description: 'Name of the dimension or custom property to match to the data
+
+                              Note: If the dimension or custom property doesn''t exist in any
+
+                              of the charts for the dashboard, and ChartsFilter.NOT is true,
+
+                              the system doesn''t display any data in the charts.'
+                          value:
+                            type: array
+                            items:
+                              type: string
+                            description: 'A list of values to compare to the value of the dimension or custom
+
+                              property specified in ChartsFilter.property. If the list contains
+
+                              more than one value, the filter becomes a set of queries between the
+
+                              value of property and each element of value. The system joins
+
+                              these queries with an implicit OR.'
+                        description: 'A single filter object to apply to the charts in the dashboard. The
+
+                          filter specifies a default or user-defined dimension or custom property.
+
+                          You can either include or exclude all the data that matches the
+
+                          dimension or custom property.'
+                      description: 'List of filter objects to apply to the charts in the dashboard.
+
+                        Each object specifies a single filter for a default or user-defined
+
+                        dimension or custom property.'
+                    time:
+                      type: object
+                      properties:
+                        end:
+                          type: string
+                          description: 'The end of the time range to show for all charts in the
+
+                            dashboard. If you don''t specify a value for this property, the
+
+                            system defaults to the value for each chart''s end
+
+                            property.
+
+                            Note: The specified type for end is string, but the
+
+                            system also accepts a 64-bit signed integer >= 0 that represents a
+
+                            timestamp in *nix time in milliseconds.'
+                        start:
+                          type: string
+                          description: 'The start of the time range to show for all charts in the
+
+                            dashboard. If you don''t specify a value for this property, the
+
+                            system defaults to the value for each chart''s start
+
+                            property
+
+                            Note: The specified type for start is
+
+                            string, but the system also accepts a 64-bit signed integer >= 0
+
+                            that represents a timestamp in *nix time in milliseconds.'
+                      description: 'Time range to show in all of the charts in the dashboard. The
+
+                        specifications in this object override those in each individual
+
+                        chart. If you don''t specify values, the system defaults to using the
+
+                        individual time setting for each chart.'
+                    variables:
+                      type: array
+                      items:
+                        title: Filter that appears in the UI
+                        type: object
+                        required:
+                        - property
+                        - value
+                        properties:
+                          alias:
+                            type: string
+                            description: 'A label for the filter. The system displays this label in the area
+
+                              preceding the input textarea for the filter in the UI.
+
+                              Note: A good way to indicate that the string is a label is to
+
+                              append a space and a colon (":") to it.'
+                          preferredSuggestions:
+                            type: array
+                            items:
+                              type: string
+                            description: 'List of strings containing values to place at the top of the
+
+                              Suggested Values dropdown in UI for the dashboard, in the
+
+                              form of a JSON array. If ChartsWebUIFilter.restricted is true,
+
+                              the filter must use one of the values in the list; users only have a
+
+                              choice of selecting a value from this list.'
+                          property:
+                            type: string
+                            description: 'Name of a custom property or dimension to filter against.
+
+                              Note: If the dimension or custom property doesn''t exist in any
+
+                              of the charts for the dashboard, the system doesn''t display any
+
+                              data in the charts.'
+                          required:
+                            type: boolean
+                            default: false
+                            description: 'Flag that controls the display of chart data. If true, users must
+
+                              use this filter in order to see data; otherwise, users can delete
+
+                              the filter.'
+                          restricted:
+                            type: boolean
+                            default: false
+                            description: 'Flag that controls the values allowed in the filter. If true, the
+
+                              only allowable values are those specified in the
+
+                              ChartsWebUIFilter.preferredSuggestions array; otherwise, any value
+
+                              is allowed.'
+                          value:
+                            type: array
+                            items:
+                              type: string
+                            description: 'A list of values to compare to the value of the dimension or custom
+
+                              property specified in ChartsWebUIFilter.property. If the list
+
+                              contains more than one value, the filter becomes a set of queries
+
+                              between the value of property and each element of value. The
+
+                              system joins these queries with an implicit OR.'
+                        description: 'The specification for a filter that appears in the UI. The filter
+
+                          compares the value of a dimension or custom property to a value
+
+                          specified in this filter. You can specify the following in the
+
+                          filter:
+
+
+                          A default value
+
+                          A list of suggested values to display in the UI
+
+                          A flag that controls user input; if set to true, users are limited
+
+                          to the default and suggested values.
+
+
+                          You can also force users to choose this filter in order to see data in
+
+                          the dashboard''s charts.'
+                      description: 'List of UI-oriented filters that appear at the top of the
+
+                        dashboard, in the form of a JSON array. For each filter you can
+
+                        specify a name and a label for the dimension or custom property to
+
+                        filter against, a list of suggested comparison values to display in
+
+                        the UI, and other properties that control the UI display. To
+
+                        see a more detailed description of the options, refer to the
+
+                        property descriptions for the ChartsWebUIFilter model.'
+                  description: 'Specifies the properties of filters to apply to the cloned dashboard.
+
+                    This is an optional property that you only need to use if you
+
+                    want to override the filters property of the dashboard you''re cloning.
+
+                    Filters give you fine-grained control over the data displayed in the
+
+                    charts in the dashboard. You can specify ad hoc filters or save them
+
+                    as variables for repeated use of the filter criteria.
+
+                    You can also use filters to apply a custom time window to all of the charts in the
+
+                    dashboard.'
+                name:
+                  type: string
+                  title: DashboardName
+                  description: 'A human-readable label for the dashboard. The UI displays this label
+
+                    in the dashboard''s group.'
+                sourceDashboard:
+                  title: Dashboard ID of a cloned dashboard
+                  type: string
+                  description: 'The ID of the dashboard to clone into the dashboard group whose ID is
+
+                    specified in the {id} path parameter'
+            examples:
+              example:
+                value:
+                  description: string
+                  filters:
+                    sources:
+                    - NOT: true
+                      property: string
+                      value:
+                      - string
+                    time:
+                      end: string
+                      start: string
+                    variables:
+                    - alias: string
+                      preferredSuggestions:
+                      - string
+                      property: string
+                      required: true
+                      restricted: true
+                      value:
+                      - string
+                  name: string
+                  sourceDashboard: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ID of the new dashboard.
+              examples:
+                example:
+                  value:
+                    id: string
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    description: HTTP response code. Always '400'
+                  message:
+                    type: string
+                    description: Error explanation
+              examples:
+                example:
+                  value:
+                    code: 0
+                    message: string
+      security:
+      - SessionToken: []
+      tags:
+      - Dashboard groups

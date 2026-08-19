@@ -1,0 +1,82 @@
+generated: '2026-08-19'
+method: searched
+status: published
+source: https://help.splunk.com/en/splunk-observability-cloud/splunk-ai-assistant/interact-with-your-observability-data-using-the-splunk-mcp-server
+deployment:
+  mode: remote
+  endpoint: https://region-pdx10.api.scs.splunk.com/system/mcp-gateway/v1/
+  auth: api-key
+  verified: probed
+  note: >-
+    Splunk operates a HOSTED MCP gateway. The endpoint above is the example the documentation
+    publishes; the host segment is regional and Splunk instructs you to replace region-pdx10
+    with the MCP gateway URL for your realm. Probed 2026-08-19: an unauthenticated GET and an
+    unauthenticated POST of tools/list both return HTTP 401 with
+    {"detail":"Missing authorization token"} — the server is live and the schema is auth-gated.
+    No stdio/npx package is published for Splunk Observability Cloud.
+server:
+  name: Splunk MCP server (Splunk AI Assistant in Observability Cloud)
+  transport: http
+  protocol_note: Streamable HTTP transport as defined in the MCP specification.
+  url: https://region-pdx10.api.scs.splunk.com/system/mcp-gateway/v1/
+authentication:
+  scheme: headers
+  headers:
+    - name: X-SF-REALM
+      description: The Splunk Observability Cloud realm the organization is provisioned in.
+    - name: X-SF-TOKEN
+      description: A Splunk Observability Cloud user API access token (session token).
+  note: >-
+    The same X-SF-TOKEN credential the REST API uses. The Splunk Cloud Platform variant of the
+    gateway instead takes splunk_tenant + Authorization: Bearer, which is a different product.
+availability:
+  realms: >-
+    Supported in all Splunk Observability Cloud production realms except Google Cloud Platform
+    realms and GovCloud realms.
+tools:
+  - name: get_metric_names
+    category: metrics
+    description: Search for metric names using wildcard search terms
+  - name: get_metric_metadata
+    category: metrics
+    description: Get dimensions, properties, and sample values for specific metrics
+  - name: generate_signalflow_program
+    category: signalflow
+    description: Generate a SignalFlow program from a natural language prompt
+  - name: execute_signalflow_program
+    category: signalflow
+    description: Execute a SignalFlow program and return the data stream
+  - name: get_apm_environments
+    category: apm
+    description: List APM environments
+  - name: get_apm_services
+    category: apm
+    description: List services in a given environment
+  - name: get_apm_service_dependencies
+    category: apm
+    description: Get inbound and outbound dependencies with requests and latencies
+  - name: get_apm_service_latency
+    category: apm
+    description: Get latency breakdown by tag for a service
+  - name: get_apm_service_errors_and_requests
+    category: apm
+    description: Get error and request breakdown by tag
+  - name: get_apm_exemplar_traces
+    category: apm
+    description: Get sample traces (errors, latency buckets, etc.)
+  - name: get_apm_trace_tool
+    category: apm
+    description: Get trace details and spans for a specific trace ID
+  - name: search_alerts_or_incidents
+    category: alerting
+    description: Search for alerts or incidents
+x-evidence:
+  - {url: 'https://region-pdx10.api.scs.splunk.com/system/mcp-gateway/v1/', method: GET, http_status: 401, body: '{"detail":"Missing authorization token"}'}
+  - {url: 'https://region-pdx10.api.scs.splunk.com/system/mcp-gateway/v1/', method: 'POST tools/list', http_status: 401}
+  - {url: 'https://region-iad10.api.scs.splunk.com/system/mcp-gateway/v1/', method: GET, http_status: 401}
+  - {url: 'https://region-pdx10.api.scs.splunk.com/.well-known/oauth-protected-resource', http_status: 400}
+note: >-
+  Tool names and descriptions are transcribed verbatim from Splunk's own tool tables. Input
+  schemas are NOT recorded: tools/list is auth-gated, so the live inputSchema for each tool
+  requires authenticated introspection. mcp/splunk-observability-tool-crosswalk.yml binds each
+  tool to the REST operation that carries the equivalent parameters.

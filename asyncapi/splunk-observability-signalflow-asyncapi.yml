@@ -1,0 +1,348 @@
+asyncapi: 3.0.0
+info:
+  title: Splunk Observability Cloud — SignalFlow streaming
+  version: 3.2.0
+  description: |
+    The SignalFlow streaming analytics service. A client opens a WebSocket connection, authenticates
+    with a session token within 5 seconds, then starts computations on named channels and receives
+    control, information, metadata, data, event and error messages asynchronously on the same
+    connection. The same computations can be run over HTTP, in which case responses arrive as
+    Server-Sent Events with content-type text/event-stream.
+
+    PROVENANCE: Splunk publishes no AsyncAPI document. This document was DERIVED by API Evangelist
+    from Splunk's own SignalFlow message references. Message names, request `type` values, control
+    `event` values and field names are transcribed from those pages; nothing was invented. The
+    version 3.2.0 is the version Splunk gives its SignalFlow OpenAPI document.
+  contact:
+    name: Splunk Developer Program
+    url: https://dev.splunk.com/observability/docs/signalflow/
+  externalDocs:
+    description: SignalFlow WebSocket request messages and stream messages reference
+    url: https://dev.splunk.com/observability/docs/signalflow/messages/
+servers:
+  websocket:
+    host: 'stream.{realm}.observability.splunkcloud.com'
+    pathname: /v2/signalflow/connect
+    protocol: wss
+    description: WebSocket interface. Multiple computations multiplex over one connection.
+    variables:
+      realm:
+        default: us0
+        description: The realm the organization is provisioned in.
+    security:
+      - $ref: '#/components/securitySchemes/sessionToken'
+  sse:
+    host: 'stream.{realm}.observability.splunkcloud.com'
+    pathname: /v2/signalflow/execute
+    protocol: https
+    description: HTTP interface. Responses are delivered as Server-Sent Events (text/event-stream).
+    variables:
+      realm:
+        default: us0
+        description: The realm the organization is provisioned in.
+    security:
+      - $ref: '#/components/securitySchemes/sessionToken'
+channels:
+  signalflow:
+    address: /v2/signalflow/connect
+    title: SignalFlow computation channel
+    description: >-
+      A single WebSocket connection carries many logical channels. The client names a channel on
+      each execute request and SignalFlow stamps that name into every response message it emits for
+      that computation.
+    servers:
+      - $ref: '#/servers/websocket'
+    messages:
+      authenticate:
+        $ref: '#/components/messages/authenticate'
+      execute:
+        $ref: '#/components/messages/execute'
+      detach:
+        $ref: '#/components/messages/detach'
+      stop:
+        $ref: '#/components/messages/stop'
+      controlMessage:
+        $ref: '#/components/messages/controlMessage'
+      metadata:
+        $ref: '#/components/messages/metadata'
+      expiredTsid:
+        $ref: '#/components/messages/expiredTsid'
+      data:
+        $ref: '#/components/messages/data'
+      event:
+        $ref: '#/components/messages/event'
+operations:
+  sendAuthenticate:
+    action: send
+    channel:
+      $ref: '#/channels/signalflow'
+    title: Authenticate the connection
+    description: >-
+      Must be sent within 5 seconds of establishing the WebSocket connection. May be re-sent with a
+      new token to re-authenticate or switch organization without reconnecting; a valid
+      re-authentication does not affect running jobs, an invalid token closes the connection.
+    messages:
+      - $ref: '#/channels/signalflow/messages/authenticate'
+  sendExecute:
+    action: send
+    channel:
+      $ref: '#/channels/signalflow'
+    title: Start a computation
+    description: >-
+      Starts a new SignalFlow computation on a named channel. Optional properties include job start
+      time, stop time, resolution, maxDelay, and lists of publish() and detect() labels to disable.
+    messages:
+      - $ref: '#/channels/signalflow/messages/execute'
+  sendDetach:
+    action: send
+    channel:
+      $ref: '#/channels/signalflow'
+    title: Detach from a computation
+    messages:
+      - $ref: '#/channels/signalflow/messages/detach'
+  sendStop:
+    action: send
+    channel:
+      $ref: '#/channels/signalflow'
+    title: Stop a computation
+    messages:
+      - $ref: '#/channels/signalflow/messages/stop'
+  receiveStream:
+    action: receive
+    channel:
+      $ref: '#/channels/signalflow'
+    title: Receive computation output
+    description: >-
+      Control, metadata, expired-tsid, data and event messages. Data messages are binary-encoded
+      over WebSocket; every other type is JSON. Over SSE all messages are JSON.
+    messages:
+      - $ref: '#/channels/signalflow/messages/controlMessage'
+      - $ref: '#/channels/signalflow/messages/metadata'
+      - $ref: '#/channels/signalflow/messages/expiredTsid'
+      - $ref: '#/channels/signalflow/messages/data'
+      - $ref: '#/channels/signalflow/messages/event'
+components:
+  securitySchemes:
+    sessionToken:
+      type: httpApiKey
+      name: X-SF-TOKEN
+      in: header
+      description: >-
+        Session token for the initial HTTP upgrade; the same token value is sent again inside the
+        authenticate message. Org tokens are used instead when cost-related or rate-related token
+        limits must apply to WebSocket operations.
+  messages:
+    authenticate:
+      name: authenticate
+      title: Authenticate request
+      payload:
+        type: object
+        required: [type, token]
+        properties:
+          type:
+            type: string
+            const: authenticate
+          token:
+            type: string
+            description: Session token.
+      examples:
+        - name: authenticate
+          payload:
+            type: authenticate
+            token: '<SESSION_TOKEN>'
+    execute:
+      name: execute
+      title: Execute request
+      payload:
+        type: object
+        required: [type, channel, program]
+        properties:
+          type:
+            type: string
+            const: execute
+          channel:
+            type: string
+            description: Client-chosen channel name; SignalFlow stamps it into every response message for this computation.
+          program:
+            type: string
+            description: The SignalFlow program to run.
+    detach:
+      name: detach
+      title: Detach request
+      payload:
+        type: object
+        required: [type, channel]
+        properties:
+          type:
+            type: string
+            const: detach
+          channel:
+            type: string
+    stop:
+      name: stop
+      title: Stop request
+      payload:
+        type: object
+        required: [type]
+        properties:
+          type:
+            type: string
+            const: stop
+    controlMessage:
+      name: control-message
+      title: Control message
+      summary: Status and progress of the stream and the job.
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: control-message
+          channel:
+            type: string
+          event:
+            type: string
+            enum: [STREAM_START, JOB_START, JOB_PROGRESS, CHANNEL_ABORT, END_OF_CHANNEL]
+          handle:
+            type: string
+            description: Job handle, present on JOB_START.
+          progress:
+            type: integer
+            description: Percent complete, present on JOB_PROGRESS.
+          timestampMs:
+            type: integer
+            format: int64
+      examples:
+        - name: jobStart
+          payload:
+            type: control-message
+            channel: channel-1
+            event: JOB_START
+            handle: ChkVxy0AEAA
+            timestampMs: 1461351771160
+    metadata:
+      name: metadata
+      title: Metadata message
+      summary: Metadata for an output time series produced by the computation.
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: metadata
+          channel:
+            type: string
+          tsId:
+            type: string
+    expiredTsid:
+      name: expired-tsid
+      title: Expired tsId message
+      summary: Indicates that a specific output time series is no longer part of the computation.
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: expired-tsid
+          channel:
+            type: string
+          tsId:
+            type: string
+    data:
+      name: data
+      title: Data message
+      summary: >-
+        One message per compute iteration per publish() call, carrying the logical timestamp and a
+        list of data points identified by time series ID.
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          logicalTimestampMs:
+            type: integer
+            format: int64
+          data:
+            type: array
+            items:
+              type: object
+              properties:
+                tsId:
+                  type: string
+                value:
+                  type: number
+      bindings:
+        ws:
+          bindingVersion: 0.1.0
+      examples:
+        - name: dataPoint
+          payload:
+            logicalTimestampMs: 1461353198000
+            data:
+              - tsId: CgrT2EkAAAA
+                value: 199.53076547689204
+    event:
+      name: event
+      title: Event message
+      summary: Sent when a detect() block detects or clears an incident.
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: event
+          channel:
+            type: string
+          tsId:
+            type: string
+            description: Identifier of the input MTS for the computation that caused the event message.
+          timestampMs:
+            type: integer
+            format: int64
+          properties:
+            type: object
+            properties:
+              incidentId:
+                type: string
+              inputValues:
+                type: string
+                description: JSON-encoded map of the detect condition's variables and their values.
+              was:
+                type: string
+                description: State of the alert before the computation.
+              is:
+                type: string
+                description: State of the alert after the computation.
+      examples:
+        - name: alertFires
+          payload:
+            type: event
+            channel: channel-1
+            properties:
+              incidentId: Cj5VGRiAEAM
+              inputValues: '{"a":4}'
+              is: anomalous
+              was: ok
+            timestampMs: 1464816908000
+            tsId: AAAAAOsfgK8
+x-binary-encoding:
+  applies_to: data messages over WebSocket
+  description: >-
+    Binary WebSocket messages have a 4-byte preamble (version always 1, message type always 5 for a
+    data batch, flags, reserved) followed by the 16-byte ASCII channel name, then a 64-bit logical
+    millisecond timestamp, a 32-bit payload element count, and a series of 17-byte tuples of
+    1-byte value type (0x01 long, 0x02 double, 0x03 int), 8-byte time series ID and 8-byte value.
+    All big-endian. Time series IDs convert to their string form by base64-decoding and stripping
+    the = padding.
+  docs: https://dev.splunk.com/observability/docs/signalflow/messages/stream_messages_specification/
+x-provenance:
+  generated: '2026-08-19'
+  method: derived
+  source:
+    - https://dev.splunk.com/observability/docs/signalflow/messages/websocket_request_messages/
+    - https://dev.splunk.com/observability/docs/signalflow/messages/stream_messages_specification/
+    - openapi/splunk-observability-signalflow-openapi.yml
+  note: Derived by API Evangelist. Splunk publishes no AsyncAPI document for this surface.

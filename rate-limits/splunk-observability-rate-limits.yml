@@ -1,0 +1,68 @@
+generated: '2026-08-19'
+method: searched
+source: >-
+  https://help.splunk.com/en/splunk-observability-cloud/administer/authentication-and-security/authentication-tokens/manage-usage-with-access-tokens,
+  https://dev.splunk.com/observability/docs/apibasics/authentication_basics/,
+  plus derivation from openapi/ (10 operations declare a 429 response)
+limit_count: 2
+status_on_exhaustion: 429
+response_headers: []
+headers_note: >-
+  THIS IS THE FINDING. Splunk documents no rate-limit response headers — no X-RateLimit-*, no
+  RateLimit-*, no Retry-After — and none of the 48 OpenAPI documents declares one. An agent
+  receives HTTP 429 with no remaining-budget, no limit and no reset hint, so it cannot pace itself
+  and can only back off blindly after being refused. Splunk's own documentation adds that "you
+  can't set up alerts or notifications for rate-related token limits", so the operator cannot see
+  the approach either.
+model: >-
+  Rate limiting is not a fixed platform quota. It is OPT-IN and per-org-token: an administrator
+  sets rate-related limits on an org token, and a token with no limit configured is not rate
+  limited at the documented layer. That inverts the usual contract — the limit an agent hits
+  depends on which token it was handed, and the value is not discoverable from the API.
+limits:
+  - name: SignalFlow job start limit
+    scope: per-org-token
+    applies_to: POST /v2/signalflow/execute
+    spec: openapi/splunk-observability-signalflow-openapi.yml
+    window: minute
+    limit: null
+    range: 1-60 requests per minute
+    default: null
+    default_note: No limit is applied unless an administrator configures one; setting the value to 0 removes the limit.
+    status: 429
+  - name: Event search limit
+    scope: per-org-token
+    applies_to: GET /v1/event
+    spec: openapi/splunk-observability-retrieve-events-v1-openapi.yml
+    window: minute
+    limit: null
+    range: 1-30 requests per minute
+    default: null
+    default_note: No limit is applied unless an administrator configures one; setting the value to 0 removes the limit.
+    status: 429
+other_throttling:
+  - name: Data ingestion throttling
+    scope: per-org-token
+    applies_to: The ingest APIs (POST /v2/datapoint, POST /v2/event)
+    status: 429
+    note: >-
+      Cost-related token limits on ingest return HTTP 429 from the Data Ingestion APIs when
+      exceeded. This is a spend control, not a request-rate control.
+  - name: Per-product system limits
+    scope: per-organization
+    note: >-
+      Splunk publishes separate per-product system limits (hosts, MTS, containers, custom metrics).
+      Exceeding them causes ingest throttling rather than API 429s.
+    docs: https://docs.splunk.com/observability/admin/references/per-product-limits.html
+result_set_ceiling:
+  value: 10000
+  applies_to: any retrieve operation that returns multiple objects
+  note: >-
+    Not a rate limit but the hard ceiling an agent will actually hit first — no query returns more
+    than 10,000 business objects regardless of limit/offset.
+  docs: https://dev.splunk.com/observability/docs/apibasics/retrieve_data_basics/
+spec_evidence:
+  operations_declaring_429: 10
+  note: >-
+    Only 10 of 242 operations declare a 429 response in the contract, even though the limits above
+    can be applied per token. The contract under-declares the failure mode.

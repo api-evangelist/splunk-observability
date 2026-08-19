@@ -1,0 +1,223 @@
+generated: '2026-08-19'
+method: derived
+source: openapi/ (48 documents, 242 operations) — the 4xx/5xx responses Splunk declares in its own API
+  reference payload
+format: vendor-json
+rfc9457: false
+note: Splunk Observability Cloud does not use RFC 9457 problem+json. Every error response is application/json
+  with a vendor envelope. Four envelope shapes are in use across the 48 documents and they are not interchangeable,
+  which is the single most important thing for an agent to know before writing error handling against
+  this API.
+envelopes:
+- shape: '{code, message, details}'
+  operations: 73
+  note: Dominant shape. Used across Synthetics and most newer services; details is an object keyed by
+    the offending field.
+- shape: '{code, message}'
+  operations: 47
+  note: code is an integer equal to the HTTP status; several endpoints enumerate the exact message strings.
+- shape: '{error:{code, message, details}}'
+  operations: 26
+  note: Nested envelope used by the Client Inventory API; code here is a machine-readable string such
+    as BAD_REQUEST.
+- shape: '{code, message, details, timestamp}'
+  operations: 7
+  note: Audit Events API adds a timestamp.
+- shape: '{type, status, message}'
+  operations: 1
+  note: Session Tokens API; type is always "error".
+- shape: bare string
+  operations: 42
+  note: '42 declared 4xx responses carry schema {type: string} — a plain text message with no envelope
+    at all.'
+problems:
+- status: 400
+  title: Bad Request
+  operations: 62
+  specs:
+  - apm-service-topology
+  - apm-visibility-filters
+  - audit-events
+  - automatedarchival
+  - client-inventory
+  - dashboard-groups
+  - dashboards
+  - datalinks
+  remediation: 'Fix the request: the specs enumerate the exact validation messages for several endpoints
+    (missing timeRange, malformed filters, limit above the maximum).'
+  specs_note: 23 specs declare this status; first 8 listed
+  documented_messages:
+  - Cannot create multiple cross links for the same property-value combination
+  - Cannot have more than 1000 filters.
+  - Cross link may not have multiple default targets
+  - Cross link must have a target
+  - Cross link targets must have a label
+  - Do not send `filterId` while creating a `filter`.
+  - Invalid crosslink target dashboard
+  - Invalid crosslink target dashboard group
+  - Invalid delimiter used to split time range
+  - Invalid tag filter operator value
+  - Invalid time range
+  - 'Unable to parse endTime=2021-06-30T00:00:0: Text ''2021-06-30T00:00:0'' could not be parsed at index
+    16'
+  - 'Unable to parse startTime=2021-06-14T00:00: Text ''2021-06-14T00:00'' could not be parsed at index
+    16'
+  - '`matcher` is required'
+  - '`matcher` must include `sf_operation`'
+  - '`matcher` must include `sf_service`'
+  - description is required
+  - description must not be longer than 256 characters
+  - instanceUrl is invalid
+  - instanceUrl is missing
+  - invalid format for filter
+  - limit can't be larger than 1000
+  - limit can't be negative
+  - limit is required
+  - minimumTimeWindow is invalid
+  example:
+    error:
+      code: BAD_REQUEST
+      details: {}
+      message: Bad Request
+- status: 401
+  title: Unauthorized
+  operations: 41
+  specs:
+  - apm-service-topology
+  - audit-events
+  - automatedarchival
+  - client-inventory
+  - detectors
+  - incidents
+  - ingest-data
+  - metric-ruleset
+  remediation: Send a valid X-SF-TOKEN. Session tokens are short-lived user tokens; org tokens are long-lived.
+    An expired session token is the usual cause.
+  specs_note: 13 specs declare this status; first 8 listed
+  example:
+    error:
+      code: BAD_REQUEST
+      details: {}
+      message: Bad Request
+- status: 403
+  title: Forbidden
+  operations: 27
+  specs:
+  - apm-visibility-filters
+  - audit-events
+  - client-inventory
+  - ingest-data
+  - metric-ruleset
+  - navigator
+  - signalflow
+  - slo
+  remediation: The token authenticated but the role is insufficient. Write operations on charts, dashboards
+    and detectors need the admin or power role; reads also accept read_only.
+  specs_note: 10 specs declare this status; first 8 listed
+  example:
+    error:
+      code: BAD_REQUEST
+      details: {}
+      message: Bad Request
+- status: 404
+  title: Not Found
+  operations: 74
+  specs:
+  - apm-visibility-filters
+  - audit-events
+  - client-inventory
+  - datalinks
+  - incidents
+  - metric-ruleset
+  - metrics-metadata
+  - navigator
+  remediation: The object ID does not exist in this organization, or the request went to the wrong realm
+    host. Realm is part of the hostname, not a header.
+  specs_note: 30 specs declare this status; first 8 listed
+  documented_messages:
+  - Cross link not found
+  example:
+    error:
+      code: BAD_REQUEST
+      details: {}
+      message: Bad Request
+- status: 406
+  title: Not Acceptable
+  operations: 1
+  specs:
+  - retrieve-events-v2
+  remediation: The Accept header does not match a representation the endpoint produces.
+  example:
+    code: 406
+    message: At least one filtration clause must be specified.
+- status: 409
+  title: Conflict
+  operations: 1
+  specs:
+  - metric-ruleset
+  remediation: The object already exists or conflicts with an existing one (metric rulesets are the case
+    the specs document).
+  example:
+    code: 409
+    message: A metric ruleset with this ID already exists
+- status: 422
+  title: Unprocessable Entity
+  operations: 34
+  specs:
+  - synthetics-api-tests
+  - synthetics-api-tests-v2
+  - synthetics-browser
+  - synthetics-browser-v2
+  - synthetics-ca-certs
+  - synthetics-certificates
+  - synthetics-downtime-configurations
+  - synthetics-global-variables
+  remediation: The request parsed but failed business validation; the Synthetics APIs return a details
+    object keyed by the offending field.
+  specs_note: 13 specs declare this status; first 8 listed
+  example:
+    code: unprocessable_entity
+    message: Could not create API Test
+    details:
+      locationIds:
+      - must be present
+- status: 429
+  title: Too Many Requests
+  operations: 10
+  specs:
+  - audit-events
+  - ingest-data
+  - organizations
+  - signalflow
+  - trace-id
+  remediation: A token limit was exceeded. See rate-limits/splunk-observability-rate-limits.yml — the
+    SignalFlow job-start and event-search limits are the two configurable rate limits, and ingest throttling
+    also returns 429.
+- status: 500
+  title: Internal Server Error
+  operations: 14
+  specs:
+  - audit-events
+  - client-inventory
+  - integrations
+  - organizations
+  - retrieve-events-v2
+  - roles
+  remediation: Retry with backoff; if it persists, open a Splunk support case.
+  example:
+    error:
+      code: BAD_REQUEST
+      details: {}
+      message: Bad Request
+- status: 503
+  title: Service Unavailable
+  operations: 6
+  specs:
+  - audit-events
+  - client-inventory
+  remediation: The service is temporarily unavailable. Retry with backoff and check https://status.signalfx.com.
+  example:
+    error:
+      code: BAD_REQUEST
+      details: {}
+      message: Bad Request

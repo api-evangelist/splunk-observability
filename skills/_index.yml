@@ -1,0 +1,28 @@
+generated: '2026-08-19'
+method: generated
+source: openapi/ (48 documents, 242 operations) + conventions/, errors/, rate-limits/, asyncapi/
+note: >-
+  Every step in every skill is grounded in an operation that exists in this repo's specs; the
+  operation names quoted are the operationId strings Splunk's own reference carries (they are human
+  sentences, not camelCase identifiers, on most of the older services).
+skills:
+  - file: splunk-observability-create-detector-and-notify.md
+    name: Create a Splunk Observability Cloud detector and route its alerts
+    api: openapi/splunk-observability-detectors-openapi.yml
+    operations: ['Validate Detector Definition', 'Create Single Detector', 'Retrieve Detector ID', 'Enable Detect Blocks', 'Create Integration', 'Validate Integration', 'Retrieve Incidents Single Detector']
+  - file: splunk-observability-build-dashboard.md
+    name: Build a Splunk Observability Cloud dashboard from charts
+    api: openapi/splunk-observability-dashboards-openapi.yml
+    operations: ['Create Single Dashboard Group', 'Create Single Chart', 'Create Single Dashboard', 'Create Simple Dashboard', 'Clone Dashboard to Group', 'Retrieve Dashboards Using Query']
+  - file: splunk-observability-query-metrics-signalflow.md
+    name: Find metrics and run a SignalFlow computation
+    api: openapi/splunk-observability-signalflow-openapi.yml
+    operations: ['Retrieve Metadata MetricsQuery', 'Retrieve Metadata Metric Name', 'Retrieve Dimensions Query', 'Retrieve Metric Timeseries Metadata', 'Execute SignalFlow computation', 'Retrieve Computation Feedback', 'Stop SignalFlow Computation', 'Create WebSocket Connection']
+  - file: splunk-observability-triage-incidents.md
+    name: Triage Splunk Observability Cloud incidents and mute noisy alerts
+    api: openapi/splunk-observability-incidents-openapi.yml
+    operations: ['Retrieve Incidents', 'Retrieve Incident ID', 'Clear Single Incident', 'Clear Incidents', 'Create Single Muting Rule', 'Retrieve Muting Rules Using Query', 'Unmute Single Muting Rule']
+  - file: splunk-observability-manage-tokens.md
+    name: Manage Splunk Observability Cloud authentication tokens
+    api: openapi/splunk-observability-org-tokens-openapi.yml
+    operations: ['Create Session Token', 'Delete Session Token', 'Create Single Token', 'Retrieve Tokens Using Query', 'Retrieve Token Using Name', 'Update Single Token', 'Rotate Token Secret', 'Delete Single Token']

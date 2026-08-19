@@ -1,0 +1,119 @@
+generated: '2026-08-19'
+method: searched
+source: >-
+  https://dev.splunk.com/observability/docs/apibasics/authentication_basics/,
+  https://dev.splunk.com/observability/docs/apibasics/retrieve_data_basics/,
+  https://dev.splunk.com/observability/docs/realms_in_endpoints/,
+  https://dev.splunk.com/observability/docs/integrations/webhook_integration_overview/,
+  plus derivation from openapi/ (48 documents, 242 operations).
+authentication:
+  style: api-key-header
+  header: X-SF-TOKEN
+  note: >-
+    One header, two token classes. Org tokens (called Access Tokens in the UI) are long-lived and
+    organization-scoped; session tokens (called User API Access Tokens in the UI) are short-lived and
+    user-scoped. The specs spell the header both X-SF-TOKEN and X-SF-Token across documents; HTTP
+    header names are case-insensitive so both work, but the inconsistency is real and worth knowing.
+  cross_reference: authentication/splunk-observability-authentication.yml
+host_addressing:
+  style: realm-in-hostname
+  pattern: https://<service>.<REALM>.observability.splunkcloud.com
+  services:
+    api: Control plane — charts, dashboards, detectors, teams, tokens, metadata, synthetics
+    ingest: Datapoints, events, and custom event retrieval
+    backfill: Historical MTS backfill
+    stream: SignalFlow execution and streaming
+  note: >-
+    The realm is part of the hostname, not a header or a parameter. Splunk documents that omitting
+    the realm (https://api.observability.splunkcloud.com) is interpreted as the us0 realm, though
+    that bare hostname did not resolve when probed on 2026-08-19. Legacy hostnames on the signalfx.com
+    domain remain valid — see lifecycle/splunk-observability-lifecycle.yml.
+idempotency:
+  supported: false
+  header: null
+  note: >-
+    Splunk publishes no idempotency-key contract for Splunk Observability Cloud. No operation in any
+    of the 48 specs declares an Idempotency-Key parameter, and the docs describe no request-replay
+    protection. Safe repetition is achieved structurally instead: object creation is POST to a
+    collection and update is PUT to /{id}, so a retried update is naturally idempotent while a
+    retried create will produce a second object. Agents must treat POST /v2/chart, /v2/dashboard,
+    /v2/detector and the Synthetics create operations as NOT safe to blind-retry.
+pagination:
+  style: limit-offset
+  parameters:
+    limit:
+      in: query
+      type: integer
+      default: 50
+      note: Default is 50 on the object-search operations; an invalid value falls back to the default.
+    offset:
+      in: query
+      type: integer
+      default: 0
+      note: 0-indexed array position at which to start returning results.
+  response_fields: [count, results]
+  hard_ceiling: 10000
+  ceiling_note: >-
+    "For requests that return multiple results, the system returns a maximum of 10,000 business
+    objects." This is a ceiling on the RESULT SET, not a page size — an organization with more than
+    10,000 charts cannot page past 10,000 with limit/offset alone. Narrow with name/tag filters.
+  docs: https://dev.splunk.com/observability/docs/apibasics/retrieve_data_basics/
+filtering:
+  style: repeated-query-parameter
+  note: >-
+    Repeating a query parameter ORs the values: tags=cpu&tags=prod&tags=customer-facing matches any
+    of the three. name is a substring match anywhere in the property, and an empty string matches
+    everything.
+field_expansion:
+  supported: false
+metadata:
+  supported: true
+  note: >-
+    Most first-class objects carry a customProperties object and a tags array (max 50 items), and
+    metric time series carry dimensions. Tag and dimension metadata is separately addressable
+    through the Metrics Metadata API.
+request_tracing:
+  request_id_header: null
+  note: No request-id or correlation-id header is documented or declared in any spec.
+versioning:
+  scheme: uri-path
+  current: v2
+  note: >-
+    v2 is the current path segment for the control plane. Three surfaces are still on v1 — the
+    backfill service, /v1/timeserieswindow, and /v1/event (Retrieve Events V1). The Synthetics APIs
+    sit under /v2/synthetics and additionally carry their own V1/V2 document pairs for API tests and
+    browser tests, so "v2" means two different things depending on the endpoint.
+  cross_reference: lifecycle/splunk-observability-lifecycle.yml
+error_envelope:
+  format: vendor-json
+  rfc9457: false
+  shapes:
+    - '{code, message, details}'
+    - '{code, message}'
+    - '{error: {code, message, details}}'
+    - '{code, message, details, timestamp}'
+    - '{type, status, message}'
+    - bare string
+  note: Five JSON envelopes plus a bare-string form are in use across the 48 documents; they are not interchangeable.
+  cross_reference: errors/splunk-observability-problem-types.yml
+rate_limit_signaling:
+  status_on_exhaustion: 429
+  response_headers: []
+  headers_note: >-
+    No X-RateLimit-* or RateLimit-* response headers are documented, and none is declared in any
+    spec. An agent gets a 429 and no budget signal, so it cannot pace itself before exhaustion —
+    only back off after it. Splunk's own documentation states you cannot even set up alerts on the
+    rate-related token limits.
+  cross_reference: rate-limits/splunk-observability-rate-limits.yml
+content_negotiation:
+  request: application/json
+  response: application/json
+  vendor_media_types:
+    - application/vnd.splunk.observability.navigator+json
+  note: The Navigators API is the only surface that returns a vendor media type.
+webhook_signing:
+  header: X-SFX-Signature
+  algorithm: HMAC-SHA256, base64-encoded
+  secret_field: sharedSecret
+  docs: https://dev.splunk.com/observability/docs/integrations/webhook_integration_overview/
+  cross_reference: asyncapi/splunk-observability-webhooks.yml

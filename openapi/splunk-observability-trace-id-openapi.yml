@@ -1,0 +1,365 @@
+openapi: 3.0.3
+info:
+  title: Splunk Observability Cloud — Download APM traces
+  version: 1.0.0
+  description: 'API for retrieving APM traces by trace ID.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You have to have the Splunk Observability Cloud admin, power, or read_only role to download traces using these endpoints.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference
+      pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's.
+      Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset
+      path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2
+  description: Base API URL.
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.
+paths:
+  /apm/trace/{traceId}/{segmentTimestamp}:
+    get:
+      summary: getSegment
+      description: 'Retrieve persisted spans for a trace segment identified
+
+        by the segmentTimestamp path parameter.
+
+        Note: Splunk Observability Cloud returns a maximum of 10,000 persisted spans for the specified segment, even if your
+        organization contains more than 10,000. To learn more, see the
+
+        Considerations for retrieve operations section in the developer guide.
+
+        GET v2/trace/{traceId}/{segmentTimestamp} can return either application/json or application/x-ndjson
+
+        as the media type for the response body. To choose a media type, specify the Accept HTTP header
+
+        field in your request. If you don''t specify the Accept field, the endpoint returns the application/json
+
+        media type:
+
+
+        To receive a list of spans as a JSON array of span objects, specify Accept: application/json in your
+
+        HTTP request header. You can also omit the Accept field, and the endpoint defaults to application/json.
+
+        To receive a list of spans as a JSON object in which each span object is delimited by a newline,
+
+        specify Accept: application/x-ndjson in your HTTP request header. To learn more about about the
+
+        application/x-ndjson media type, see
+
+        NDJSON - Newline delimited JSON.'
+      parameters:
+      - name: traceId
+        in: path
+        description: The trace ID
+        required: true
+        schema:
+          type: string
+      - name: segmentTimestamp
+        in: path
+        description: A segmentTimestamp for a trace segment in int64 (long) format.
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  oneOf:
+                  - type: object
+                    properties:
+                      objectType:
+                        type: string
+                        description: Indicates the type of returned object. This is set to 'span' for span objects.
+                      traceId:
+                        type: string
+                        description: Trace ID, in hexadecimal
+                      spanId:
+                        type: string
+                        description: Span ID, in hexadecimal
+                      parentId:
+                        type: string
+                        description: 'ID of the parent span, in hex. If there''s no parent
+
+                          span, the value is "null".'
+                      serviceName:
+                        type: string
+                        description: Service that executed the span.
+                      operationName:
+                        type: string
+                        description: Name of the operation for the span.
+                      startTime:
+                        type: string
+                        description: 'Start time of the span, in ISO-8601 format with
+
+                          precision up to six decimal places.'
+                      durationMicros:
+                        type: integer
+                        format: int64
+                        description: The span duration in microseconds. The integer is in int64 (long) format.
+                      tags:
+                        type: object
+                        description: A map from string to object, containing the key-value pairs of span tags.
+                      processTags:
+                        type: object
+                        description: A map from string to object, containing the key/value pairs of process tags.
+                      logs:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            timestamp:
+                              type: string
+                              description: The timestamp associated with the log, in ISO-8601 format with precision up to
+                                six decimal places.
+                            fields:
+                              type: object
+                              description: A map from string to object, containing the key/value pairs of the log.
+                          title: Log
+                        description: Log annotations for the span
+                      splunk:
+                        type: object
+                        description: A map from string to object, containing key/value pairs for any Splunk-specific metadata
+                          about the span.
+                    title: Span
+                  title: TraceObject
+                title: TraceObjectList
+                description: An Array of JSON objects, each of which contains a type of trace data.
+              examples:
+                example:
+                  value:
+                  - durationMicros: 0
+                    logs:
+                    - timestamp: string
+                    objectType: string
+                    operationName: string
+                    parentId: string
+                    serviceName: string
+                    spanId: string
+                    startTime: string
+                    traceId: string
+        '404':
+          description: HTTP 404 response
+        '429':
+          description: HTTP 429 response
+      security:
+      - SessionToken: []
+      tags:
+      - Download APM traces
+  /apm/trace/{traceId}/latest:
+    get:
+      summary: getLatestSegment
+      description: 'Get all persisted spans for the most recent segmentTimestamp.
+
+        GET v2/trace/{traceId}/latest can return either application/json or application/x-ndjson
+
+        as the media type for the response body. To choose a media type, specify the Accept HTTP header
+
+        field in your request. If you don''t specify the Accept field, the endpoint returns the application/json
+
+        media type:
+
+
+        To receive a list of spans as a JSON array of span objects, specify Accept: application/json in your
+
+        HTTP request header. You can also omit the Accept field, and the endpoint defaults to application/json.
+
+        To receive a list of spans as a JSON object in which each span object is delimited by a newline,
+
+        specify Accept: application/x-ndjson in your HTTP request header. To learn more about about the
+
+        application/x-ndjson media type, see NDJSON - Newline delimited JSON.'
+      parameters:
+      - name: traceId
+        in: path
+        description: The trace ID.
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  oneOf:
+                  - type: object
+                    properties:
+                      objectType:
+                        type: string
+                        description: Indicates the type of returned object. This is set to 'span' for span objects.
+                      traceId:
+                        type: string
+                        description: Trace ID, in hexadecimal
+                      spanId:
+                        type: string
+                        description: Span ID, in hexadecimal
+                      parentId:
+                        type: string
+                        description: 'ID of the parent span, in hex. If there''s no parent
+
+                          span, the value is "null".'
+                      serviceName:
+                        type: string
+                        description: Service that executed the span.
+                      operationName:
+                        type: string
+                        description: Name of the operation for the span.
+                      startTime:
+                        type: string
+                        description: 'Start time of the span, in ISO-8601 format with
+
+                          precision up to six decimal places.'
+                      durationMicros:
+                        type: integer
+                        format: int64
+                        description: The span duration in microseconds. The integer is in int64 (long) format.
+                      tags:
+                        type: object
+                        description: A map from string to object, containing the key-value pairs of span tags.
+                      processTags:
+                        type: object
+                        description: A map from string to object, containing the key/value pairs of process tags.
+                      logs:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            timestamp:
+                              type: string
+                              description: The timestamp associated with the log, in ISO-8601 format with precision up to
+                                six decimal places.
+                            fields:
+                              type: object
+                              description: A map from string to object, containing the key/value pairs of the log.
+                          title: Log
+                        description: Log annotations for the span
+                      splunk:
+                        type: object
+                        description: A map from string to object, containing key/value pairs for any Splunk-specific metadata
+                          about the span.
+                    title: Span
+                  title: TraceObject
+                title: TraceObjectList
+                description: An Array of JSON objects, each of which contains a type of trace data.
+              examples:
+                example:
+                  value:
+                  - durationMicros: 0
+                    logs:
+                    - timestamp: string
+                    objectType: string
+                    operationName: string
+                    parentId: string
+                    serviceName: string
+                    spanId: string
+                    startTime: string
+                    traceId: string
+        '404':
+          description: HTTP 404 response
+        '429':
+          description: HTTP 429 response
+      security:
+      - SessionToken: []
+      tags:
+      - Download APM traces
+  /apm/trace/{traceId}/segments:
+    get:
+      summary: getTraceSegmentTimestamps
+      description: 'Retrieve every segmentTimestamp for the trace ID
+
+        specified in the {traceId} path parameter.
+
+        Note: Splunk Observability Cloud returns a maximum of 10,000 trace segments for the specified ID, even if your organization
+        contains more than 10,000. To learn more, see the
+
+        Considerations for retrieve operations section in the developer guide.'
+      parameters:
+      - name: traceId
+        in: path
+        description: ID of the trace for which you want to retrieve segments
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+                title: SegmentTimestampList
+                description: 'A list of all segmentTimestamp values for a trace ID in int64 (long) format. Use
+
+                  a value as the query parameter for /v2/apm/trace/{traceId}/{segmentTimestamp}
+
+                  to retrieve spans for a specific trace segment.'
+              examples:
+                example:
+                  value:
+                  - 0
+        '404':
+          description: HTTP 404 response
+        '429':
+          description: HTTP 429 response
+      security:
+      - SessionToken: []
+      tags:
+      - Download APM traces

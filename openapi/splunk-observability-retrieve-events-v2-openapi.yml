@@ -1,0 +1,382 @@
+openapi: 3.0.3
+info:
+  title: Splunk Observability Cloud — Retrieve events V2
+  version: 1.0.0
+  description: 'V2 API for retrieving events.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You have to have the Splunk Observability Cloud admin, power user, or read_only role to use this API.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference
+      pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's.
+      Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset
+      path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2
+  description: API for retrieving events.
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.
+paths:
+  /event/find:
+    get:
+      summary: Retrieve Events Using Query
+      description: 'Retrieves events from Splunk Observability Cloud, based on
+
+        query parameters you specify. The operation retrieves detector
+
+        events as well as custom events.
+
+        Note: Splunk Observability Cloud returns a maximum of 10,000 events, even if your organization contains more than
+        10,000. To learn more, see the
+
+        Considerations for retrieve operations section in the developer guide.
+
+        The operation provides these query parameters:
+
+
+        The query query parameter specifies name- and value-based
+
+        search criteria.
+
+        The fields query parameter specifies custom fields to return values for. You can add multiple fields to one query.
+
+        The start_time and end_time query parameters specify the boundaries of a time window from which
+
+        you want to retrieve datapoints.
+
+        The offset parameter specifies the point in the query results at
+
+        which the API should start sending event data.
+
+        The limit parameter specifies the number of results to send.
+
+        The order_by parameter controls the order of the results you receive.
+
+
+        The API combines the query results and the time window with a logical AND.
+
+        This API doesn''t take a request body.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use this endpoint.
+
+        You must have the Splunk Observability Cloud admin, power role, or read_only role.'
+      parameters:
+      - name: query
+        in: query
+        description: 'Search criteria that specifies the events that you want the
+
+          API to return. You can search for any of the event properties.
+
+          You might need to use different forms of a field name in the
+
+          query parameter:
+
+
+          To search for eventType, use sf_eventType.
+
+          To search for category, use sf_eventCategory.
+
+
+          You have to specify at least one value for query.
+
+          Search criteria have the following rules:
+
+
+          To search for specific values of a dimension or property, specify
+
+          <name>:<value>. If <value> contains
+
+          non-alphanumeric characters, encode the non-alphanumeric characters and surround the value with
+
+          double quotes. For example, the region custom property value US East must be passed in the parameter as region:"US%20East".
+
+          To search for names or values using wildcards, use * as the
+
+          wildcard character.
+
+          Join searches with NOT, AND, and OR operators.
+
+          Use parentheses ''('' and '')'' to change the evaluation order.'
+        required: true
+        schema:
+          type: string
+      - name: fields
+        in: query
+        schema:
+          type: string
+      - name: start_time
+        in: query
+        description: 'Start of the time window from which the API should retrieve custom
+
+          events. Specify the value in *nix time in milliseconds, and remember to
+
+          correct for your time zone.
+
+          If the value is negative, the API interprets it as an offset before
+
+          the current server time (UTC).
+
+          If you specify start_time but not end_time, the time window extends to the
+
+          current server time.'
+        schema:
+          type: integer
+          format: int64
+      - name: limit
+        in: query
+        description: 'The number of events to retrieve from the result set:
+
+
+          The maximum is 9,999, because the first retrieved event is result 0.
+
+          The default is 1000.
+
+          If you specify -1, the API returns 1000 results.
+
+          Regardless of the value of offset, requesting more than
+
+          10,000 results results in an HTTP response code 500.'
+        schema:
+          type: integer
+          format: int32
+          maximum: 9999
+      - name: offset
+        in: query
+        description: 'The index in the query result set at which the API should start
+
+          sending results to you. For example, 0 is first result in the set, and
+
+          10 is the 11th result.'
+        schema:
+          type: integer
+          format: int32
+      - name: order_by
+        in: query
+        description: 'The field on which the API should sort the query results. The value
+
+          can be any event property, including metadata.
+
+          Prepend a - character to the property name to sort in descending order. If you want to apply order_by to non-custom
+          property fields like timestamp, prepend the field with sf_. For example: order_by=-sf_timestamp.'
+        schema:
+          type: string
+      - name: end_time
+        in: query
+        description: 'End of the time window from which the API should retrieve custom
+
+          events. Specify the value in *nix time in milliseconds and remember to
+
+          correct for your time zone.
+
+          If the value is negative, the API interprets it as an offset before
+
+          the current server time (UTC).
+
+          If you specify end_time but not start_time, the time window extends from the
+
+          earliest event to the value of end_time.'
+        schema:
+          type: integer
+          format: int64
+      - name: X-SF-Token
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 10000
+                minItems: 0
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: AddBYZrEFEF
+                      description: ID of the event, assigned by Splunk Observability Cloud
+                    metadata:
+                      type: object
+                      additionalProperties: true
+                      example:
+                        ETS_key1: detector
+                        ETS_key2: false
+                        ETS_key3: 1001
+                      description: 'A map of key-value pairs created by Splunk Observability Cloud from
+
+                        event time series metadata for the ETS that the event belongs to.
+
+                        For example, alerts received from AWS contain metadata that describes
+
+                        the AWS instance that sent the alert.'
+                    properties:
+                      type: object
+                      additionalProperties: true
+                      example:
+                        is: ok
+                        sf_notificationWasSent: true
+                        was: anomalous
+                      description: 'A map of key-value pairs. The map can contain data sent to
+
+                        Splunk Observability Cloud in a POST v2/event request. It can also contain
+
+                        data added to the event from other sources.'
+                    sf_eventCategory:
+                      type: string
+                      enum:
+                      - USER_DEFINED
+                      - ALERT
+                      - AUDIT
+                      - JOB
+                      - COLLECTED
+                      - SERVICE_DISCOVERY
+                      - EXCEPTION
+                      description: 'A category that describes the event. The values are a set of enumerated types.
+
+                        Splunk Observability Cloud sets some values, while you can set others:
+
+
+                        USER_DEFINED: The default for events
+
+                        ALERT: Used by Splunk Observability Cloud to mark an event generated by
+
+                        a detector.
+
+                        AUDIT: Used by third-party integrations
+
+                        JOB: Event generated by an Splunk Observability Cloud or third-party
+
+                        background job
+
+                        COLLECTD: Generated by the Splunk Observability Cloud collectd integration
+
+                        SERVICE_DISCOVERY: Generated by third-party integrations
+
+                        EXCEPTION: A software exception occurred'
+                    sf_eventCreatedOnMs:
+                      type: integer
+                      format: int64
+                      readOnly: true
+                      example: 1553678621002
+                      description: The date and time when the alert that creates the event was set, in *nix time in milliseconds.
+                    sf_eventType:
+                      type: string
+                      description: 'A name for the event. You can specify this value when you send a
+
+                        custom event to Splunk Observability Cloud. Use it to uniquely identify
+
+                        custom events.
+
+                        For an event time series, this value is the analog of the metric
+
+                        name in a metric time series.'
+                    timestamp:
+                      type: integer
+                      format: int64
+                      readOnly: true
+                      example: 1554672630000
+                      description: The date and time of the event in *nix time in milliseconds. It's set by system.
+                    tsId:
+                      type: string
+                      example: XzZYApXCDCD
+                      description: 'Splunk Observability Cloud-assigned ID of the event time series (ETS) this
+
+                        event belongs to'
+                  title: EventResponseObject
+                  description: Specifies a single event
+              examples:
+                example:
+                  value:
+                  - id: AddBYZrEFEF
+                    metadata:
+                      ETS_key1: detector
+                      ETS_key2: false
+                      ETS_key3: 1001
+                    properties:
+                      is: ok
+                      sf_notificationWasSent: true
+                      was: anomalous
+                    sf_eventCategory: USER_DEFINED
+                    sf_eventCreatedOnMs: 1553678621002
+                    sf_eventType: string
+                    timestamp: 1554672630000
+                    tsId: XzZYApXCDCD
+        '406':
+          description: HTTP 406 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: HTTP response code. Always 406.
+                  message:
+                    type: string
+                    description: Error message
+                example:
+                  code: 406
+                  message: At least one filtration clause must be specified.
+              examples:
+                example:
+                  value:
+                    code: 406
+                    message: At least one filtration clause must be specified.
+        '500':
+          description: HTTP 500 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 500
+                    description: HTTP response code. Always 500.
+                  message:
+                    type: string
+                    example: Server error occurred. Unique error identifier [<error_id>]
+                    description: Error message, including a unique error identifier
+              examples:
+                example:
+                  value:
+                    code: 500
+                    message: Server error occurred. Unique error identifier [<error_id>]
+      security:
+      - SessionToken: []
+      tags:
+      - Retrieve events V2

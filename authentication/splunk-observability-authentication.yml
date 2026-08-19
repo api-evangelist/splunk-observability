@@ -1,0 +1,69 @@
+generated: '2026-08-19'
+method: derived
+source: openapi/splunk-observability-apm-service-topology-openapi.yml, openapi/splunk-observability-apm-visibility-filters-openapi.yml,
+  openapi/splunk-observability-audit-events-openapi.yml, openapi/splunk-observability-automatedarchival-openapi.yml,
+  openapi/splunk-observability-backfill-openapi.yml, openapi/splunk-observability-charts-openapi.yml,
+  openapi/splunk-observability-client-inventory-openapi.yml, openapi/splunk-observability-dashboard-groups-openapi.yml,
+  openapi/splunk-observability-dashboards-openapi.yml, openapi/splunk-observability-datalinks-openapi.yml,
+  openapi/splunk-observability-detectors-openapi.yml, openapi/splunk-observability-incidents-openapi.yml
+  ...
+summary:
+  types:
+  - apiKey
+  api_key_in:
+  - header
+schemes:
+- name: SessionToken
+  type: apiKey
+  in: header
+  parameter: X-SF-Token
+  description: Splunk Observability Cloud session token or org access token.
+  sources:
+  - openapi/splunk-observability-apm-service-topology-openapi.yml
+  - openapi/splunk-observability-apm-visibility-filters-openapi.yml
+  - openapi/splunk-observability-audit-events-openapi.yml
+  - openapi/splunk-observability-automatedarchival-openapi.yml
+  - openapi/splunk-observability-backfill-openapi.yml
+  - openapi/splunk-observability-charts-openapi.yml
+  - openapi/splunk-observability-client-inventory-openapi.yml
+  - openapi/splunk-observability-dashboard-groups-openapi.yml
+  - openapi/splunk-observability-dashboards-openapi.yml
+  - openapi/splunk-observability-datalinks-openapi.yml
+  - openapi/splunk-observability-detectors-openapi.yml
+  - openapi/splunk-observability-incidents-openapi.yml
+  - openapi/splunk-observability-ingest-data-openapi.yml
+  - openapi/splunk-observability-integrations-openapi.yml
+  - openapi/splunk-observability-metric-ruleset-openapi.yml
+  - openapi/splunk-observability-metrics-metadata-openapi.yml
+  - openapi/splunk-observability-navigator-openapi.yml
+  - openapi/splunk-observability-org-tokens-openapi.yml
+  - openapi/splunk-observability-organizations-openapi.yml
+  - openapi/splunk-observability-passwords-openapi.yml
+  - openapi/splunk-observability-retrieve-events-v1-openapi.yml
+  - openapi/splunk-observability-retrieve-events-v2-openapi.yml
+  - openapi/splunk-observability-retrieve-timeserieswindow-openapi.yml
+  - openapi/splunk-observability-roles-openapi.yml
+  - openapi/splunk-observability-sessiontokens-openapi.yml
+  - openapi/splunk-observability-signalflow-openapi.yml
+  - openapi/splunk-observability-slo-openapi.yml
+  - openapi/splunk-observability-synthetics-api-tests-openapi.yml
+  - openapi/splunk-observability-synthetics-api-tests-v2-openapi.yml
+  - openapi/splunk-observability-synthetics-artifacts-openapi.yml
+  - openapi/splunk-observability-synthetics-audits-openapi.yml
+  - openapi/splunk-observability-synthetics-browser-openapi.yml
+  - openapi/splunk-observability-synthetics-browser-v2-openapi.yml
+  - openapi/splunk-observability-synthetics-ca-certs-openapi.yml
+  - openapi/splunk-observability-synthetics-certificates-openapi.yml
+  - openapi/splunk-observability-synthetics-chrome-flags-openapi.yml
+  - openapi/splunk-observability-synthetics-devices-openapi.yml
+  - openapi/splunk-observability-synthetics-downtime-configurations-openapi.yml
+  - openapi/splunk-observability-synthetics-excluded-files-openapi.yml
+  - openapi/splunk-observability-synthetics-global-variables-openapi.yml
+  - openapi/splunk-observability-synthetics-http-tests-openapi.yml
+  - openapi/splunk-observability-synthetics-locations-openapi.yml
+  - openapi/splunk-observability-synthetics-ports-tests-openapi.yml
+  - openapi/splunk-observability-synthetics-runs-openapi.yml
+  - openapi/splunk-observability-synthetics-ssl-tests-openapi.yml
+  - openapi/splunk-observability-synthetics-tests-openapi.yml
+  - openapi/splunk-observability-teams-openapi.yml
+  - openapi/splunk-observability-trace-id-openapi.yml

@@ -1,0 +1,1810 @@
+openapi: 3.0.3
+info:
+  title: Splunk Observability Cloud — Metrics metadata
+  version: 3.4.0
+  description: 'API for creating, retrieving, updating, and deleting metric metadata and MTS metadata.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You must have the Splunk Observability Cloud admin or power role to use the PUT /dimension/{key}/{value}
+
+    and PUT /tag/{name} endpoints.
+
+    You must have the Splunk Observability Cloud admin, power, or read_only roles to use the GET /tag
+
+    and GET /tag/{name} endpoints.
+
+    You must have the Splunk Observability Cloud admin role to use the DELETE /tag/{name} endpoint.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference
+      pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's.
+      Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset
+      path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2
+  description: Metrics and metadata API endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.
+paths:
+  /dimension:
+    get:
+      summary: Retrieve Dimensions Query
+      description: 'Retrieves the dimensions objects for the search criteria you specify
+
+        in the query query parameter.
+
+        The query can contain one or more of the following:
+
+
+        Dimension names
+
+        Dimension names and values
+
+        Custom property names
+
+
+        The API first collects all of the matching results. This is known as the
+
+        result set. Depending on the values you specify for offset and
+
+        limit, the number of metadata objects in the response body can be
+
+        smaller than than the result set. For example, if you specify offset=0
+
+        (the default) and limit=50, and the API finds 100 matches, you only
+
+        receive the first 50 results.
+
+        Note: Splunk Observability Cloud returns a maximum of 10,000 dimensions, even if your organization contains more than
+        10,000. To learn more, see the
+
+        Considerations for retrieve operations section in the developer guide.'
+      parameters:
+      - name: query
+        in: query
+        description: 'Search criteria for the dimensions you want to retrieve
+
+          Use this syntax:
+
+
+          To search for a dimension name use query=key:<dimension_name>
+
+          To search for specific values of a dimension or property, use
+
+          the name and value as query=<name>:<value>. If <value> contains non-alphanumeric characters, encode the non-alphanumeric
+          characters and surround the value with double quotes. For example, the region custom property value US East must
+          be passed in the parameter as region:"US%20East".
+
+          Use * as a wildcard character. For example, to search for all
+
+          values of the region dimension, use query=region:*.
+
+          To search for the existence of dimensions, use _exists_ and
+
+          _missing_. For example, to search for metadata that
+
+          has the host_machine dimension, specify query=_exists_:host_machine.
+
+          A single dimension name or name-value pair (or wildcards) make up
+
+          a predicate that implicitly returns a boolean.
+
+          Join predicates with the NOT, AND, and OR boolean operators.
+
+          Use parentheses ''('' and '')'' to change the evaluation order.
+
+          For example, to retrieve all metadata that has the dimensions
+
+          region:emea and hostname:france-*, use
+
+          query=region:emea AND hostname:france-*.'
+        schema:
+          type: string
+      - name: order_by
+        in: query
+        description: 'Metadata object property on which the API should sort the results.
+
+          This must be a property of the dimensions metadata object.
+
+          Prepend a - character to the property name to sort in descending order. If you want to apply order_by to non-custom
+          property fields like timestamp, prepend the field with sf_. For example: order_by=-sf_timestamp.'
+        schema:
+          type: string
+      - name: offset
+        in: query
+        description: 'Object in the result set at which the API should start
+
+          returning results to you. If omitted, the API starts at the first
+
+          result in the set.'
+        schema:
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: Number of results to return from the result set
+        schema:
+          type: integer
+          format: int32
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    format: int64
+                    description: 'Number of metadata objects that matched the search criteria. This
+
+                      isn''t the same as sizeOf(results), because the limit and
+
+                      offset query parameters affect the number of objects
+
+                      in the response body.'
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        creator:
+                          type: string
+                          description: 'ID of the user who created the dimension. This can
+
+                            be one of the following:
+
+
+                            ID of user who created the integration that sent the dimension
+
+                            ID of user who sent the dimension using the API
+
+                            ID of user who added the dimension using the UI
+
+
+                            If the value is "AAAAAAAAAAA", Splunk Observability Cloud created the dimension.'
+                        created:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1555065030000
+                          description: 'Dimension creation timestamp, in *nix time in milliseconds.
+
+                            This property is set by the system, and you can''t modify it.'
+                        customProperties:
+                          type: object
+                          additionalProperties: true
+                          maxItems: 50
+                          description: 'Dimension custom properties, in the form of a JSON
+
+                            object containing custom property key-value pairs.
+
+                            Names and values have these requirements:
+
+                            Name:
+
+
+                            UTF-8 string, maximum length of 128 characters (512 bytes)
+
+                            Must start with an uppercase or lowercase letter. The rest of
+
+                            the name can contain letters, numbers, underscores (_) and
+
+                            hyphens (-).
+
+                            Must not start with the underscore character (_)
+
+
+                            Value:
+
+
+                            String: Maximum length 256 UTF-8 characters (1024 bytes)
+
+                            Integer or float: Maximum length 8192 bits (1024 bytes)'
+                        description:
+                          type: string
+                          minLength: 0
+                          maxLength: 1024
+                          format: UTF-8
+                          description: Dimension description, up to 1024 UTF-8 characters
+                        key:
+                          type: string
+                          maxLength: 128
+                          description: 'Dimension name. It has these requirements:
+
+
+                            UTF-8 string, maximum length of 128 characters (512 bytes)
+
+                            Must start with an uppercase or lowercase letter. The rest of
+
+                            the name can contain letters, numbers, underscores (_) and
+
+                            hyphens (-), but cannot be blank
+
+                            Must not start with the underscore character (_)
+
+                            Must not start with the prefix sf_, except for dimensions
+
+                            defined by Splunk Observability Cloud such as sf_hires'
+                        lastUpdated:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1555237830000
+                          description: Last updated timestamp, in *nix time in milliseconds.
+                        lastUpdatedBy:
+                          type: string
+                          description: 'ID of the user who last updated the dimension by
+
+                            modifying its metadata. If the value is "AAAAAAAAAAA", Splunk Observability Cloud
+
+                            last modified the dimension.'
+                        tags:
+                          type: array
+                          items:
+                            type: string
+                            maxLength: 256
+                          maxItems: 50
+                          description: 'Tags for the dimension, in the form of a JSON array of tag names
+
+                            Each tag is a UTF-8 string, starting with an uppercase or lowercase
+
+                            alphabetic character. The maximum length is expressed in characters;
+
+                            if a string consists solely of single-byte UTF-8 entities, 1024
+
+                            characters are available.
+
+                            Note: You can''t have more than 50 tags per MTS, so you can''t
+
+                            have more than 50 tags total for all of the dimensions associated
+
+                            with the MTS.'
+                        value:
+                          type: string
+                          maxLength: 256
+                          description: 'Dimension value. It has these requirements:
+
+
+                            String: Maximum length 256 UTF-8 characters (1024 bytes)
+
+                            Integer or float: Maximum length 8192 bits (1024 bytes)'
+                      title: DimensionMetadata
+                      description: Metadata for a single dimension, in the form of a JSON object
+                    description: 'List of dimension metadata objects, in the form of an array of JSON
+
+                      objects. Each object contains metadata for a dimension that matched
+
+                      the query.'
+                title: DimensionQueryResponse
+                description: Response body for GET /v2/dimension
+              examples:
+                example:
+                  value:
+                    count: 0
+                    results:
+                    - created: 1555065030000
+                      creator: string
+                      description: string
+                      key: string
+                      lastUpdated: 1555237830000
+                      lastUpdatedBy: string
+                      tags:
+                      - string
+                      value: string
+      security:
+      - SessionToken: []
+      tags:
+      - Metrics metadata
+  /dimension/{key}/{value}:
+    get:
+      summary: Retrieve Dimension Metadata Name Value
+      description: 'Retrieves the metadata for the dimension and value specified in the
+
+        key and value path parameters'
+      parameters:
+      - name: key
+        in: path
+        description: Dimension name
+        required: true
+        schema:
+          type: string
+      - name: value
+        in: path
+        description: Dimension value
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  creator:
+                    type: string
+                    description: 'ID of the user who created the dimension. This can
+
+                      be one of the following:
+
+
+                      ID of user who created the integration that sent the dimension
+
+                      ID of user who sent the dimension using the API
+
+                      ID of user who added the dimension using the UI
+
+
+                      If the value is "AAAAAAAAAAA", Splunk Observability Cloud created the dimension.'
+                  created:
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1555065030000
+                    description: 'Dimension creation timestamp, in *nix time in milliseconds.
+
+                      This property is set by the system, and you can''t modify it.'
+                  customProperties:
+                    type: object
+                    additionalProperties: true
+                    maxItems: 50
+                    description: 'Dimension custom properties, in the form of a JSON
+
+                      object containing custom property key-value pairs.
+
+                      Names and values have these requirements:
+
+                      Name:
+
+
+                      UTF-8 string, maximum length of 128 characters (512 bytes)
+
+                      Must start with an uppercase or lowercase letter. The rest of
+
+                      the name can contain letters, numbers, underscores (_) and
+
+                      hyphens (-).
+
+                      Must not start with the underscore character (_)
+
+
+                      Value:
+
+
+                      String: Maximum length 256 UTF-8 characters (1024 bytes)
+
+                      Integer or float: Maximum length 8192 bits (1024 bytes)'
+                  description:
+                    type: string
+                    minLength: 0
+                    maxLength: 1024
+                    format: UTF-8
+                    description: Dimension description, up to 1024 UTF-8 characters
+                  key:
+                    type: string
+                    maxLength: 128
+                    description: 'Dimension name. It has these requirements:
+
+
+                      UTF-8 string, maximum length of 128 characters (512 bytes)
+
+                      Must start with an uppercase or lowercase letter. The rest of
+
+                      the name can contain letters, numbers, underscores (_) and
+
+                      hyphens (-), but cannot be blank
+
+                      Must not start with the underscore character (_)
+
+                      Must not start with the prefix sf_, except for dimensions
+
+                      defined by Splunk Observability Cloud such as sf_hires'
+                  lastUpdated:
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1555237830000
+                    description: Last updated timestamp, in *nix time in milliseconds.
+                  lastUpdatedBy:
+                    type: string
+                    description: 'ID of the user who last updated the dimension by
+
+                      modifying its metadata. If the value is "AAAAAAAAAAA", Splunk Observability Cloud
+
+                      last modified the dimension.'
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                      maxLength: 256
+                    maxItems: 50
+                    description: 'Tags for the dimension, in the form of a JSON array of tag names
+
+                      Each tag is a UTF-8 string, starting with an uppercase or lowercase
+
+                      alphabetic character. The maximum length is expressed in characters;
+
+                      if a string consists solely of single-byte UTF-8 entities, 1024
+
+                      characters are available.
+
+                      Note: You can''t have more than 50 tags per MTS, so you can''t
+
+                      have more than 50 tags total for all of the dimensions associated
+
+                      with the MTS.'
+                  value:
+                    type: string
+                    maxLength: 256
+                    description: 'Dimension value. It has these requirements:
+
+
+                      String: Maximum length 256 UTF-8 characters (1024 bytes)
+
+                      Integer or float: Maximum length 8192 bits (1024 bytes)'
+                title: DimensionMetadata
+                description: Metadata for a single dimension, in the form of a JSON object
+              examples:
+                example:
+                  value:
+                    created: 1555065030000
+                    creator: string
+                    description: string
+                    key: string
+                    lastUpdated: 1555237830000
+                    lastUpdatedBy: string
+                    tags:
+                    - string
+                    value: string
+      security:
+      - SessionToken: []
+      tags:
+      - Metrics metadata
+    put:
+      summary: Update Dimension Metadata
+      description: 'Overwrites metadata for the dimension specified by the name and value
+
+        in the path parameters.
+
+        This method uses overwrite semantics. Properties in the request body
+
+        overwrite existing values. If a property exists and you omit it from the
+
+        request body, the API sets it to null.'
+      parameters:
+      - name: key
+        in: path
+        description: Name of the dimension you want to update
+        required: true
+        schema:
+          type: string
+      - name: value
+        in: path
+        description: Value of the dimension you want to update
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customProperties:
+                  type: object
+                  additionalProperties: true
+                  description: 'Custom property updates. Because PUT /dimension/{key}/{value}
+
+                    has overwrite semantics, you need to include existing custom properties
+
+                    when you update; otherwise, they''re deleted.
+
+
+                    To change the value of a custom property, use
+
+                    "<property_name>": "<new_value>".
+
+                    To add a custom property, use
+
+                    "<new_property_name>": "<value>"'
+                description:
+                  type: string
+                  minLength: 0
+                  maxLength: 1024
+                  format: UTF-8
+                  description: Updated dimension description
+                key:
+                  type: string
+                  maxLength: 128
+                  description: Dimension name for which you want to update metadata
+                value:
+                  maxLength: 256
+                  description: Dimension value for which you want to update metadata
+                tags:
+                  type: array
+                  items:
+                    type: string
+                    maxLength: 256
+                  maxItems: 50
+                  description: 'List of tags you want to add, in the form of
+
+                    a JSON array. Because PUT /dimension/{key}/{value}
+
+                    has overwrite semantics, you need to include existing tags
+
+                    when you update tags or  custom properties; otherwise, they''re
+
+                    deleted.'
+              title: DimensionUpdateRequest
+              description: PUT /dimension/{key}/{value} request body.
+            examples:
+              example:
+                value:
+                  description: string
+                  key: string
+                  tags:
+                  - string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  key:
+                    type: string
+                    maxLength: 128
+                    description: Name of the updated dimension
+                  value:
+                    maxLength: 256
+                    description: Value of the updated dimension
+                  description:
+                    type: string
+                    minLength: 0
+                    maxLength: 1024
+                    format: UTF-8
+                    description: Dimension description, up to 1024 UTF-8 characters
+                  customProperties:
+                    type: object
+                    additionalProperties: true
+                    maxItems: 50
+                    description: 'Custom properties for the dimension, in the form
+
+                      of a JSON object containing custom property key-value pairs'
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                      maxLength: 256
+                    maxItems: 50
+                    description: 'List of tags for the dimension, in the form of a
+
+                      JSON array of strings'
+                  creator:
+                    type: string
+                    description: 'ID of the user who created the dimension. This can
+
+                      be one of the following:
+
+
+                      ID of user who created the integration that sent the dimension
+
+                      ID of user who sent the dimension using the API
+
+                      ID of user who added the dimension using the UI
+
+
+                      If the value is "AAAAAAAAAAA", Splunk Observability Cloud created the dimension.'
+                  created:
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1557484230100
+                    description: 'Dimension creation timestamp, in *nix time in milliseconds.
+
+                      This property is set by the system, and you can''t modify it.'
+                  lastUpdatedBy:
+                    type: string
+                    description: 'ID of the user who last updated the dimension.
+
+                      If the value is "AAAAAAAAAAA", Splunk Observability Cloud last modified the metric.'
+                  lastUpdated:
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1557570630000
+                    description: Last updated timestamp, in *nix time in milliseconds.
+                title: DimensionUpdateResponse
+                description: Response body for PUT /dimension/{key}/{value}
+              examples:
+                example:
+                  value:
+                    created: 1557484230100
+                    creator: string
+                    description: string
+                    key: string
+                    lastUpdated: 1557570630000
+                    lastUpdatedBy: string
+                    tags:
+                    - string
+      security:
+      - SessionToken: []
+      tags:
+      - Metrics metadata
+  /metric:
+    get:
+      summary: Retrieve Metadata MetricsQuery
+      description: 'Retrieves metadata objects for which the metrics name matches the
+
+        search criteria.
+
+        The API first collects all of the matching results. This is known as the
+
+        result set. Depending on the values you specify for offset and
+
+        limit, the number of metadata objects in the response body can be
+
+        smaller than than the result set. For example, if you specify offset=0
+
+        (the default) and limit=50, and the API finds 100 matches, you only
+
+        receive the first 50 results.
+
+        Note: Splunk Observability Cloud returns a maximum of 10,000 metadata objects, even if your organization contains
+        more than 10,000. To learn more, see the
+
+        Considerations for retrieve operations section in the developer guide.'
+      parameters:
+      - name: query
+        in: query
+        description: 'Metric name search string. The string always starts with name:. You
+
+          have the following search options:
+
+
+          To search by metric name, use query=name:<metric_name>. This
+
+          returns all of the metadata for that metric.
+
+          Metrics generated by Splunk Observability Cloud start with the prefix sf. or sf_metric.
+
+          To search for names using wildcards, use * as the
+
+          wildcard character. For example, to search for all the metrics that
+
+          start with cpu., use name:cpu.*. This returns metadata for
+
+          cpu.utilization, cpu.num_cores, and so forth.'
+        schema:
+          type: string
+      - name: order_by
+        in: query
+        description: 'Result object property on which the API should sort the results.
+
+          This must be a property of the metrics metadata object.
+
+          Prepend a - character to the property name to sort in descending order. If you want to apply order_by to non-custom
+          property fields like timestamp, prepend the field with sf_. For example: order_by=-sf_timestamp.'
+        schema:
+          type: string
+      - name: offset
+        in: query
+        description: 'Object in the result set at which the API should start returning
+
+          results to you. If omitted, the API starts at the first result in the
+
+          set.'
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: limit
+        in: query
+        description: 'Number of results to return from the set of all metrics that
+
+          match the query.'
+        schema:
+          type: integer
+          format: int32
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: Name of the metric
+                        description:
+                          type: string
+                          minLength: 0
+                          maxLength: 1024
+                          format: UTF-8
+                          description: Description of the metric
+                        type:
+                          type: string
+                          enum:
+                          - GAUGE
+                          - COUNTER
+                          - CUMULATIVE_COUNTER
+                          - HISTOGRAM
+                          description: 'Metric type of the metric. Possible values are "GAUGE", "COUNTER", "CUMULATIVE_COUNTER",
+                            and "HISTOGRAM". To learn more, refer to the
+
+                            Metric types section in the user documentation.'
+                        customProperties:
+                          type: object
+                          additionalProperties: true
+                          maxItems: 50
+                          description: 'Custom properties retrieved for the metric, in the form of a JSON
+
+                            object. Each property is a key-value pair.'
+                        tags:
+                          type: array
+                          items:
+                            type: string
+                            maxLength: 256
+                          maxItems: 50
+                          description: 'List of tags associated with the metric, in the form
+
+                            of a JSON array of strings.'
+                        created:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1556055030000
+                          description: 'Metric creation timestamp, in *nix time in milliseconds
+
+                            This property is set by the system, and you can''t modify it.'
+                        creator:
+                          type: string
+                          description: 'ID of the user who created the metric. This can
+
+                            be one of the following:
+
+
+                            ID of user who created the integration that sent the metric
+
+                            ID of user who sent the metric using the API
+
+
+                            If the value is "AAAAAAAAAAA", Splunk Observability Cloud created the metric.'
+                        lastUpdated:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1556141430000
+                          description: Last updated timestamp for the metric, in Unix time
+                        lastUpdatedBy:
+                          type: string
+                          description: 'ID of the user who last updated the metric by
+
+                            modifying its metadata. If the value is "AAAAAAAAAAA", Splunk Observability Cloud
+
+                            last modified the metric.'
+                      title: MetricsMetadata
+                      description: Metadata for a single metric name
+                    description: 'List of results, in the form of a JSON array of metadata
+
+                      objects'
+                  count:
+                    type: integer
+                    format: int64
+                    description: 'Number of metadata objects that matched the specified metrics name.
+
+                      This isn''t  the same as sizeOf(results), because the limit and
+
+                      offset query parameters affect the number of objects the API
+
+                      returns in the response body.'
+                title: MetricsQueryResponse
+                description: 'Results of calling the operation GET /v2/metric to retrieve
+
+                  all of the metadata for metrics that match search criteria, in the form
+
+                  of a JSON object.'
+              examples:
+                example:
+                  value:
+                    count: 0
+                    result:
+                    - created: 1556055030000
+                      creator: string
+                      description: string
+                      lastUpdated: 1556141430000
+                      lastUpdatedBy: string
+                      name: string
+                      tags:
+                      - string
+                      type: GAUGE
+      security:
+      - SessionToken: []
+      tags:
+      - Metrics metadata
+  /metric/{name}:
+    get:
+      summary: Retrieve Metadata Metric Name
+      description: 'Retrieves the metadata for the metric name specified in the
+
+        {name} path parameter. The API returns all of the metadata for this
+
+        metric.'
+      parameters:
+      - name: name
+        in: path
+        description: 'Name of an existing metric. For example, to
+
+          retrieve the metadata for the cpu.utilization metric, use the
+
+          endpoint https://api.{REALM}.observability.splunkcloud.com/v2/metric/cpu.utilization'
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: Name of the metric
+                  description:
+                    type: string
+                    minLength: 0
+                    maxLength: 1024
+                    format: UTF-8
+                    description: Description of the metric
+                  type:
+                    type: string
+                    enum:
+                    - GAUGE
+                    - COUNTER
+                    - CUMULATIVE_COUNTER
+                    - HISTOGRAM
+                    description: 'Metric type of the metric. Possible values are "GAUGE", "COUNTER", "CUMULATIVE_COUNTER",
+                      and "HISTOGRAM". To learn more, refer to the
+
+                      Metric types section in the user documentation.'
+                  customProperties:
+                    type: object
+                    additionalProperties: true
+                    maxItems: 50
+                    description: 'Custom properties retrieved for the metric, in the form of a JSON
+
+                      object. Each property is a key-value pair.'
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                      maxLength: 256
+                    maxItems: 50
+                    description: 'List of tags associated with the metric, in the form
+
+                      of a JSON array of strings.'
+                  created:
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1556055030000
+                    description: 'Metric creation timestamp, in *nix time in milliseconds
+
+                      This property is set by the system, and you can''t modify it.'
+                  creator:
+                    type: string
+                    description: 'ID of the user who created the metric. This can
+
+                      be one of the following:
+
+
+                      ID of user who created the integration that sent the metric
+
+                      ID of user who sent the metric using the API
+
+
+                      If the value is "AAAAAAAAAAA", Splunk Observability Cloud created the metric.'
+                  lastUpdated:
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1556141430000
+                    description: Last updated timestamp for the metric, in Unix time
+                  lastUpdatedBy:
+                    type: string
+                    description: 'ID of the user who last updated the metric by
+
+                      modifying its metadata. If the value is "AAAAAAAAAAA", Splunk Observability Cloud
+
+                      last modified the metric.'
+                title: MetricsMetadata
+                description: Metadata for a single metric name
+              examples:
+                example:
+                  value:
+                    created: 1556055030000
+                    creator: string
+                    description: string
+                    lastUpdated: 1556141430000
+                    lastUpdatedBy: string
+                    name: string
+                    tags:
+                    - string
+                    type: GAUGE
+      security:
+      - SessionToken: []
+      tags:
+      - Metrics metadata
+  /metrictimeseries:
+    get:
+      summary: Retrieve Metric Timeseries Metadata
+      description: 'Retrieves metadata for the metric timeseries specified by the search criteria in the query query parameter.
+
+        The query can contain one or more of the following:
+
+
+        Metric name
+
+        Dimensions
+
+        Custom properties
+
+        Tags
+
+
+        The API first collects all of the matching results. This is known as the result set. Depending on the value you specify
+        for limit, the number of metadata objects in the response body can be smaller than than the result set. For example,
+        if you specify limit=50, and the API finds 100 matches, you only receive the first 50 results.
+
+        Splunk Observability Cloud returns a maximum of 10,000 objects, even if your organization contains more. To learn
+        more, see the Considerations for retrieve operations section in the developer guide.'
+      parameters:
+      - name: query
+        in: query
+        description: 'Search criteria that selects the metric timeseries for which you want metadata.
+
+          Search criteria have the following rules:
+
+
+          To search by metric name, use query=metric:<metric_name> or query=sf_metric:<metric_name>. The result is metadata
+          for MTS that have that metric name.
+
+          Metrics and MTS generated by Splunk Observability Cloud start with the prefix sf. or sf_metric.
+
+          To search by dimension name, use query=<dimension_name>:*. The result
+
+          is metadata for MTS that have a dimension with that dimension name,
+
+          regardless of metric name.
+
+          To search for specific values of a dimension or custom property, use query=<name>:<value>. The result is metadata
+          for MTS that have that dimension or property, regardless of metric name. If <value> contains non-alphanumeric characters,
+          encode the non-alphanumeric characters and surround the value with double quotes. For example, the region custom
+          property value US East must be passed in the parameter as region:"US%20East".
+
+          To search with a wildcard character, use *. For example, to
+
+          search for all of the values of the region dimension, use
+
+          query=region:*.
+
+          To search for the existence of dimensions or properties, use
+
+          _exists_ and _missing_. For example, to search for metadata that
+
+          has the host_machine dimension, specify query=_exists_:host_machine.
+
+          A single name and value (or wildcards) make up a
+
+          predicate  that implicitly returns a boolean.
+
+          Join predicates with the NOT, AND, and OR boolean operators.
+
+          Use parentheses ''('' and '')'' to change the evaluation order.
+
+          For example, to retrieve all metadata that has the dimension
+
+          region:emea and the custom property company with values that
+
+          start with Schneider*, use query=region:emea AND company:Schneider*.'
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Number of result objects to return from the result set.
+        schema:
+          type: integer
+          format: int32
+      - name: searchInactive
+        in: query
+        description: 'Flag that controls the retrieval of metadata for inactive MTS.
+
+          The default for searchInactive is false, so GET /metrictimeseries
+
+          only searches for active MTS.
+
+          If the query parameter includes active MTS filter terms like sf_isActive or sf_lastActiveMs, then this flag value
+          is ignored.'
+        schema:
+          type: boolean
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        created:
+                          type: integer
+                          format: int64
+                          example: 1557743430000
+                          description: MTS creation timestamp, in *nix time in milliseconds.
+                        creator:
+                          type: string
+                          description: 'ID of the user who created the MTS. This can
+
+                            be one of the following:
+
+
+                            ID of user who created the integration that sent the MTS
+
+                            ID of user who sent the MTS using the API
+
+
+                            If the value is "AAAAAAAAAAA", Splunk Observability Cloud created the MTS.'
+                        customProperties:
+                          type: object
+                          additionalProperties: true
+                          maxItems: 50
+                          description: 'MTS custom properties, in the form of a JSON object.
+
+                            Each object property is a custom property key-value pair.
+
+                            The section [/docs/datamodel/metrics_metadata#Custom-properties-criteria)
+
+                            lists the requirements for custom properties.'
+                        dimensions:
+                          type: object
+                          maxItems: 50
+                          additionalProperties: true
+                          description: 'MTS dimensions, in the form of a JSON object. Each object property
+
+                            is a dimension key-value pair.
+
+                            The section Dimension Criteria
+
+                            lists the requirements for dimensions.'
+                        lastUpdated:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1557916230000
+                          description: MTS last updated timestamp, in *nix time in milliseconds.
+                        lastUpdatedBy:
+                          type: string
+                          description: 'ID of the user who last updated the MTS by
+
+                            modifying its metadata. If the value is "AAAAAAAAAAA", Splunk Observability Cloud
+
+                            last modified the metric.'
+                        metric:
+                          type: string
+                          maxLength: 256
+                          description: 'MTS metric name. Metric names are UTF-8 strings with a maximum
+
+                            length of 256 characters (1024 bytes).'
+                        tags:
+                          type: array
+                          items:
+                            type: string
+                            maxLength: 256
+                          maxItems: 50
+                          description: 'MTS tags, in the form of a JSON array of strings.
+
+                            Each tag is in UTF-8, starting with an uppercase or lowercase
+
+                            alphabetic character. The maximum length is expressed in characters;
+
+                            if a string consists solely of single-byte UTF-8 entities, 1024
+
+                            characters are available.'
+                        type:
+                          type: string
+                          enum:
+                          - GAUGE
+                          - COUNTER
+                          - CUMULATIVE_COUNTER
+                          - HISTOGRAM
+                          description: 'Metric type of the MTS. The possible values are
+
+                            "GAUGE", "COUNTER", "CUMULATIVE_COUNTER", and "HISTOGRAM". To learn more, refer to the
+
+                            Metric types section in the user documentation.'
+                      title: MTSMetadata
+                      description: Metadata for an MTS
+                    description: 'List of metadata for retrieved MTS, in the form of a JSON array.
+
+                      Each element contains metadata for a single MTS.'
+                  count:
+                    type: integer
+                    format: int64
+                    description: Number of metadata objects that matched the search criteria. This isn't the same as the size
+                      of results, because the limit query parameter affects the number of objects in the response body. count
+                      cannot exceed 10,000.
+                  isPartialCount:
+                    type: boolean
+                    description: If isPartialCount is true, the number of results exceeded 10,000, so there's more results
+                      than the amount indicated by the count field. If false, count represents the exact number of results.
+                title: MTSQueryResponse
+                description: GET /metrictimeseries response body
+              examples:
+                example:
+                  value:
+                    count: 0
+                    isPartialCount: true
+                    results:
+                    - created: 1557743430000
+                      creator: string
+                      lastUpdated: 1557916230000
+                      lastUpdatedBy: string
+                      metric: string
+                      tags:
+                      - string
+                      type: GAUGE
+      security:
+      - SessionToken: []
+      tags:
+      - Metrics metadata
+  /metrictimeseries/{id}:
+    get:
+      summary: Retrieve MTS Metadata Using ID
+      description: 'Retrieves metadata for the single metric timeseries specified by
+
+        the {id} path parameter.'
+      parameters:
+      - name: id
+        in: path
+        description: ID of the MTS for which you want metadata
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created:
+                    type: integer
+                    format: int64
+                    example: 1557743430000
+                    description: MTS creation timestamp, in *nix time in milliseconds.
+                  creator:
+                    type: string
+                    description: 'ID of the user who created the MTS. This can
+
+                      be one of the following:
+
+
+                      ID of user who created the integration that sent the MTS
+
+                      ID of user who sent the MTS using the API
+
+
+                      If the value is "AAAAAAAAAAA", Splunk Observability Cloud created the MTS.'
+                  customProperties:
+                    type: object
+                    additionalProperties: true
+                    maxItems: 50
+                    description: 'MTS custom properties, in the form of a JSON object.
+
+                      Each object property is a custom property key-value pair.
+
+                      The section [/docs/datamodel/metrics_metadata#Custom-properties-criteria)
+
+                      lists the requirements for custom properties.'
+                  dimensions:
+                    type: object
+                    maxItems: 50
+                    additionalProperties: true
+                    description: 'MTS dimensions, in the form of a JSON object. Each object property
+
+                      is a dimension key-value pair.
+
+                      The section Dimension Criteria
+
+                      lists the requirements for dimensions.'
+                  lastUpdated:
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1557916230000
+                    description: MTS last updated timestamp, in *nix time in milliseconds.
+                  lastUpdatedBy:
+                    type: string
+                    description: 'ID of the user who last updated the MTS by
+
+                      modifying its metadata. If the value is "AAAAAAAAAAA", Splunk Observability Cloud
+
+                      last modified the metric.'
+                  metric:
+                    type: string
+                    maxLength: 256
+                    description: 'MTS metric name. Metric names are UTF-8 strings with a maximum
+
+                      length of 256 characters (1024 bytes).'
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                      maxLength: 256
+                    maxItems: 50
+                    description: 'MTS tags, in the form of a JSON array of strings.
+
+                      Each tag is in UTF-8, starting with an uppercase or lowercase
+
+                      alphabetic character. The maximum length is expressed in characters;
+
+                      if a string consists solely of single-byte UTF-8 entities, 1024
+
+                      characters are available.'
+                  type:
+                    type: string
+                    enum:
+                    - GAUGE
+                    - COUNTER
+                    - CUMULATIVE_COUNTER
+                    - HISTOGRAM
+                    description: 'Metric type of the MTS. The possible values are
+
+                      "GAUGE", "COUNTER", "CUMULATIVE_COUNTER", and "HISTOGRAM". To learn more, refer to the
+
+                      Metric types section in the user documentation.'
+                title: MTSMetadata
+                description: Metadata for an MTS
+              examples:
+                example:
+                  value:
+                    created: 1557743430000
+                    creator: string
+                    lastUpdated: 1557916230000
+                    lastUpdatedBy: string
+                    metric: string
+                    tags:
+                    - string
+                    type: GAUGE
+      security:
+      - SessionToken: []
+      tags:
+      - Metrics metadata
+  /tag:
+    get:
+      summary: Retrieve Tag Metadata Using Query
+      description: 'Retrieves metadata for which the tag matches the search criteria.
+
+        The API first collects all of the matching results. This is known as the
+
+        result set. Depending on the values you specify for offset and
+
+        limit, the number of metadata objects in the response body can be
+
+        smaller than than the result set. For example, if you specify offset=0
+
+        (the default) and limit=50, and the API finds 100 matches, you only
+
+        receive the first 50 results.
+
+        Note: Splunk Observability Cloud returns a maximum of 10,000 tags, even if your organization contains more than 10,000.
+        To learn more, see the
+
+        Considerations for retrieve operations section in the developer guide.'
+      parameters:
+      - name: query
+        in: query
+        description: 'Search criteria for tags.
+
+          Use the following syntax rules:
+
+
+          To search for a tag, specify query=<tagname>. If <tagname> contains
+
+          non-alphanumeric characters, encode the non-alphanumeric characters and surround the value with
+
+          double quotes. For example, the tag prod env must be passed in the parameter as query="prod%20env".
+
+          Use * as a wildcard. For example, to
+
+          search for tags that start with the string "python", use
+
+          `query="python*".'
+        schema:
+          type: string
+      - name: order_by
+        in: query
+        description: 'Result object property on which the API should sort the results.
+
+          This must be a property of the tag metadata object.
+
+          Prepend a - character to the property name to sort in descending order. If you want to apply order_by to non-custom
+          property fields like timestamp, prepend the field with sf_. For example: order_by=-sf_timestamp.'
+        schema:
+          type: string
+      - name: offset
+        in: query
+        description: 'Object in the result set at which the API should start returning
+
+          results to you. If omitted, the API starts at the first result in the
+
+          set.'
+        schema:
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: Number of results to return from the result set.
+        schema:
+          type: integer
+          format: int32
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    format: int64
+                    description: 'Number of metadata objects that matched the specified search criteria.
+
+                      This isn''t  the same as sizeOf(results), because the limit and
+
+                      offset query parameters affect the number of objects the API
+
+                      returns in the response body.'
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        created:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1554287430000
+                          description: 'Tag creation timestamp, in *nix time in milliseconds.
+
+                            This property is set by the system, and you can''t modify it.'
+                        creator:
+                          type: string
+                          description: 'ID of the user who created the tag. This can
+
+                            be one of the following:
+
+
+                            ID of user who created the integration that sent the tag
+
+                            ID of user who sent the tag using the API
+
+
+                            If the value is "AAAAAAAAAAA", Splunk Observability Cloud created the tag.'
+                        customProperties:
+                          type: object
+                          maxProperties: 50
+                          example:
+                            name: region
+                            value: emea
+                          description: 'Custom properties for the tag, in the form of a JSON
+
+                            object. Each property in the object is a custom property
+
+                            key-value pair. The section Custom Properties Criteria
+
+                            lists the requirements for custom property keys and values.'
+                        description:
+                          type: string
+                          minLength: 0
+                          maxLength: 1024
+                          format: UTF-8
+                          description: Tag description, up to 1024 UTF-8 characters.
+                        lastUpdated:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1555497030000
+                          description: Tag last updated timestamp, in *nix time in milliseconds.
+                        lastUpdatedBy:
+                          type: string
+                          description: 'ID of the user who last updated the tag by
+
+                            modifying its metadata. If the value is "AAAAAAAAAAA", Splunk Observability Cloud
+
+                            last modified the tag.'
+                        name:
+                          type: string
+                          maxLength: 256
+                          format: UTF-8
+                          description: 'Tag value, in UTF-8. The section Tags Criteria
+
+                            lists the requirements for tags.'
+                      title: TagMetadata
+                      description: Metadata for a tag, in the form of a JSON object
+                    description: 'Tag metadata for tags that matched the search criteria, in the
+
+                      form of an array of JSON objects.'
+                title: TagQueryResponse
+                description: GET /tag response body
+              examples:
+                example:
+                  value:
+                    count: 0
+                    results:
+                    - created: 1554287430000
+                      creator: string
+                      customProperties:
+                        name: region
+                        value: emea
+                      description: string
+                      lastUpdated: 1555497030000
+                      lastUpdatedBy: string
+                      name: string
+      security:
+      - SessionToken: []
+      tags:
+      - Metrics metadata
+  /tag/{name}:
+    get:
+      summary: Retrieve Tag Metadata Using Name
+      description: 'Retrieves the metadata for the tag specified in the
+
+        {name} path parameter. The API returns all of the metadata for this
+
+        tag.'
+      parameters:
+      - name: name
+        in: path
+        description: Tag you want to retrieve
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created:
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1554287430000
+                    description: 'Tag creation timestamp, in *nix time in milliseconds.
+
+                      This property is set by the system, and you can''t modify it.'
+                  creator:
+                    type: string
+                    description: 'ID of the user who created the tag. This can
+
+                      be one of the following:
+
+
+                      ID of user who created the integration that sent the tag
+
+                      ID of user who sent the tag using the API
+
+
+                      If the value is "AAAAAAAAAAA", Splunk Observability Cloud created the tag.'
+                  customProperties:
+                    type: object
+                    maxProperties: 50
+                    example:
+                      name: region
+                      value: emea
+                    description: 'Custom properties for the tag, in the form of a JSON
+
+                      object. Each property in the object is a custom property
+
+                      key-value pair. The section Custom Properties Criteria
+
+                      lists the requirements for custom property keys and values.'
+                  description:
+                    type: string
+                    minLength: 0
+                    maxLength: 1024
+                    format: UTF-8
+                    description: Tag description, up to 1024 UTF-8 characters.
+                  lastUpdated:
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1555497030000
+                    description: Tag last updated timestamp, in *nix time in milliseconds.
+                  lastUpdatedBy:
+                    type: string
+                    description: 'ID of the user who last updated the tag by
+
+                      modifying its metadata. If the value is "AAAAAAAAAAA", Splunk Observability Cloud
+
+                      last modified the tag.'
+                  name:
+                    type: string
+                    maxLength: 256
+                    format: UTF-8
+                    description: 'Tag value, in UTF-8. The section Tags Criteria
+
+                      lists the requirements for tags.'
+                title: TagMetadata
+                description: Metadata for a tag, in the form of a JSON object
+              examples:
+                example:
+                  value:
+                    created: 1554287430000
+                    creator: string
+                    customProperties:
+                      name: region
+                      value: emea
+                    description: string
+                    lastUpdated: 1555497030000
+                    lastUpdatedBy: string
+                    name: string
+      security:
+      - SessionToken: []
+      tags:
+      - Metrics metadata
+    put:
+      summary: Create Update Tag
+      description: Creates or updates the tag specified in the {name} path parameter.
+      parameters:
+      - name: name
+        in: path
+        description: 'Data for the tag you want to create or update. The section
+
+          Tags Criteria
+
+          lists the requirements for tags.'
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customProperties:
+                  type: object
+                  additionalProperties: true
+                  maxItems: 50
+                  description: 'Custom properties for the tag, in the form of a JSON
+
+                    object. Each property is a custom property name
+
+                    and value.
+
+                    The section
+
+                    Custom Properties Criteria
+
+                    lists the requirements for custom property names and values.'
+                description:
+                  type: string
+                  minLength: 0
+                  maxLength: 1024
+                  format: UTF-8
+                  description: Tag description, up to 1024 UTF-8 characters.
+                name:
+                  description: Tag name, as specified in the {name} path parameter
+            examples:
+              example:
+                value:
+                  description: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created:
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1554287430000
+                    description: 'Tag creation timestamp, in *nix time in milliseconds.
+
+                      This property is set by the system, and you can''t modify it.'
+                  creator:
+                    type: string
+                    description: 'ID of the user who created or updated the tag.
+
+                      If the value is "AAAAAAAAAAA", Splunk Observability Cloud created or updated the tag.'
+                  customProperties:
+                    type: object
+                    additionalProperties: true
+                    maxItems: 50
+                    description: 'Custom properties created for or added to the tag, in the
+
+                      form of a JSON object. Each property is a custom property name
+
+                      and value.
+
+                      The section
+
+                      https://help.splunk.com/?resourceId=metrics-and-metadata_metrics-dimensions-mts#d20ce4ed8780040e6852273a2eba947ac__custom-properties-criteriaCustom
+                      Properties Criteria
+
+                      lists the requirements for custom property names and values.'
+                  description:
+                    type: string
+                    description: Tag description
+                  lastUpdated:
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1555497030000
+                    description: 'Tag last updated timestamp, in *nix time in milliseconds. If this is a
+
+                      new tag, lastUpdated == created.'
+                  lastUpdatedBy:
+                    description: 'ID of the user who last updated the tag. If the
+
+                      value is "AAAAAAAAAAA", Splunk Observability Cloud last updated the metric.'
+                  name:
+                    type: string
+                    description: Tag name
+                title: TagCreateUpdateResponse
+                description: PUT /tag response body
+              examples:
+                example:
+                  value:
+                    created: 1554287430000
+                    creator: string
+                    description: string
+                    lastUpdated: 1555497030000
+                    name: string
+      security:
+      - SessionToken: []
+      tags:
+      - Metrics metadata
+    delete:
+      summary: Delete Single Tag
+      description: Deletes the tag specified in the {name} path parameter
+      parameters:
+      - name: name
+        in: path
+        description: Tag you want to delete
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: HTTP 204 response
+        '404':
+          description: HTTP 404 response
+      security:
+      - SessionToken: []
+      tags:
+      - Metrics metadata

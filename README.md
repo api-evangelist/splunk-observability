@@ -42,23 +42,61 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Splunk Observability Cloud is the observability platform Splunk built on SignalFx, now part of Cisco: infrastructure monitoring, APM, real user monitoring, synthetics, log observer and incident response over OpenTelemetry-native ingest. It is the largest documented API surface Splunk operates — the developer site enumerates forty-eight distinct OpenAPI specifications covering charts, dashboards, detectors, SignalFlow, SLOs, org tokens, teams and twenty synthetics endpoints. None of them is fetchable: dev.splunk.com answers HTTP 200 with an identical 6,638-byte single-page-application shell for every path, including invented control paths, so the entire contract surface is readable by people and invisible to machines.
+Splunk Observability Cloud is the observability platform Splunk built on SignalFx and now runs as part of Cisco: infrastructure monitoring, APM, real user monitoring, synthetics, Log Observer and incident response over OpenTelemetry-native ingest. Its control plane is the largest API surface Splunk operates — 48 OpenAPI documents and 242 operations covering charts, dashboards, detectors, incidents and muting rules, metrics and dimension metadata, SignalFlow, SLOs, org and session tokens, teams, integrations and twenty distinct Synthetics services — alongside a SignalFlow WebSocket/SSE streaming interface and a hosted MCP server for agents.
 
 ## Ownership
 
 Part of the Splunk family.
 
-## Contract status
+## Contract status — corrected 2026-08-19
 
-The vendor's developer host is a soft-404 farm: every path returns HTTP 200 with an identical SPA shell, including invented control paths. No contract can be confirmed by a machine. API Evangelist has not authored a substitute.
+A previous pass recorded this provider as a soft-404 farm with no confirmable contract. **That
+finding was wrong, and this is the correction.**
+
+What is true: `dev.splunk.com` does answer HTTP 200 with an identical 6,638-byte Next.js shell for
+every *asset-style* path — `/openapi.json`, `/llms.txt`, `/.well-known/*`, and any invented path.
+Splunk publishes no downloadable OpenAPI file, no `/openapi.json`, no Swagger export and no spec
+repository.
+
+What was missed: the *documentation* pages render, and each of the 48 API reference pages embeds
+Splunk's own parsed OpenAPI object — `servers`, paths, methods, `operationId`s, parameters,
+request and response schemas, and examples — inside its React Server Component payload. All 48
+specifications and all 242 operations in `openapi/` were reconstructed from that payload and match
+Splunk's own published inventory exactly, spec for spec and operation for operation.
+
+So the contract is **machine-readable but not machine-retrievable**. It exists, it is complete, and
+Splunk simply does not offer it as a file. Every specification in this repository carries
+`info.x-apievangelist-derivation` and `info.x-apievangelist-source` naming the page it came from.
+
+## What is here
+
+| Surface | Finding |
+|---|---|
+| REST | 48 OpenAPI documents, 242 operations, reconstructed from Splunk's own reference payload |
+| Streaming | SignalFlow WebSocket + Server-Sent Events; AsyncAPI 3.0.0 derived in `asyncapi/` |
+| Webhooks | Outbound alert notifications signed with `X-SFX-Signature` (HMAC-SHA256, base64) |
+| MCP | Hosted server, 12 tools, probed live — HTTP 401 unauthenticated, so the server is real and the schema is gated |
+| A2A | No agent card on any host. Nothing was written. |
+| Auth | One `X-SF-TOKEN` header, two token classes. No OAuth, no OIDC, no scopes. |
+| Idempotency | **None.** No idempotency key anywhere; a retried POST creates a second real object. |
+| Rate limits | Two opt-in per-org-token limits. **No rate-limit response headers at all** — 429 arrives with no budget signal. |
+| Errors | Not RFC 9457. Five vendor JSON envelopes plus a bare-string form. |
+| Sandbox | **None.** No test mode, no test values. Every token is a live token. |
 
 ## Verified links
 
-- [Portal](https://dev.splunk.com/observability/reference/)
-- [Documentation](https://dev.splunk.com/observability/reference/)
-- [APIReference](https://dev.splunk.com/observability/docs/apibasics/api_list/)
+- [Developer portal](https://dev.splunk.com/observability/)
+- [API reference](https://dev.splunk.com/observability/reference/)
+- [Endpoint overview](https://dev.splunk.com/observability/docs/apibasics/api_list/)
+- [Authentication](https://dev.splunk.com/observability/docs/apibasics/authentication_basics/)
+- [MCP server](https://help.splunk.com/en/splunk-observability-cloud/splunk-ai-assistant/interact-with-your-observability-data-using-the-splunk-mcp-server)
+- [Pricing](https://www.splunk.com/en_us/products/pricing/observability.html)
+- [Release notes](https://help.splunk.com/en/splunk-observability-cloud/release-notes)
+- [Status](https://status.signalfx.com)
+- [Trust center](https://customertrust.splunk.com/)
+- [Security policy](https://advisory.splunk.com/report)
 - [ParentCompany](https://apis.io/providers/splunk/)
 - [GitHubOrganization](https://github.com/splunk)
-- [GitHubOrganization](https://github.com/CiscoDevNet)
+- [GitHubOrganization](https://github.com/signalfx)
 
 All URLs above returned HTTP 200 when probed on 2026-08-19.

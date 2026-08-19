@@ -1,0 +1,289 @@
+openapi: 3.0.3
+info:
+  title: Splunk Observability Cloud — Retrieve events V1
+  version: 3.3.0
+  description: 'API for retrieving custom events.
+
+    Note: This API is deprecated. Use the retrieve events V2 API /v2/event instead.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference
+      pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's.
+      Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset
+      path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v1
+  description: Custom event retrieval API endpoint URL (DEPRECATED)
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.
+paths:
+  /event:
+    get:
+      summary: Retrieve Custom Events Using Query
+      description: 'This API is deprecated. Use the Event Retrieval API /v2/event instead.
+
+        Retrieves one or more custom events from Splunk Observability Cloud, based on
+
+        query parameters you specify:
+
+
+        The query query parameter specifies name- and value-based
+
+        search criteria.
+
+        The time query parameters specify a time window from which
+
+        to retrieve data points
+
+        The offset parameter specifies the point in the query results at
+
+        which the API should start sending event data.
+
+        The limit parameter specifies the number of results to send.
+
+
+        The API combines the query results and the time window with a
+
+        logical AND. The result set contains custom events that match
+
+        the query parameter criteria and have a timestamp that''s within the
+
+        window specified by the time query parameters. From the result set,
+
+        the API returns a limit number custom events starting at the offset
+
+        in the result set.
+
+        The order_by parameter controls the order of the results you receive.
+
+        If you don''t specify any query parameters, the API sends you all of
+
+        the custom events it has for your organization, in an indeterminate
+
+        order.
+
+        This API doesn''t take a request body.
+
+        Note: Splunk Observability Cloud returns a maximum of 10,000 events, even if your organization contains more than
+        10,000. To learn more, see the
+
+        Considerations for retrieve operations section in the developer guide.'
+      parameters:
+      - name: query
+        in: query
+        description: 'Search criteria that specifies the custom events that you want the
+
+          API to return. You can search for any of the event properties.
+
+          Search criteria have the following rules:
+
+
+          To search for specific values of a dimension or custom property, specify
+
+          <name>:<value>. If <value> contains
+
+          non-alphanumeric characters, encode the non-alphanumeric characters and surround the value with
+
+          double quotes. For example, the region custom property value US East must be passed in the parameter as region:"US%20East".
+
+
+          To search for names or values using wildcards, use * as the
+
+          wildcard character. For example, to search for all values of the
+
+          region dimension, use region:*.
+
+
+          A single property name and value (or wildcards) make up a
+
+          predicate that implicitly returns a boolean.
+
+
+          Join predicates with the NOT, AND, and OR boolean operators.
+
+
+          Use parentheses ''('' and '')'' to change the evaluation order.
+
+          For example, to retrieve all custom events that have an eventType
+
+          prefixed with myCompany and have the dimension region:emea, use
+
+          `query="eventType:myCompany* AND region:emea".'
+        schema:
+          type: string
+      - name: from
+        in: query
+        description: 'Start of the time window from which the API should retrieve custom
+
+          events. Specify the value in *nix time in milliseconds, and remember to
+
+          correct for your time zone.
+
+          If the value is negative, the API interprets it as an offset before
+
+          the current server time (UTC).
+
+          If you specify from but not to, the time window extends to the
+
+          current server time.'
+        schema:
+          type: integer
+          format: int64
+      - name: to
+        in: query
+        description: 'End of the time window from which the API should retrieve custom
+
+          events. Specify the value in *nix time in milliseconds and remember to
+
+          correct for your time zone.
+
+          If the value is negative, the API interprets it as an offset before
+
+          the current server time (UTC).
+
+          If you specify to but not from, the time window extends from the
+
+          earliest event to the value of to.'
+        schema:
+          type: integer
+          format: int64
+      - name: order_by
+        in: query
+        description: 'The field on which the API should sort the query results. The value
+
+          can be any custom event property, including metadata
+
+          Prepend a - character to the property name to sort in descending order. If you want to apply order_by to non-custom
+          property fields like timestamp, prepend the field with sf_. For example: order_by=-sf_timestamp.'
+        schema:
+          type: string
+      - name: offset
+        in: query
+        description: 'The index in the query result set at which the API should start
+
+          sending results to you. For example, 0 is first result in the set, and
+
+          10 is the 11th result.'
+        schema:
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: 'The number of custom events to return. If you specify -1, the API
+
+          returns 1000 results. The value of limit is an upper boundary on
+
+          the number of results; the API may return less depending on the
+
+          other query parameters.'
+        schema:
+          type: integer
+          format: int32
+      - name: X-SF-Token
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                  - eventType
+                  properties:
+                    category:
+                      type: string
+                      enum:
+                      - USER_DEFINED
+                      - ALERT
+                      - AUDIT
+                      - JOB
+                      - COLLECTED
+                      - SERVICE_DISCOVERY
+                      - EXCEPTION
+                      description: 'A category that describes the custom event, in the
+
+                        form of one of the allowed enumerated types:
+
+
+                        USER_DEFINED: The default for custom events
+
+                        ALERT: Used by Splunk Observability Cloud to mark an event generated by
+
+                        a detector.
+
+                        AUDIT: Used by third-party integrations
+
+                        JOB: Event generated by an Splunk Observability Cloud or third-party
+
+                        background job
+
+                        COLLECTD: Generated by the Splunk Observability Cloud CollectD integration
+
+                        SERVICE_DISCOVERY: Generated by third-party integrations
+
+                        EXCEPTION: A software exception occurred'
+                    eventType:
+                      type: string
+                      description: 'A name for the custom event. Use this name to find the
+
+                        event in other API calls or in the UI.'
+                    dimensions:
+                      type: object
+                      description: 'A list of key-value pairs that specify dimension names
+
+                        and values to associate with the event. Splunk Observability Cloud assumes
+
+                        that each value of eventType you send is associated with
+
+                        a specific set of dimension names and values.'
+                    properties:
+                      type: object
+                      description: 'A list of key-value pairs that specify properties of the
+
+                        specified event.'
+                    timestamp:
+                      type: integer
+                      format: int64
+                      readOnly: true
+                      example: 1554672630000
+                      description: The date and time of the event in *nix time in milliseconds
+                  title: CustomEventResponseObject
+                  description: Specifies a single custom event
+              examples:
+                example:
+                  value:
+                  - category: USER_DEFINED
+                    eventType: string
+                    timestamp: 1554672630000
+      security:
+      - SessionToken: []
+      tags:
+      - Retrieve events V1

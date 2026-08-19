@@ -1,0 +1,35 @@
+generated: '2026-08-19'
+method: probed
+source: live DNS/TLS/HTTP probes of apis.yml + OpenAPI hosts
+hosts:
+- host: dev.splunk.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Jan 19 23:59:59 2027 GMT
+  hsts: true
+  hsts_max_age: 31536000
+- host: www.splunk.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Jan  8 23:59:59 2027 GMT
+  hsts: true
+  hsts_max_age: 31557600
+- host: api.us0.signalfx.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Sep 27 23:59:59 2026 GMT
+  hsts: true
+  hsts_max_age: 7776000
+domains:
+- domain: splunk.com
+  dnssec: false
+  caa: []
+  spf: true
+  dmarc: true
+  dmarc_policy: reject
+- domain: signalfx.com
+  dnssec: true
+  caa: []
+  spf: true
+  dmarc: true
+  dmarc_policy: quarantine

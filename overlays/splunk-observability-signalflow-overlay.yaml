@@ -1,0 +1,32 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for Splunk Observability Cloud — SignalFlow
+  version: 1.0.0
+extends: openapi/splunk-observability-signalflow-openapi.yml
+actions:
+- target: $.info
+  update:
+    x-apievangelist-profile: https://apis.io/providers/splunk-observability/
+    x-apievangelist-enriched: '2026-08-19'
+    x-apievangelist-operations: 6
+    x-apievangelist-contract-origin: Reconstructed from the parsedSpec payload embedded in https://dev.splunk.com/observability/reference/api/signalflow/latest/
+      — Splunk publishes no downloadable OpenAPI file.
+- target: $.info
+  update:
+    x-apievangelist-conventions: conventions/splunk-observability-conventions.yml
+    x-apievangelist-errors: errors/splunk-observability-problem-types.yml
+    x-apievangelist-rate-limits: rate-limits/splunk-observability-rate-limits.yml
+    x-apievangelist-authentication: authentication/splunk-observability-authentication.yml
+- target: $.info
+  update:
+    x-apievangelist-idempotency:
+      supported: false
+      note: No Idempotency-Key contract. Retried POSTs create duplicate objects; prefer PUT /{id}.
+    x-apievangelist-rate-limit-signal:
+      headers: []
+      status: 429
+      note: No X-RateLimit-*/RateLimit-*/Retry-After headers are published; 429 arrives with no budget
+        signal.
+- target: $.servers.*
+  update:
+    x-apievangelist-realm-note: The realm is part of the hostname. Omitting it is documented as us0.

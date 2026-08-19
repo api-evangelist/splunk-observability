@@ -1,0 +1,700 @@
+openapi: 3.0.3
+info:
+  title: Splunk Observability Cloud — Splunk Observability Cloud Audit Events
+  version: 2.0.0
+  description: 'The Audit Events API provides programmatic access to your organization''s audit trail,
+
+    enabling you to retrieve, filter, and analyze system activities and user actions within
+
+    Splunk Observability Cloud.
+
+    Supported Event Types
+
+
+    Audit events - Gateway-level audit logs capturing API calls, DetectorLog and SessionLog.
+
+    Customer Audit Events - Configuration changes to dashboards, detectors, etc.
+
+
+    Audit events are organized into two categories: AUDIT and CUSTOMER_AUDIT. Each category contains multiple event types,
+    and each event type defines its own set of properties.
+
+    When querying audit events, you can filter by any property defined for that event type. Following are examples of event
+    types, their categories, and lists of their properties. You can filter any of the event types by any of the fields listed
+    as their properties.
+
+    The event type HttpRequest is in the AUDIT category and supports the following filterable properties:
+
+
+    sf_actorId
+
+    sf_email
+
+    sf_requestUri
+
+    sf_resourceType
+
+    sf_organizationId
+
+    sf_sessionId
+
+    sf_responseStatus
+
+    sf_clientIp
+
+    sf_actorType
+
+    sf_resourceId
+
+    sf_requestMethod
+
+
+    You can use any of the fields in the preceding list as query parameters to filter HttpRequest audit events.
+
+    The event type DetectorLog is in the AUDIT category and supports the following filterable properties:
+
+
+    jobId
+
+    detectorId
+
+    action
+
+    principalId
+
+    orgId
+
+
+    You can use any of the fields in the preceding list as query parameters to filter DetectorLogs audit events.
+
+    The event type SessionLog is in the AUDIT category and supports the following filterable properties:
+
+
+    action
+
+    authMethod
+
+    userId
+
+    email
+
+
+    You can use any of the fields in the preceding list as query parameters to filter SessionLog audit events.
+
+    The event type INTEGRATION is in the CUSTOMER_AUDIT category and supports the following filterable properties:
+
+
+    principal
+
+    principalName
+
+    newResource
+
+    operation
+
+    srn
+
+
+    You can use any of the fields in the preceding list as query parameters to filter INTEGRATION audit events.
+
+    Authentication
+
+    User require READ_AUDIT_EVENTS capability to access /v2/audit/events endpoint.
+
+    Rate Limiting
+
+    API requests are rate-limited per user and per organization. Exceeding limits
+
+    returns a 429 response with a Retry-After header.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference
+      pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's.
+      Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset
+      path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.us0.signalfx.com
+  description: US0 Realm
+security:
+- SessionToken: []
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.
+paths:
+  /v2/audit/events:
+    get:
+      summary: getAuditEvents
+      description: 'Retrieves audit events for your organization with optional filtering, pagination, and sorting.
+
+        Performance Considerations:
+
+
+        Larger time ranges may take longer to process
+
+        Use specific filters to reduce result set size
+
+        Consider using sortBy=timestamp to get most recent events first
+
+        Use - infront of sortBy filter to reverse the order. example sortBy=-timestamp
+
+
+        Best Practices:
+
+
+        Always specify startTime and endTime for optimal performance
+
+        Use limit to control response size'
+      parameters:
+      - name: sf_eventCategory
+        in: query
+        schema:
+          type: string
+          enum:
+          - AUDIT
+          - CUSTOMER_AUDIT
+      - name: sf_eventType
+        in: query
+        description: 'Filter by event type. The valid values depend on the event category:
+
+          For AUDIT events:
+
+
+          HttpRequest: HTTP API calls
+
+          SessionLog: Authentication/session events
+
+          DetectorLog: Generated during detector job events (start/stop job, start/stop error)
+
+
+          For CUSTOMER_AUDIT events:
+
+
+          DASHBOARD: Dashboard-related events
+
+          DETECTOR: Detector-related events
+
+          DASHBOARD_GROUP: Dashboard group events
+
+          ORG_MEMBER: Members of organization
+
+          INTEGRATION: Name of integration
+
+          SLO: Service Level Objective'
+        schema:
+          type: string
+          example: HttpRequest
+      - name: startTime
+        in: query
+        description: 'Start of time range (Unix timestamp in milliseconds). Defaults to 7 days ago if not specified.
+
+          Example: For December 5, 2024 00:00:00 UTC, use 1733356800000'
+        schema:
+          type: integer
+          format: int64
+          minimum: 0
+      - name: endTime
+        in: query
+        description: 'End of time range (Unix timestamp in milliseconds). Defaults to current time if not specified.
+
+          Example: For December 6, 2024 00:00:00 UTC, use 1733443200000'
+        schema:
+          type: integer
+          format: int64
+          minimum: 0
+      - name: offset
+        in: query
+        description: 'Number of results to skip for pagination. Used with limit for paging through large result sets.
+
+          Constraint: The sum of offset + limit must not exceed 10,000.
+
+          Examples:
+
+
+          ✓ offset=0, limit=1000 (total: 1,000)
+
+          ✓ offset=5000, limit=5000 (total: 10,000)
+
+          ✗ offset=9000, limit=2000 (total: 11,000 - rejected)'
+        schema:
+          type: integer
+          minimum: 0
+          maximum: 10000
+          default: 0
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 10000
+          default: 1000
+      - name: sortBy
+        in: query
+        description: 'Field to sort results by. Defaults to timestamp in ascending order (oldest first).
+
+          Only fields that exist in all event types are allowed to prevent query failures during
+
+          multi-index searches. Use -prefix to reverse/descending the order'
+        schema:
+          type: string
+          default: timestamp
+          enum:
+          - timestamp
+          - sf_eventCategory
+          - sf_eventType
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - count
+                - offset
+                - limit
+                - results
+                properties:
+                  count:
+                    type: integer
+                    example: 42
+                    description: Number of events returned in this response
+                  offset:
+                    type: integer
+                    example: 0
+                    description: Pagination offset used for this request
+                  limit:
+                    type: integer
+                    example: 1000
+                    description: Maximum number of results requested
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                      - id
+                      - timestamp
+                      - metadata
+                      - properties
+                      properties:
+                        id:
+                          type: string
+                          example: E-xyz123abc
+                          description: Unique identifier for the event
+                        tsId:
+                          type: string
+                          example: E-abc456def
+                          description: Time series identifier
+                        timestamp:
+                          type: integer
+                          format: int64
+                          example: 1733443200000
+                          description: Event timestamp in milliseconds since Unix epoch
+                        metadata:
+                          type: object
+                          required:
+                          - sf_eventCategory
+                          - sf_eventType
+                          properties:
+                            sf_eventCategory:
+                              type: string
+                              enum:
+                              - AUDIT
+                              - CUSTOMER_AUDIT
+                              description: Event category
+                            sf_eventType:
+                              type: string
+                              description: Event type (varies by category)
+                          additionalProperties: true
+                          example:
+                            sf_eventCategory: AUDIT
+                            sf_eventType: HttpRequest
+                          description: Event metadata containing category and type information
+                        properties:
+                          type: object
+                          additionalProperties: true
+                          example:
+                            sf_userId: E-user123
+                            sf_email: user@example.com
+                            sf_requestMethod: POST
+                            sf_requestUri: /v2/detector
+                            sf_responseStatus: 200
+                          description: Event-specific properties and details
+                      title: AuditEvent
+                    description: Array of audit event objects
+                title: AuditEventsResponse
+              examples:
+                httpRequestEvents:
+                  summary: HTTP Request Audit Events
+                  value:
+                    count: 2
+                    offset: 0
+                    limit: 1000
+                    results:
+                    - id: E-xyz123abc
+                      tsId: E-abc456def
+                      timestamp: 1733443200000
+                      metadata:
+                        sf_eventCategory: AUDIT
+                        sf_eventType: HttpRequest
+                      properties:
+                        sf_userId: E-user123
+                        sf_email: user@example.com
+                        sf_requestMethod: POST
+                        sf_requestUri: /v2/detector
+                        sf_responseStatus: 200
+                        sf_clientIp: 203.0.113.42
+                        sf_organizationId: E-org123
+                    - id: E-def789ghi
+                      tsId: E-ghi012jkl
+                      timestamp: 1733442800000
+                      metadata:
+                        sf_eventCategory: AUDIT
+                        sf_eventType: HttpRequest
+                      properties:
+                        sf_userId: E-user456
+                        sf_email: admin@example.com
+                        sf_requestMethod: DELETE
+                        sf_requestUri: /v2/dashboard/DBxyz789
+                        sf_responseStatus: 204
+                        sf_clientIp: 198.51.100.10
+                        sf_organizationId: E-org123
+                customerAuditEvents:
+                  summary: Customer Audit Events (Configuration Changes)
+                  value:
+                    count: 1
+                    offset: 0
+                    limit: 1000
+                    results:
+                    - id: E-audit999
+                      tsId: E-ts999
+                      timestamp: 1733442500000
+                      metadata:
+                        sf_eventCategory: CUSTOMER_AUDIT
+                        sf_eventType: DASHBOARD
+                      properties:
+                        sf_operation: UPDATE
+                        sf_principal: user@example.com
+                        sf_resourceId: E-dash456
+                        sf_resourceType: DASHBOARD
+                        sf_resourceName: Production Monitoring Dashboard
+                        sf_organizationId: E-org123
+                emptyResults:
+                  summary: No Events Found
+                  value:
+                    count: 0
+                    offset: 0
+                    limit: 1000
+                    results: []
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - message
+                - code
+                properties:
+                  message:
+                    type: string
+                    example: 'Invalid query parameters: limit must not exceed 10000'
+                    description: Human-readable error message
+                  code:
+                    type: integer
+                    example: 400
+                    description: HTTP status code
+                  timestamp:
+                    type: integer
+                    format: int64
+                    example: 1733443200000
+                    description: Error timestamp in milliseconds since Unix epoch
+                  details:
+                    type: object
+                    additionalProperties: true
+                    example:
+                      field: limit
+                      provided: 15000
+                      maximum: 10000
+                    description: Additional error details (optional)
+                title: ErrorResponse
+              examples:
+                invalidTimeRange:
+                  summary: Invalid Time Range
+                  value:
+                    message: 'Invalid query parameters: startTime must be less than endTime'
+                    code: 400
+                limitExceeded:
+                  summary: Limit Exceeded
+                  value:
+                    message: 'Invalid query parameters: limit must not exceed 10000'
+                    code: 400
+                offsetExceeded:
+                  summary: Offset Exceeded
+                  value:
+                    message: 'Invalid query parameters: offset must not exceed 10000'
+                    code: 400
+                offsetPlusLimitExceeded:
+                  summary: Offset + Limit Exceeds Maximum Result Window
+                  value:
+                    message: 'Invalid pagination: offset + limit (9000 + 2000 = 11000) exceeds maximum result window of 10000'
+                    code: 400
+                invalidSortBy:
+                  summary: Invalid sortBy Field
+                  value:
+                    message: 'Invalid query parameters: sortBy must be one of [timestamp, sf_eventCategory, sf_eventType]'
+                    code: 400
+                invalidEnumValue:
+                  summary: Invalid Enum Value
+                  value:
+                    message: 'Invalid query parameters: sf_eventCategory must be one of [AUDIT, CUSTOMER_AUDIT]'
+                    code: 400
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - message
+                - code
+                properties:
+                  message:
+                    type: string
+                    example: 'Invalid query parameters: limit must not exceed 10000'
+                    description: Human-readable error message
+                  code:
+                    type: integer
+                    example: 400
+                    description: HTTP status code
+                  timestamp:
+                    type: integer
+                    format: int64
+                    example: 1733443200000
+                    description: Error timestamp in milliseconds since Unix epoch
+                  details:
+                    type: object
+                    additionalProperties: true
+                    example:
+                      field: limit
+                      provided: 15000
+                      maximum: 10000
+                    description: Additional error details (optional)
+                title: ErrorResponse
+              examples:
+                missingToken:
+                  summary: Missing Authorization Header
+                  value:
+                    message: Missing or invalid authentication token
+                    code: 401
+                expiredToken:
+                  summary: Expired JWT Token
+                  value:
+                    message: JWT token has expired
+                    code: 401
+        '403':
+          description: HTTP 403 response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - message
+                - code
+                properties:
+                  message:
+                    type: string
+                    example: 'Invalid query parameters: limit must not exceed 10000'
+                    description: Human-readable error message
+                  code:
+                    type: integer
+                    example: 400
+                    description: HTTP status code
+                  timestamp:
+                    type: integer
+                    format: int64
+                    example: 1733443200000
+                    description: Error timestamp in milliseconds since Unix epoch
+                  details:
+                    type: object
+                    additionalProperties: true
+                    example:
+                      field: limit
+                      provided: 15000
+                      maximum: 10000
+                    description: Additional error details (optional)
+                title: ErrorResponse
+              examples:
+                default:
+                  value:
+                    message: 'Access denied: User does not have READ_AUDIT_EVENTS capability'
+                    code: 403
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - message
+                - code
+                properties:
+                  message:
+                    type: string
+                    example: 'Invalid query parameters: limit must not exceed 10000'
+                    description: Human-readable error message
+                  code:
+                    type: integer
+                    example: 400
+                    description: HTTP status code
+                  timestamp:
+                    type: integer
+                    format: int64
+                    example: 1733443200000
+                    description: Error timestamp in milliseconds since Unix epoch
+                  details:
+                    type: object
+                    additionalProperties: true
+                    example:
+                      field: limit
+                      provided: 15000
+                      maximum: 10000
+                    description: Additional error details (optional)
+                title: ErrorResponse
+              examples:
+                default:
+                  value:
+                    message: Feature not available
+                    code: 404
+        '429':
+          description: HTTP 429 response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - message
+                - code
+                properties:
+                  message:
+                    type: string
+                    example: 'Invalid query parameters: limit must not exceed 10000'
+                    description: Human-readable error message
+                  code:
+                    type: integer
+                    example: 400
+                    description: HTTP status code
+                  timestamp:
+                    type: integer
+                    format: int64
+                    example: 1733443200000
+                    description: Error timestamp in milliseconds since Unix epoch
+                  details:
+                    type: object
+                    additionalProperties: true
+                    example:
+                      field: limit
+                      provided: 15000
+                      maximum: 10000
+                    description: Additional error details (optional)
+                title: ErrorResponse
+              examples:
+                default:
+                  value:
+                    message: Rate limit exceeded. Please try again later.
+                    code: 429
+        '500':
+          description: HTTP 500 response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - message
+                - code
+                properties:
+                  message:
+                    type: string
+                    example: 'Invalid query parameters: limit must not exceed 10000'
+                    description: Human-readable error message
+                  code:
+                    type: integer
+                    example: 400
+                    description: HTTP status code
+                  timestamp:
+                    type: integer
+                    format: int64
+                    example: 1733443200000
+                    description: Error timestamp in milliseconds since Unix epoch
+                  details:
+                    type: object
+                    additionalProperties: true
+                    example:
+                      field: limit
+                      provided: 15000
+                      maximum: 10000
+                    description: Additional error details (optional)
+                title: ErrorResponse
+              examples:
+                esFailure:
+                  summary: EventStore Connection Failure
+                  value:
+                    message: Failed to retrieve audit events from EventStore
+                    code: 500
+                queryTimeout:
+                  summary: Query Timeout
+                  value:
+                    message: Query execution timed out. Try reducing the time range or adding more filters.
+                    code: 500
+        '503':
+          description: HTTP 503 response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - message
+                - code
+                properties:
+                  message:
+                    type: string
+                    example: 'Invalid query parameters: limit must not exceed 10000'
+                    description: Human-readable error message
+                  code:
+                    type: integer
+                    example: 400
+                    description: HTTP status code
+                  timestamp:
+                    type: integer
+                    format: int64
+                    example: 1733443200000
+                    description: Error timestamp in milliseconds since Unix epoch
+                  details:
+                    type: object
+                    additionalProperties: true
+                    example:
+                      field: limit
+                      provided: 15000
+                      maximum: 10000
+                    description: Additional error details (optional)
+                title: ErrorResponse
+              examples:
+                default:
+                  value:
+                    message: Service temporarily unavailable due to downstream issues. Please try again later.
+                    code: 503
+      tags:
+      - Splunk Observability Cloud Audit Events

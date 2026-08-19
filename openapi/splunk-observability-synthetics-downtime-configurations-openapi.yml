@@ -1,0 +1,1440 @@
+openapi: 3.0.3
+info:
+  title: Splunk Observability Cloud — Synthetics downtime configurations
+  version: 1.0.1
+  description: 'API for creating, updating, ending, and deleting downtime configurations.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You need the Splunk Observability Cloud admin role to use the POST /downtime_configurations, PUT /downtime_configurations/{id},
+    DELETE /downtime_configurations/{id}, and PUT /downtime_configurations/{id}/end operations.
+
+    You need the Splunk Observability Cloud admin, power, or read_only role to use the GET /downtime_configurations and GET
+    /downtime_configurations/{id} operations.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference
+      pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's.
+      Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset
+      path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2/synthetics
+  description: Endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.
+paths:
+  /downtime_configurations:
+    get:
+      summary: getDowntimeConfigurations
+      description: 'Returns a list of downtime configurations.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin, power, or read_only role.'
+      parameters:
+      - name: orderby
+        in: query
+        description: 'Sorts downtime configurations by the specified value. Possible values:
+
+
+          id: Downtime configuration ID
+
+          name: Downtime configuration name
+
+          description: Downtime configuration description
+
+          rule: Downtime configuration rule
+
+          start_time: Downtime configurations start time
+
+          end_time: Downtime configurations end time
+
+          status: Status of the downtime configuration
+
+          test_count: Number of tests associated with the downtime configuration
+
+          created_at: Date and time when downtime configurations were created
+
+          updated_at: Date and time when downtime configurations were updated
+
+          recurrence: Type of recurrence the downtime configuration has'
+        schema:
+          type: string
+      - name: search
+        in: query
+        description: Returns a list of downtime configurations that have a name or description that match the search value.
+        schema:
+          type: string
+      - name: statuses
+        in: query
+        description: 'Returns downtime configurations that match the given status. Possible values:
+
+
+          active: Downtime configurations are active
+
+          completed: Downtime configurations have completed
+
+          scheduled: Downtime configurations are scheduled'
+        schema:
+          type: array
+          items:
+            type: string
+      - name: rules
+        in: query
+        description: 'Returns only downtime configurations based off of the rule. Possible values:
+
+
+          augment_data: Rule for downtime configurations is augment_data
+
+          pause_tests: Rule for downtime configurations is pause_tests'
+        schema:
+          type: array
+          items:
+            type: string
+      - name: recurrences
+        in: query
+        description: 'Returns only downtime configurations based off of the type of recurrence. Possible values:
+
+
+          daily: Recurrence type for downtime configurations is daily
+
+          weekly: Recurrence type for downtime configurations is weekly
+
+          weekdays: Recurrence type for downtime configurations is weekdays
+
+          weekends: Recurrence type for downtime configurations is weekends
+
+          custom: Recurrence type for downtime configurations is custom'
+        schema:
+          type: array
+          items:
+            type: string
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  downtimeConfigurations:
+                    type: array
+                    items:
+                      type: object
+                      title: DowntimeConfiguration
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          example: 1
+                          description: The unique ID of the downtime configuration.
+                        name:
+                          type: string
+                          example: foo
+                          title: Name
+                          description: The name of your downtime configuration.
+                        description:
+                          type: string
+                          example: My downtime configuration
+                          title: Description
+                          description: The description of your downtime configuration.
+                        rule:
+                          type: string
+                          example: pause_tests
+                          title: Rule
+                          description: 'The behavior of your tests when this downtime configuration is active. This can be
+                            pause_tests or augment_data.
+
+
+                            pause_tests: Tests will not run while the downtime configuration is active.
+
+                            augment_data: Tests continue to run when the downtime configuration is active, but the data collected
+                            includes an additional dimension (under:maintenance:true) to differentiate from the normal test
+                            data.'
+                        startTime:
+                          type: string
+                          example: '2024-05-03T16:00:00.000Z'
+                          title: StartTime
+                          description: Timestamp of when you want the downtime configuration to start, in UTC.
+                        endTime:
+                          type: string
+                          example: '2024-05-10T16:00:00.000Z'
+                          title: EndTime
+                          description: Timestamp of when you want the downtime configuration to end, in UTC.
+                        status:
+                          type: string
+                          example: active
+                          title: Status
+                          description: The status of your downtime configuration. Can be scheduled, active, or completed.
+                        createdAt:
+                          type: string
+                          readOnly: true
+                          example: '2024-05-01T14:35:37.801Z'
+                          title: CreatedAt
+                          description: 'Timestamp of when the downtime configuration was created, in UTC.
+
+                            This field is read_only, and the system always sets the value.'
+                        updatedAt:
+                          type: string
+                          readOnly: true
+                          example: '2024-05-01T14:35:37.801Z'
+                          title: UpdatedAt
+                          description: 'Timestamp of when the downtime configuration was last updated, in UTC.
+
+                            This field is read_only, and the system always sets the value.'
+                        testsUpdatedAt:
+                          type: string
+                          readOnly: true
+                          example: '2024-05-01T14:35:37.801Z'
+                          title: TestsUpdatedAt
+                          description: 'Timestamp of when the set of tests belonging to the downtime configuration was last
+                            updated, in UTC. This value can change if a test belonging to a downtime configuration is deleted.
+
+                            This field is read_only, and the system always sets the value.'
+                        testCount:
+                          type: integer
+                          readOnly: true
+                          example: 10
+                          title: TestCount
+                          description: 'The number of tests belonging to the downtime configuration.
+
+                            This field is read_only, and the system always sets the value.'
+                        timezone:
+                          type: string
+                          example: America/New_York
+                          title: Timezone
+                          description: IANA timezone in which you want your downtime configuration to be set at. This is required
+                            for recurring downtime configurations.
+                        recurrence:
+                          type: object
+                          properties:
+                            repeats:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  example: custom
+                                  description: 'The frequency in which you would like your downtime configuration to repeat.
+                                    This can be one of the following:
+
+
+                                    daily: Every day at the same time as the originally specified start time.
+
+                                    weekly: Every week at the same time as the originally specified start time.
+
+                                    weekdays: Mondays through Fridays at the same time as the originally specified start time.
+
+                                    weekends: Saturdays and Sundays at the same time as the originally specified start time.
+
+                                    custom: You can specify how frequently you would like your downtime configuration to repeat
+                                    by the number of days or weeks.'
+                                custom_value:
+                                  type: integer
+                                  example: 3
+                                  description: This field is only required if the recurrence type is custom.
+                                custom_frequency:
+                                  type: string
+                                  example: days
+                                  description: 'This field is only required if the recurrence type is custom. This can be
+                                    one of days or weeks
+
+
+                                    days: Every custom_value days at the same time as the originally specified start time.
+
+                                    weeks: Every custom_value weeks at the same time as the originally specified start time.'
+                            end:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  example: 'on'
+                                  description: 'How you would like your recurring downtime configuration to end. You can specify
+                                    the number of times it runs or specify an end date. Can be one of after or on.
+
+
+                                    after: Here you can specify the number of times you want your downtime configuration to
+                                    run.
+
+                                    on: Here you can specify the date in which you want your downtime configuration to end.'
+                                value:
+                                  type: string
+                                  example: '2025-12-31'
+                          title: Recurrence
+                          description: The id of the test belonging to the downtime configuration.
+              examples:
+                example:
+                  value:
+                    downtimeConfigurations:
+                    - createdAt: '2024-05-01T14:35:37.801Z'
+                      description: My downtime configuration
+                      endTime: '2024-05-10T16:00:00.000Z'
+                      id: 1
+                      name: foo
+                      recurrence:
+                        end:
+                          type: 'on'
+                          value: '2025-12-31'
+                        repeats:
+                          custom_frequency: days
+                          custom_value: 3
+                          type: custom
+                      rule: pause_tests
+                      startTime: '2024-05-03T16:00:00.000Z'
+                      status: active
+                      testCount: 10
+                      testsUpdatedAt: '2024-05-01T14:35:37.801Z'
+                      timezone: America/New_York
+                      updatedAt: '2024-05-01T14:35:37.801Z'
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics downtime configurations
+    post:
+      summary: createDowntimeConfiguration
+      description: 'Creates a new downtime configuration, based on the specifications in the request body.
+
+        Requirements
+
+        You must have an admin API session token to use this endpoint. To learn more about API tokens, see https://quickdraw.splunk.com/redirect/?product=Observability&location=api-access-tokens&version=current.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                downtimeConfiguration:
+                  properties:
+                    name:
+                      type: string
+                      example: foo
+                      title: Name
+                      description: The name of your downtime configuration.
+                    description:
+                      type: string
+                      example: My downtime configuration
+                      title: Description
+                      description: The description of your downtime configuration.
+                    rule:
+                      type: string
+                      example: pause_tests
+                      title: Rule
+                      description: 'The behavior of your tests when this downtime configuration is active. This can be pause_tests
+                        or augment_data.
+
+
+                        pause_tests: Tests will not run while the downtime configuration is active.
+
+                        augment_data: Tests continue to run when the downtime configuration is active, but the data collected
+                        includes an additional dimension (under:maintenance:true) to differentiate from the normal test data.'
+                    testIds:
+                      type: array
+                      items:
+                        type: integer
+                        example: 123
+                        title: TestId
+                        description: The id of the test belonging to the downtime configuration.
+                    startTime:
+                      type: string
+                      example: '2024-05-03T16:00:00.000Z'
+                      title: StartTimePost
+                      description: 'Timestamp of when you want the downtime configuration to start, in UTC.
+
+
+                        startTime cannot be set in the past.
+
+                        startTime cannot be set more than 1 year in the future.'
+                    endTime:
+                      type: string
+                      example: '2024-05-10T16:00:00.000Z'
+                      title: EndTimePost
+                      description: 'Timestamp of when you want the downtime configuration to end, in UTC.
+
+
+                        endTime must be at least 15 minutes after the startTime, unless you are cancelling an active downtime
+                        configuration.
+
+                        endTime must be no more than 1 year after the startTime.'
+                    timezone:
+                      type: string
+                      example: America/New_York
+                      title: Timezone
+                      description: IANA timezone in which you want your downtime configuration to be set at. This is required
+                        for recurring downtime configurations.
+                    recurrence:
+                      type: object
+                      properties:
+                        repeats:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              example: custom
+                              description: 'The frequency in which you would like your downtime configuration to repeat. This
+                                can be one of the following:
+
+
+                                daily: Every day at the same time as the originally specified start time.
+
+                                weekly: Every week at the same time as the originally specified start time.
+
+                                weekdays: Mondays through Fridays at the same time as the originally specified start time.
+
+                                weekends: Saturdays and Sundays at the same time as the originally specified start time.
+
+                                custom: You can specify how frequently you would like your downtime configuration to repeat
+                                by the number of days or weeks.'
+                            custom_value:
+                              type: integer
+                              example: 3
+                              description: This field is only required if the recurrence type is custom.
+                            custom_frequency:
+                              type: string
+                              example: days
+                              description: 'This field is only required if the recurrence type is custom. This can be one
+                                of days or weeks
+
+
+                                days: Every custom_value days at the same time as the originally specified start time.
+
+                                weeks: Every custom_value weeks at the same time as the originally specified start time.'
+                        end:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              example: 'on'
+                              description: 'How you would like your recurring downtime configuration to end. You can specify
+                                the number of times it runs or specify an end date. Can be one of after or on.
+
+
+                                after: Here you can specify the number of times you want your downtime configuration to run.
+
+                                on: Here you can specify the date in which you want your downtime configuration to end.'
+                            value:
+                              type: string
+                              example: '2025-12-31'
+                      title: Recurrence
+                      description: The id of the test belonging to the downtime configuration.
+                  required:
+                  - name
+                  - rule
+                  - testIds
+                  - startTime
+                  - endTime
+                  type: object
+              title: RequestBody
+              description: 'The request body sent by the following method/endpoint operations:
+
+
+                POST /downtime_configurations'
+            examples:
+              example:
+                value:
+                  downtimeConfiguration:
+                    description: My downtime configuration
+                    endTime: '2024-05-10T16:00:00.000Z'
+                    name: foo
+                    recurrence:
+                      end:
+                        type: 'on'
+                        value: '2025-12-31'
+                      repeats:
+                        custom_frequency: days
+                        custom_value: 3
+                        type: custom
+                    rule: pause_tests
+                    startTime: '2024-05-03T16:00:00.000Z'
+                    testIds:
+                    - 123
+                    timezone: America/New_York
+      responses:
+        '201':
+          description: HTTP 201 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  downtimeConfiguration:
+                    type: array
+                    items:
+                      type: object
+                      title: DowntimeConfiguration
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          example: 1
+                          description: The unique ID of the downtime configuration.
+                        name:
+                          type: string
+                          example: foo
+                          title: Name
+                          description: The name of your downtime configuration.
+                        description:
+                          type: string
+                          example: My downtime configuration
+                          title: Description
+                          description: The description of your downtime configuration.
+                        rule:
+                          type: string
+                          example: pause_tests
+                          title: Rule
+                          description: 'The behavior of your tests when this downtime configuration is active. This can be
+                            pause_tests or augment_data.
+
+
+                            pause_tests: Tests will not run while the downtime configuration is active.
+
+                            augment_data: Tests continue to run when the downtime configuration is active, but the data collected
+                            includes an additional dimension (under:maintenance:true) to differentiate from the normal test
+                            data.'
+                        startTime:
+                          type: string
+                          example: '2024-05-03T16:00:00.000Z'
+                          title: StartTime
+                          description: Timestamp of when you want the downtime configuration to start, in UTC.
+                        endTime:
+                          type: string
+                          example: '2024-05-10T16:00:00.000Z'
+                          title: EndTime
+                          description: Timestamp of when you want the downtime configuration to end, in UTC.
+                        status:
+                          type: string
+                          example: active
+                          title: Status
+                          description: The status of your downtime configuration. Can be scheduled, active, or completed.
+                        createdAt:
+                          type: string
+                          readOnly: true
+                          example: '2024-05-01T14:35:37.801Z'
+                          title: CreatedAt
+                          description: 'Timestamp of when the downtime configuration was created, in UTC.
+
+                            This field is read_only, and the system always sets the value.'
+                        updatedAt:
+                          type: string
+                          readOnly: true
+                          example: '2024-05-01T14:35:37.801Z'
+                          title: UpdatedAt
+                          description: 'Timestamp of when the downtime configuration was last updated, in UTC.
+
+                            This field is read_only, and the system always sets the value.'
+                        testsUpdatedAt:
+                          type: string
+                          readOnly: true
+                          example: '2024-05-01T14:35:37.801Z'
+                          title: TestsUpdatedAt
+                          description: 'Timestamp of when the set of tests belonging to the downtime configuration was last
+                            updated, in UTC. This value can change if a test belonging to a downtime configuration is deleted.
+
+                            This field is read_only, and the system always sets the value.'
+                        testCount:
+                          type: integer
+                          readOnly: true
+                          example: 10
+                          title: TestCount
+                          description: 'The number of tests belonging to the downtime configuration.
+
+                            This field is read_only, and the system always sets the value.'
+                        timezone:
+                          type: string
+                          example: America/New_York
+                          title: Timezone
+                          description: IANA timezone in which you want your downtime configuration to be set at. This is required
+                            for recurring downtime configurations.
+                        recurrence:
+                          type: object
+                          properties:
+                            repeats:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  example: custom
+                                  description: 'The frequency in which you would like your downtime configuration to repeat.
+                                    This can be one of the following:
+
+
+                                    daily: Every day at the same time as the originally specified start time.
+
+                                    weekly: Every week at the same time as the originally specified start time.
+
+                                    weekdays: Mondays through Fridays at the same time as the originally specified start time.
+
+                                    weekends: Saturdays and Sundays at the same time as the originally specified start time.
+
+                                    custom: You can specify how frequently you would like your downtime configuration to repeat
+                                    by the number of days or weeks.'
+                                custom_value:
+                                  type: integer
+                                  example: 3
+                                  description: This field is only required if the recurrence type is custom.
+                                custom_frequency:
+                                  type: string
+                                  example: days
+                                  description: 'This field is only required if the recurrence type is custom. This can be
+                                    one of days or weeks
+
+
+                                    days: Every custom_value days at the same time as the originally specified start time.
+
+                                    weeks: Every custom_value weeks at the same time as the originally specified start time.'
+                            end:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  example: 'on'
+                                  description: 'How you would like your recurring downtime configuration to end. You can specify
+                                    the number of times it runs or specify an end date. Can be one of after or on.
+
+
+                                    after: Here you can specify the number of times you want your downtime configuration to
+                                    run.
+
+                                    on: Here you can specify the date in which you want your downtime configuration to end.'
+                                value:
+                                  type: string
+                                  example: '2025-12-31'
+                          title: Recurrence
+                          description: The id of the test belonging to the downtime configuration.
+              examples:
+                example:
+                  value:
+                    downtimeConfiguration:
+                    - createdAt: '2024-05-01T14:35:37.801Z'
+                      description: My downtime configuration
+                      endTime: '2024-05-10T16:00:00.000Z'
+                      id: 1
+                      name: foo
+                      recurrence:
+                        end:
+                          type: 'on'
+                          value: '2025-12-31'
+                        repeats:
+                          custom_frequency: days
+                          custom_value: 3
+                          type: custom
+                      rule: pause_tests
+                      startTime: '2024-05-03T16:00:00.000Z'
+                      status: active
+                      testCount: 10
+                      testsUpdatedAt: '2024-05-01T14:35:37.801Z'
+                      timezone: America/New_York
+                      updatedAt: '2024-05-01T14:35:37.801Z'
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Could not create downtime configuration
+                  details:
+                    type: object
+                    properties:
+                      value:
+                        type: array
+                        items:
+                          type: string
+                          example: can't be blank
+                        description: 'This is a dynamic schema that consists of:
+
+                          "fieldName": ["reason"]'
+                type: object
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details:
+                      value:
+                      - can't be blank
+                    message: Could not create downtime configuration
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics downtime configurations
+  /downtime_configurations/{id}:
+    get:
+      summary: getSingleDowntimeConfiguration
+      description: 'Retrieves a single downtime configuration.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin, power, or read_only role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of a downtime configuration you want to retrieve
+        required: true
+        schema:
+          type: integer
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  downtimeConfiguration:
+                    type: array
+                    items:
+                      type: object
+                      title: DowntimeConfiguration
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          example: 1
+                          description: The unique ID of the downtime configuration.
+                        name:
+                          type: string
+                          example: foo
+                          title: Name
+                          description: The name of your downtime configuration.
+                        description:
+                          type: string
+                          example: My downtime configuration
+                          title: Description
+                          description: The description of your downtime configuration.
+                        rule:
+                          type: string
+                          example: pause_tests
+                          title: Rule
+                          description: 'The behavior of your tests when this downtime configuration is active. This can be
+                            pause_tests or augment_data.
+
+
+                            pause_tests: Tests will not run while the downtime configuration is active.
+
+                            augment_data: Tests continue to run when the downtime configuration is active, but the data collected
+                            includes an additional dimension (under:maintenance:true) to differentiate from the normal test
+                            data.'
+                        startTime:
+                          type: string
+                          example: '2024-05-03T16:00:00.000Z'
+                          title: StartTime
+                          description: Timestamp of when you want the downtime configuration to start, in UTC.
+                        endTime:
+                          type: string
+                          example: '2024-05-10T16:00:00.000Z'
+                          title: EndTime
+                          description: Timestamp of when you want the downtime configuration to end, in UTC.
+                        status:
+                          type: string
+                          example: active
+                          title: Status
+                          description: The status of your downtime configuration. Can be scheduled, active, or completed.
+                        createdAt:
+                          type: string
+                          readOnly: true
+                          example: '2024-05-01T14:35:37.801Z'
+                          title: CreatedAt
+                          description: 'Timestamp of when the downtime configuration was created, in UTC.
+
+                            This field is read_only, and the system always sets the value.'
+                        updatedAt:
+                          type: string
+                          readOnly: true
+                          example: '2024-05-01T14:35:37.801Z'
+                          title: UpdatedAt
+                          description: 'Timestamp of when the downtime configuration was last updated, in UTC.
+
+                            This field is read_only, and the system always sets the value.'
+                        testsUpdatedAt:
+                          type: string
+                          readOnly: true
+                          example: '2024-05-01T14:35:37.801Z'
+                          title: TestsUpdatedAt
+                          description: 'Timestamp of when the set of tests belonging to the downtime configuration was last
+                            updated, in UTC. This value can change if a test belonging to a downtime configuration is deleted.
+
+                            This field is read_only, and the system always sets the value.'
+                        testCount:
+                          type: integer
+                          readOnly: true
+                          example: 10
+                          title: TestCount
+                          description: 'The number of tests belonging to the downtime configuration.
+
+                            This field is read_only, and the system always sets the value.'
+                        timezone:
+                          type: string
+                          example: America/New_York
+                          title: Timezone
+                          description: IANA timezone in which you want your downtime configuration to be set at. This is required
+                            for recurring downtime configurations.
+                        recurrence:
+                          type: object
+                          properties:
+                            repeats:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  example: custom
+                                  description: 'The frequency in which you would like your downtime configuration to repeat.
+                                    This can be one of the following:
+
+
+                                    daily: Every day at the same time as the originally specified start time.
+
+                                    weekly: Every week at the same time as the originally specified start time.
+
+                                    weekdays: Mondays through Fridays at the same time as the originally specified start time.
+
+                                    weekends: Saturdays and Sundays at the same time as the originally specified start time.
+
+                                    custom: You can specify how frequently you would like your downtime configuration to repeat
+                                    by the number of days or weeks.'
+                                custom_value:
+                                  type: integer
+                                  example: 3
+                                  description: This field is only required if the recurrence type is custom.
+                                custom_frequency:
+                                  type: string
+                                  example: days
+                                  description: 'This field is only required if the recurrence type is custom. This can be
+                                    one of days or weeks
+
+
+                                    days: Every custom_value days at the same time as the originally specified start time.
+
+                                    weeks: Every custom_value weeks at the same time as the originally specified start time.'
+                            end:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  example: 'on'
+                                  description: 'How you would like your recurring downtime configuration to end. You can specify
+                                    the number of times it runs or specify an end date. Can be one of after or on.
+
+
+                                    after: Here you can specify the number of times you want your downtime configuration to
+                                    run.
+
+                                    on: Here you can specify the date in which you want your downtime configuration to end.'
+                                value:
+                                  type: string
+                                  example: '2025-12-31'
+                          title: Recurrence
+                          description: The id of the test belonging to the downtime configuration.
+              examples:
+                example:
+                  value:
+                    downtimeConfiguration:
+                    - createdAt: '2024-05-01T14:35:37.801Z'
+                      description: My downtime configuration
+                      endTime: '2024-05-10T16:00:00.000Z'
+                      id: 1
+                      name: foo
+                      recurrence:
+                        end:
+                          type: 'on'
+                          value: '2025-12-31'
+                        repeats:
+                          custom_frequency: days
+                          custom_value: 3
+                          type: custom
+                      rule: pause_tests
+                      startTime: '2024-05-03T16:00:00.000Z'
+                      status: active
+                      testCount: 10
+                      testsUpdatedAt: '2024-05-01T14:35:37.801Z'
+                      timezone: America/New_York
+                      updatedAt: '2024-05-01T14:35:37.801Z'
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Could not find downtime configuration
+                  details:
+                    type: object
+                    example: '{}'
+                type: object
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Could not find downtime configuration
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics downtime configurations
+    put:
+      summary: updateSingleDowntimeConfiguration
+      description: 'Update an existing downtime configuration.
+
+        Requirements
+
+        You must have an admin API session token to use this endpoint. To learn more about API tokens, see https://quickdraw.splunk.com/redirect/?product=Observability&location=api-access-tokens&version=current.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the downtime configuration you are updating
+        required: true
+        schema:
+          type: integer
+          example: 1
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                downtimeConfiguration:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: foo
+                      title: Name
+                      description: The name of your downtime configuration.
+                    description:
+                      type: string
+                      example: My downtime configuration
+                      title: Description
+                      description: The description of your downtime configuration.
+                    rule:
+                      type: string
+                      example: pause_tests
+                      title: Rule
+                      description: 'The behavior of your tests when this downtime configuration is active. This can be pause_tests
+                        or augment_data.
+
+
+                        pause_tests: Tests will not run while the downtime configuration is active.
+
+                        augment_data: Tests continue to run when the downtime configuration is active, but the data collected
+                        includes an additional dimension (under:maintenance:true) to differentiate from the normal test data.'
+                    testIds:
+                      type: array
+                      items:
+                        type: integer
+                        example: 123
+                        title: TestId
+                        description: The id of the test belonging to the downtime configuration.
+                    startTime:
+                      type: string
+                      example: '2024-05-03T16:00:00.000Z'
+                      title: StartTimePost
+                      description: 'Timestamp of when you want the downtime configuration to start, in UTC.
+
+
+                        startTime cannot be set in the past.
+
+                        startTime cannot be set more than 1 year in the future.'
+                    endTime:
+                      type: string
+                      example: '2024-05-10T16:00:00.000Z'
+                      title: EndTimePost
+                      description: 'Timestamp of when you want the downtime configuration to end, in UTC.
+
+
+                        endTime must be at least 15 minutes after the startTime, unless you are cancelling an active downtime
+                        configuration.
+
+                        endTime must be no more than 1 year after the startTime.'
+                    timezone:
+                      type: string
+                      example: America/New_York
+                      title: Timezone
+                      description: IANA timezone in which you want your downtime configuration to be set at. This is required
+                        for recurring downtime configurations.
+                    recurrence:
+                      type: object
+                      properties:
+                        repeats:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              example: custom
+                              description: 'The frequency in which you would like your downtime configuration to repeat. This
+                                can be one of the following:
+
+
+                                daily: Every day at the same time as the originally specified start time.
+
+                                weekly: Every week at the same time as the originally specified start time.
+
+                                weekdays: Mondays through Fridays at the same time as the originally specified start time.
+
+                                weekends: Saturdays and Sundays at the same time as the originally specified start time.
+
+                                custom: You can specify how frequently you would like your downtime configuration to repeat
+                                by the number of days or weeks.'
+                            custom_value:
+                              type: integer
+                              example: 3
+                              description: This field is only required if the recurrence type is custom.
+                            custom_frequency:
+                              type: string
+                              example: days
+                              description: 'This field is only required if the recurrence type is custom. This can be one
+                                of days or weeks
+
+
+                                days: Every custom_value days at the same time as the originally specified start time.
+
+                                weeks: Every custom_value weeks at the same time as the originally specified start time.'
+                        end:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              example: 'on'
+                              description: 'How you would like your recurring downtime configuration to end. You can specify
+                                the number of times it runs or specify an end date. Can be one of after or on.
+
+
+                                after: Here you can specify the number of times you want your downtime configuration to run.
+
+                                on: Here you can specify the date in which you want your downtime configuration to end.'
+                            value:
+                              type: string
+                              example: '2025-12-31'
+                      title: Recurrence
+                      description: The id of the test belonging to the downtime configuration.
+              title: UpdateRequestBody
+              description: 'The request body sent by the following method/endpoint operations:
+
+
+                PUT /downtime_configurations
+
+                PATCH /downtime_configurations'
+            examples:
+              example:
+                value:
+                  downtimeConfiguration:
+                    description: My downtime configuration
+                    endTime: '2024-05-10T16:00:00.000Z'
+                    name: foo
+                    recurrence:
+                      end:
+                        type: 'on'
+                        value: '2025-12-31'
+                      repeats:
+                        custom_frequency: days
+                        custom_value: 3
+                        type: custom
+                    rule: pause_tests
+                    startTime: '2024-05-03T16:00:00.000Z'
+                    testIds:
+                    - 123
+                    timezone: America/New_York
+      responses:
+        '200':
+          description: HTTP 200 response
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Could not find downtime configuration
+                  details:
+                    type: object
+                    example: '{}'
+                type: object
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Could not find downtime configuration
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Could not update downtime configuration
+                  details:
+                    type: object
+                    properties:
+                      value:
+                        type: array
+                        items:
+                          type: string
+                          example: can't be blank
+                        description: 'This is a dynamic schema that consists of:
+
+                          "fieldName": ["reason"]'
+                type: object
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details:
+                      value:
+                      - can't be blank
+                    message: Could not update downtime configuration
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics downtime configurations
+    delete:
+      summary: deleteDowntimeConfiguration
+      description: 'Deletes a downtime configuration
+
+        Requirements
+
+        You must have an admin API session token to use this endpoint. To learn more about API tokens, see https://quickdraw.splunk.com/redirect/?product=Observability&location=api-access-tokens&version=current.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of a downtime configuration
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: HTTP 204 response
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics downtime configurations
+  /downtime_configurations/{id}/end:
+    put:
+      summary: endDowntimeConfiguration
+      description: 'End a downtime configuration.
+
+        Requirements
+
+        You must have an admin API session token to use this endpoint. To learn more about API tokens, see https://quickdraw.splunk.com/redirect/?product=Observability&location=api-access-tokens&version=current.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the downtime configuration you are ending.
+        required: true
+        schema:
+          type: integer
+          example: 1
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                downtimeConfiguration:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: foo
+                      title: Name
+                      description: The name of your downtime configuration.
+                    description:
+                      type: string
+                      example: My downtime configuration
+                      title: Description
+                      description: The description of your downtime configuration.
+                    rule:
+                      type: string
+                      example: pause_tests
+                      title: Rule
+                      description: 'The behavior of your tests when this downtime configuration is active. This can be pause_tests
+                        or augment_data.
+
+
+                        pause_tests: Tests will not run while the downtime configuration is active.
+
+                        augment_data: Tests continue to run when the downtime configuration is active, but the data collected
+                        includes an additional dimension (under:maintenance:true) to differentiate from the normal test data.'
+                    testIds:
+                      type: array
+                      items:
+                        type: integer
+                        example: 123
+                        title: TestId
+                        description: The id of the test belonging to the downtime configuration.
+                    startTime:
+                      type: string
+                      example: '2024-05-03T16:00:00.000Z'
+                      title: StartTimePost
+                      description: 'Timestamp of when you want the downtime configuration to start, in UTC.
+
+
+                        startTime cannot be set in the past.
+
+                        startTime cannot be set more than 1 year in the future.'
+                    endTime:
+                      type: string
+                      example: '2024-05-10T16:00:00.000Z'
+                      title: EndTimePost
+                      description: 'Timestamp of when you want the downtime configuration to end, in UTC.
+
+
+                        endTime must be at least 15 minutes after the startTime, unless you are cancelling an active downtime
+                        configuration.
+
+                        endTime must be no more than 1 year after the startTime.'
+                    timezone:
+                      type: string
+                      example: America/New_York
+                      title: Timezone
+                      description: IANA timezone in which you want your downtime configuration to be set at. This is required
+                        for recurring downtime configurations.
+                    recurrence:
+                      type: object
+                      properties:
+                        repeats:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              example: custom
+                              description: 'The frequency in which you would like your downtime configuration to repeat. This
+                                can be one of the following:
+
+
+                                daily: Every day at the same time as the originally specified start time.
+
+                                weekly: Every week at the same time as the originally specified start time.
+
+                                weekdays: Mondays through Fridays at the same time as the originally specified start time.
+
+                                weekends: Saturdays and Sundays at the same time as the originally specified start time.
+
+                                custom: You can specify how frequently you would like your downtime configuration to repeat
+                                by the number of days or weeks.'
+                            custom_value:
+                              type: integer
+                              example: 3
+                              description: This field is only required if the recurrence type is custom.
+                            custom_frequency:
+                              type: string
+                              example: days
+                              description: 'This field is only required if the recurrence type is custom. This can be one
+                                of days or weeks
+
+
+                                days: Every custom_value days at the same time as the originally specified start time.
+
+                                weeks: Every custom_value weeks at the same time as the originally specified start time.'
+                        end:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              example: 'on'
+                              description: 'How you would like your recurring downtime configuration to end. You can specify
+                                the number of times it runs or specify an end date. Can be one of after or on.
+
+
+                                after: Here you can specify the number of times you want your downtime configuration to run.
+
+                                on: Here you can specify the date in which you want your downtime configuration to end.'
+                            value:
+                              type: string
+                              example: '2025-12-31'
+                      title: Recurrence
+                      description: The id of the test belonging to the downtime configuration.
+              title: UpdateRequestBody
+              description: 'The request body sent by the following method/endpoint operations:
+
+
+                PUT /downtime_configurations
+
+                PATCH /downtime_configurations'
+            examples:
+              example:
+                value:
+                  downtimeConfiguration:
+                    description: My downtime configuration
+                    endTime: '2024-05-10T16:00:00.000Z'
+                    name: foo
+                    recurrence:
+                      end:
+                        type: 'on'
+                        value: '2025-12-31'
+                      repeats:
+                        custom_frequency: days
+                        custom_value: 3
+                        type: custom
+                    rule: pause_tests
+                    startTime: '2024-05-03T16:00:00.000Z'
+                    testIds:
+                    - 123
+                    timezone: America/New_York
+      responses:
+        '200':
+          description: HTTP 200 response
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Could not find downtime configuration
+                  details:
+                    type: object
+                    example: '{}'
+                type: object
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Could not find downtime configuration
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Could not end downtime configuration
+                  details:
+                    type: object
+                    properties:
+                      value:
+                        type: array
+                        items:
+                          type: string
+                          example: can't be blank
+                        description: 'This is a dynamic schema that consists of:
+
+                          "fieldName": ["reason"]'
+                type: object
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details:
+                      value:
+                      - can't be blank
+                    message: Could not end downtime configuration
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics downtime configurations

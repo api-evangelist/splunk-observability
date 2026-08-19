@@ -1,0 +1,50 @@
+generated: '2026-08-19'
+method: searched
+source: >-
+  https://help.splunk.com/en/splunk-observability-cloud/administer/org-reference-info/view-your-realm-api-endpoints-and-organization,
+  https://help.splunk.com/en/splunk-observability-cloud/release-notes,
+  https://www.splunk.com/en_us/legal/splunk-cloud-service-level-schedule.html,
+  https://status.signalfx.com, plus derivation from openapi/
+versioning:
+  scheme: uri-path
+  current: v2
+  legacy_in_service: [v1]
+  docs: https://dev.splunk.com/observability/docs/apibasics/api_list/
+  note: >-
+    v2 is the current control-plane path. Three surfaces remain on v1 and are not deprecated:
+    the backfill service (/v1/backfill), /v1/timeserieswindow and /v1/event.
+deprecation:
+  policy_url: https://help.splunk.com/en/splunk-observability-cloud/administer/org-reference-info/view-your-realm-api-endpoints-and-organization
+  sunset_header: false
+  deprecation_header: false
+  formal_policy: false
+  note: >-
+    Splunk publishes no formal API deprecation policy, no sunset timetable and no RFC 8594
+    Sunset/Deprecation headers for Splunk Observability Cloud. What it does publish is a concrete
+    domain migration: as of 2026-03-24 both the legacy signalfx.com endpoints and the new
+    observability.splunkcloud.com endpoints are valid, and Splunk names both forms explicitly
+    (ingest.<REALM>.signalfx.com alongside ingest.<REALM>.observability.splunkcloud.com). No
+    removal date for the legacy domain has been announced. This repo's specs carry the new domain
+    except audit_events, whose own servers[] block still names https://api.us0.signalfx.com.
+  library_deprecations:
+    - The SignalFx-era client libraries (signalfx on PyPI/npm, com.signalfx.public on Maven) are
+      deprecated; the repositories state final versions were published on or before 2025-03-01.
+    - signalfx/signalflow-cli is archived (last push 2021-12-20).
+deprecated_operations: []
+deprecated_operations_note: >-
+  No operation in any of the 48 OpenAPI documents carries deprecated: true. Splunk does version
+  side by side instead — Synthetics ships both V1 and V2 documents for API tests and browser tests,
+  and Retrieve Events ships V1 and V2, with neither generation marked deprecated in the contract.
+status_page: https://status.signalfx.com
+status_page_note: >-
+  https://status.signalfx.com is the Splunk Observability Cloud status index; each realm has its own
+  Statuspage instance (for example https://status.us0.signalfx.com, titled "Splunk Observability
+  Cloud US0 Status"). This is a DIFFERENT status page from https://status.splunkcloud.com, which is
+  Splunk Cloud Platform and carries no Observability components.
+sla:
+  url: https://www.splunk.com/en_us/legal/splunk-cloud-service-level-schedule.html
+  uptime_target: null
+  note: >-
+    Splunk publishes a Cloud Service Level Schedule as contract terms. No uptime percentage is
+    recorded here because none was read verbatim from the page during this pass.
+release_notes: https://help.splunk.com/en/splunk-observability-cloud/release-notes

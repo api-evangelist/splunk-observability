@@ -1,0 +1,183 @@
+openapi: 3.0.3
+info:
+  title: Splunk Observability Cloud — Synthetics runs
+  version: 1.0.1
+  description: 'API for retrieving Splunk Synthetic Monitoring runs.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You need the Splunk Observability Cloud admin, power, or read_only role to use this API.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference
+      pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's.
+      Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset
+      path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2/synthetics
+  description: Endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.
+paths:
+  /runs/{id}:
+    get:
+      summary: retrieveRunById
+      description: 'Retrieve a run by ID.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin, power, or read_only role.'
+      parameters:
+      - name: id
+        in: path
+        description: The UUID of the run you want to retrieve. To obtain the UUID, see for example try_now.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: 1c4d52be-e7e1-4611-97f9-73c6ddfbeed9
+                        description: The UUID of the run.
+                      testId:
+                        oneOf:
+                        - type: string
+                          format: uuid
+                          example: 1c4d52be-e7e1-4611-97f9-73c6ddfbeed9
+                          description: UUID of the try now run.
+                        - type: integer
+                          example: 42
+                          description: Integer test ID
+                        description: The test ID, either a UUID for a try now run, or an integer for a persisted run. A try
+                          now run executes immediately and doesn't store any metrics. Try now runs are used to validate your
+                          test. Persisted runs are executed on a schedule, store metrics, and are used for monitoring.
+                      testType:
+                        type: string
+                        enum:
+                        - browser
+                        - api
+                        - uptime
+                        - port
+                        description: The test type
+                      testName:
+                        type: string
+                        example: My Test
+                        description: The name of the test
+                      triggerType:
+                        type: string
+                        enum:
+                        - scheduled
+                        - manual
+                        example: manual
+                        description: The type of trigger that initiated the run
+                      locationId:
+                        type: string
+                        example: aws-us-west-2
+                        description: The location ID of the run
+                      status:
+                        type: string
+                        enum:
+                        - running
+                        - success
+                        - failed
+                        description: The status of the run
+                      message:
+                        type: string
+                        example: Timeout error
+                        description: A description of the run failure. Will be null until the run is complete or if the run
+                          succeeds.
+                      timestamp:
+                        type: integer
+                        description: The timestamp of the run in epoch format
+              examples:
+                example:
+                  value:
+                    run:
+                      id: 1c4d52be-e7e1-4611-97f9-73c6ddfbeed9
+                      locationId: aws-us-west-2
+                      message: Timeout error
+                      status: running
+                      testId: 1c4d52be-e7e1-4611-97f9-73c6ddfbeed9
+                      testName: My Test
+                      testType: browser
+                      timestamp: 0
+                      triggerType: manual
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Record not found
+                  details:
+                    type: object
+                    example: '{}'
+                title: NotFound
+                description: Not Found
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Record not found
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics runs

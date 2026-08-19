@@ -1,0 +1,866 @@
+generated: '2026-08-19'
+method: derived
+source: openapi/ (48 documents, 242 operations)
+note: Derived from the request/response schemas of the reconstructed specs. Splunk publishes no object
+  reference with id prefixes, so entity identity is expressed through the id-bearing fields the schemas
+  actually carry rather than through documented prefixes. Every Splunk Observability Cloud object ID is
+  an opaque base64-ish string (for example ABCDEFGHIJK) with no type prefix — an agent cannot tell a chart
+  ID from a detector ID by looking at it, which is the single most important fact in this file.
+id_convention:
+  prefixed: false
+  shape: opaque base64-style string, typically 11 characters
+  examples:
+  - ABCDEFGHIJK (detectorId)
+  - BCDEFGHIJKL (incidentId)
+  - ChkVxy0AEAA (SignalFlow job handle)
+  - CgrT2EkAAAA (tsId)
+  implication: IDs are not self-describing. Track the type alongside the ID; a wrong-type ID returns 404,
+    not a 400.
+domains:
+- name: Visualization
+  specs:
+  - charts
+  - dashboards
+  - navigator
+  - datalinks
+  operations: 12
+- name: Alerting
+  specs:
+  - detectors
+  - incidents
+  operations: 14
+- name: Metrics and metadata
+  specs:
+  - automatedarchival
+  operations: 3
+- name: Ingest
+  specs:
+  - backfill
+  operations: 1
+- name: APM and tracing
+  specs: []
+  operations: 0
+- name: Streaming analytics
+  specs:
+  - signalflow
+  operations: 6
+- name: Synthetics
+  specs: []
+  operations: 0
+- name: Service levels
+  specs:
+  - slo
+  operations: 4
+- name: Administration
+  specs:
+  - organizations
+  - teams
+  - roles
+  - sessiontokens
+  - passwords
+  operations: 16
+- name: Integrations
+  specs:
+  - integrations
+  operations: 3
+entities:
+- entity: APM service topology
+  spec: openapi/splunk-observability-apm-service-topology-openapi.yml
+  paths:
+  - /apm/topology
+  - /apm/topology/{serviceName}
+  fields:
+  - timeRange
+  - tagFilters
+  - nodes
+  - edges
+  - inbound
+  - outbound
+  - services
+- entity: APM visibility filters
+  spec: openapi/splunk-observability-apm-visibility-filters-openapi.yml
+  paths:
+  - /apm/visibility-filter
+  - /apm/visibility-filter/{FilterId}
+  - /apm/visibility-filter/{FilterId}/enabled
+  fields:
+  - description
+  - startTime
+  - endTime
+  - matcher
+  - visibleTags
+  - hiddenTags
+  - enabled
+  - filterId
+- entity: Splunk Observability Cloud Audit Events
+  spec: openapi/splunk-observability-audit-events-openapi.yml
+  paths:
+  - /v2/audit/events
+  fields:
+  - id
+  - tsId
+  - timestamp
+  - metadata
+  - properties
+- entity: Automated archival
+  spec: openapi/splunk-observability-automatedarchival-openapi.yml
+  paths:
+  - /automated-archival/exempt-metrics
+  - /automated-archival/preview
+  - /automated-archival/settings
+  fields:
+  - enabled
+  - version
+  - orgId
+  - rulesetLimit
+  - gracePeriod
+  - lookbackPeriod
+  - creator
+  - created
+  - lastUpdated
+  - lastUpdatedBy
+  - ids
+- entity: Backfill
+  spec: openapi/splunk-observability-backfill-openapi.yml
+  paths:
+  - /backfill
+  fields:
+  - timestamp
+  - value
+- entity: Charts
+  spec: openapi/splunk-observability-charts-openapi.yml
+  paths:
+  - /chart
+  - /chart/{id}
+  fields:
+  - customProperties
+  - description
+  - name
+  - options
+  - packageSpecifications
+  - programText
+  - tags
+  - created
+  - creator
+  - id
+  - lastUpdated
+  - lastUpdatedBy
+  - relatedDetectorIds
+  - autoDetectRelatedDetectorIds
+- entity: Client Inventory
+  spec: openapi/splunk-observability-client-inventory-openapi.yml
+  paths:
+  - /clients
+  - /clients/configs:batch
+  - /clients/metadata/values
+  - /clients/{id}
+  - /clients/{id}/config
+  fields:
+  - pagination
+  - clients
+  - connection_health
+  - created_at
+  - health
+  - instance_uid
+  - last_heartbeat_at
+  - metadata
+  - org_id
+  - updated_at
+  - clientIds
+  - stringify
+  - configs
+  - notFound
+- entity: Dashboard groups
+  spec: openapi/splunk-observability-dashboard-groups-openapi.yml
+  paths:
+  - /dashboardgroup
+  - /dashboardgroup/{id}
+  - /dashboardgroup/{id}/dashboard
+  fields:
+  - description
+  - name
+  - authorizedWriters
+  - dashboardConfigs
+  - dashboards
+  - teams
+  - permissions
+  - id
+  - created
+  - creator
+  - lastUpdated
+  - lastUpdatedBy
+  - dashboardId
+  - teamId
+- entity: Dashboards
+  spec: openapi/splunk-observability-dashboards-openapi.yml
+  paths:
+  - /dashboard
+  - /dashboard/simple
+  - /dashboard/{id}
+  fields:
+  - chartDensity
+  - charts
+  - description
+  - eventOverlays
+  - filters
+  - groupId
+  - maxDelayOverride
+  - name
+  - selectedEventOverlays
+  - authorizedWriters
+  - customProperties
+  - permissions
+  - created
+  - creator
+- entity: Data links
+  spec: openapi/splunk-observability-datalinks-openapi.yml
+  paths:
+  - /crosslink
+  - /crosslink/{id}
+  fields:
+  - contextId
+  - propertyName
+  - propertyValue
+  - targets
+  - id
+- entity: Detectors
+  spec: openapi/splunk-observability-detectors-openapi.yml
+  paths:
+  - /detector
+  - /detector/validate
+  - /detector/{id}
+  - /detector/{id}/disable
+  - /detector/{id}/enable
+  - /detector/{id}/events
+  fields:
+  - customProperties
+  - description
+  - detectorOrigin
+  - maxDelay
+  - name
+  - parentDetectorId
+  - programText
+  - rules
+  - tags
+  - teams
+  - timezone
+  - visualizationOptions
+  - minDelay
+  - created
+- entity: Incidents and alerts
+  spec: openapi/splunk-observability-incidents-openapi.yml
+  paths:
+  - /alertmuting
+  - /alertmuting/{id}
+  - /alertmuting/{id}/unmute
+  - /incident
+  - /incident/clear
+  - /incident/{id}
+  fields:
+  - filters
+  - linkedTeams
+  - created
+  - creator
+  - description
+  - id
+  - lastUpdated
+  - lastUpdatedBy
+  - recurrence
+  - sendAlertsOnceMutingPeriodHasEnded
+  - startTime
+  - stopTime
+  - active
+  - anomalyState
+- entity: Send traces, metrics and events
+  spec: openapi/splunk-observability-ingest-data-openapi.yml
+  paths:
+  - /datapoint
+  - /datapoint/otlp
+  - /event
+  - /trace
+  - /trace/otlp
+  fields: []
+- entity: Integrations
+  spec: openapi/splunk-observability-integrations-openapi.yml
+  paths:
+  - /integration
+  - /integration/validate/{id}
+  - /integration/{id}
+  fields: []
+- entity: Metric ruleset
+  spec: openapi/splunk-observability-metric-ruleset-openapi.yml
+  paths:
+  - /metricruleset
+  - /metricruleset/generateAggregationMetricName
+  - /metricruleset/restoration/{id}
+  - /metricruleset/{id}
+  fields:
+  - metricName
+  - aggregationRules
+  - exceptionRules
+  - routingRule
+  - version
+  - description
+  - creator
+  - creatorName
+  - created
+  - id
+  - lastUpdatedBy
+  - lastUpdatedByName
+  - lastUpdated
+  - dimensions
+- entity: Metrics metadata
+  spec: openapi/splunk-observability-metrics-metadata-openapi.yml
+  paths:
+  - /dimension
+  - /dimension/{key}/{value}
+  - /metric
+  - /metric/{name}
+  - /metrictimeseries
+  - /metrictimeseries/{id}
+  fields:
+  - customProperties
+  - creator
+  - created
+  - description
+  - lastUpdated
+  - lastUpdatedBy
+  - tags
+  - name
+  - key
+  - value
+  - type
+  - dimensions
+  - metric
+  - result
+- entity: Navigators
+  spec: openapi/splunk-observability-navigator-openapi.yml
+  paths:
+  - /navigator
+  - /navigator/{id}
+  - /navigator/{id}/dashboards
+  - /navigator/{id}/navigatorcustomization
+  - /navigator/{id}/navigatorcustomization/{customizationId}
+  fields:
+  - instanceDashboards
+  - created
+  - creator
+  - id
+  - lastUpdated
+  - lastUpdatedBy
+  - aggregateDashboards
+  - name
+  - navigatorId
+  - alertQuery
+  - categories
+  - defaultGroupBy
+  - displayName
+  - idDisplayName
+- entity: Org tokens
+  spec: openapi/splunk-observability-org-tokens-openapi.yml
+  paths:
+  - /token
+  - /token/{name}
+  - /token/{name}/rotate
+  fields:
+  - created
+  - creator
+  - description
+  - disabled
+  - expiry
+  - id
+  - lastUpdated
+  - lastUpdatedBy
+  - latestRotation
+  - limits
+  - notifications
+  - permissions
+  - roles
+  - secret
+- entity: Organizations
+  spec: openapi/splunk-observability-organizations-openapi.yml
+  paths:
+  - /organization
+  - /organization/custom-categories
+  - /organization/member
+  - /organization/member/{id}
+  - /organization/members
+  - /organization/orgMembers
+  fields:
+  - admin
+  - email
+  - fullName
+  - phone
+  - title
+  - creator
+  - lastUpdatedBy
+  - created
+  - lastUpdated
+  - id
+  - members
+  - userId
+  - organizationId
+  - roles
+- entity: Passwords
+  spec: openapi/splunk-observability-passwords-openapi.yml
+  paths:
+  - /password/update
+  fields:
+  - oldPassword
+  - newPassword
+- entity: Retrieve events V1
+  spec: openapi/splunk-observability-retrieve-events-v1-openapi.yml
+  paths:
+  - /event
+  fields: []
+- entity: Retrieve events V2
+  spec: openapi/splunk-observability-retrieve-events-v2-openapi.yml
+  paths:
+  - /event/find
+  fields: []
+- entity: Retrieve metric time series (MTS)
+  spec: openapi/splunk-observability-retrieve-timeserieswindow-openapi.yml
+  paths:
+  - /timeserieswindow
+  fields:
+  - data
+  - errors
+- entity: Role
+  spec: openapi/splunk-observability-roles-openapi.yml
+  paths:
+  - /role
+  - /role/assign
+  - /role/dismiss
+  - /role/{roleId}
+  fields:
+  - objectType
+  - objectIds
+  - roleNames
+  - capabilities
+  - created
+  - creator
+  - description
+  - id
+  - immutable
+  - lastUpdated
+  - lastUpdatedBy
+  - organizationId
+  - title
+- entity: Session tokens
+  spec: openapi/splunk-observability-sessiontokens-openapi.yml
+  paths:
+  - /session
+  fields:
+  - email
+  - organizationId
+  - password
+  - accessToken
+  - createdBy
+  - createdMs
+  - disabled
+  - expiryMs
+  - id
+  - sessionType
+  - updatedBy
+  - updatedMs
+  - userId
+  - username
+- entity: SignalFlow
+  spec: openapi/splunk-observability-signalflow-openapi.yml
+  paths:
+  - /connect
+  - /execute
+  - /preflight
+  - /start
+  - /{id}/feedback
+  - /{id}/stop
+  fields:
+  - programText
+  - programArgs
+- entity: SLOs
+  spec: openapi/splunk-observability-slo-openapi.yml
+  paths:
+  - /slo
+  - /slo/search
+  - /slo/validate
+  - /slo/{id}
+  fields:
+  - name
+  - description
+  - type
+  - inputs
+  - targets
+  - metadata
+  - created
+  - creator
+  - id
+  - lastUpdated
+  - lastUpdatedBy
+  - sloIds
+  - breachAlertsTriggered
+  - errorBudgetLeftAlertsTriggered
+- entity: Synthetics API tests (V1)
+  spec: openapi/splunk-observability-synthetics-api-tests-openapi.yml
+  paths:
+  - /tests/api
+  - /tests/api/try_now
+  - /tests/api/validate
+  - /tests/api/{id}
+  - /tests/api/{id}/validate
+  fields:
+  - test
+  - valid
+  - message
+  - runId
+  - testId
+  - locationId
+  - testName
+  - testType
+- entity: Synthetics API tests V2
+  spec: openapi/splunk-observability-synthetics-api-tests-v2-openapi.yml
+  paths:
+  - /v2/tests/api
+  - /v2/tests/api/try_now
+  - /v2/tests/api/validate
+  - /v2/tests/api/{id}
+  - /v2/tests/api/{id}/validate
+  fields:
+  - test
+  - valid
+  - message
+  - runId
+  - testId
+  - locationId
+  - testName
+  - testType
+- entity: Synthetics artifacts
+  spec: openapi/splunk-observability-synthetics-artifacts-openapi.yml
+  paths:
+  - /tests/{id}/artifacts
+  - /tests/{id}/artifacts/{locationId}/{timestamp}/{runId}/{filename}
+  - /tests/{id}/artifacts/{locationId}/{timestamp}/{runId}/{filename}/download
+  fields:
+  - artifacts
+- entity: Synthetics audit
+  spec: openapi/splunk-observability-synthetics-audits-openapi.yml
+  paths:
+  - /audits
+  fields:
+  - page
+  - perPage
+  - totalCount
+  - organizationId
+  - audits
+- entity: Synthetics Browser tests (V1)
+  spec: openapi/splunk-observability-synthetics-browser-openapi.yml
+  paths:
+  - /tests/browser
+  - /tests/browser/try_now
+  - /tests/browser/validate
+  - /tests/browser/{id}
+  - /tests/browser/{id}/validate
+  fields:
+  - test
+  - valid
+  - message
+  - details
+  - runId
+  - testId
+  - locationId
+  - testName
+  - testType
+- entity: Synthetics Browser tests V2
+  spec: openapi/splunk-observability-synthetics-browser-v2-openapi.yml
+  paths:
+  - /v2/tests/browser
+  - /v2/tests/browser/try_now
+  - /v2/tests/browser/validate
+  - /v2/tests/browser/{id}
+  - /v2/tests/browser/{id}/validate
+  fields:
+  - test
+  - valid
+  - message
+  - details
+  - runId
+  - testId
+  - locationId
+  - testName
+  - testType
+- entity: Synthetics CA certificates
+  spec: openapi/splunk-observability-synthetics-ca-certs-openapi.yml
+  paths:
+  - /cacerts
+  - /cacerts/{id}
+  fields:
+  - cacert
+  - cacerts
+- entity: Synthetics certificates
+  spec: openapi/splunk-observability-synthetics-certificates-openapi.yml
+  paths:
+  - /certificates
+  - /certificates/{id}
+  fields:
+  - certificate
+  - certificates
+  - name
+  - domain
+  - description
+  - createdAt
+  - updatedAt
+  - createdBy
+  - updatedBy
+  - publicKey
+  - privateKey
+- entity: Synthetics Chrome flags
+  spec: openapi/splunk-observability-synthetics-chrome-flags-openapi.yml
+  paths:
+  - /chrome_flags
+  fields:
+  - chromeFlags
+- entity: Synthetics devices
+  spec: openapi/splunk-observability-synthetics-devices-openapi.yml
+  paths:
+  - /devices
+  fields:
+  - defaultDeviceId
+  - devices
+- entity: Synthetics downtime configurations
+  spec: openapi/splunk-observability-synthetics-downtime-configurations-openapi.yml
+  paths:
+  - /downtime_configurations
+  - /downtime_configurations/{id}
+  - /downtime_configurations/{id}/end
+  fields:
+  - downtimeConfiguration
+  - downtimeConfigurations
+- entity: Synthetics excluded files
+  spec: openapi/splunk-observability-synthetics-excluded-files-openapi.yml
+  paths:
+  - /excluded_file_types
+  fields:
+  - excludedFileTypes
+- entity: Synthetics global variables
+  spec: openapi/splunk-observability-synthetics-global-variables-openapi.yml
+  paths:
+  - /variables
+  - /variables/{id}
+  fields:
+  - variable
+  - variables
+- entity: Synthetics HTTP tests
+  spec: openapi/splunk-observability-synthetics-http-tests-openapi.yml
+  paths:
+  - /tests/http
+  - /tests/http/try_now
+  - /tests/http/validate
+  - /tests/http/{id}
+  - /tests/http/{id}/validate
+  fields:
+  - test
+  - valid
+  - message
+  - details
+  - runId
+  - testId
+  - locationId
+  - testName
+  - testType
+- entity: Synthetics locations
+  spec: openapi/splunk-observability-synthetics-locations-openapi.yml
+  paths:
+  - /locations
+  - /locations/{id}
+  - /locations/{location_id}/runner_tokens
+  - /locations/{location_id}/runner_tokens/{id}
+  fields:
+  - location
+  - runner_token
+  - locations
+  - default_location_ids
+  - meta
+  - runner_tokens
+- entity: Synthetics Port tests
+  spec: openapi/splunk-observability-synthetics-ports-tests-openapi.yml
+  paths:
+  - /tests/port
+  - /tests/port/try_now
+  - /tests/port/validate
+  - /tests/port/{id}
+  - /tests/port/{id}/validate
+  fields:
+  - test
+  - valid
+  - message
+  - details
+  - runId
+  - testId
+  - locationId
+  - testName
+  - testType
+- entity: Synthetics runs
+  spec: openapi/splunk-observability-synthetics-runs-openapi.yml
+  paths:
+  - /runs/{id}
+  fields:
+  - run
+- entity: Synthetics SSL Certificate Tests
+  spec: openapi/splunk-observability-synthetics-ssl-tests-openapi.yml
+  paths:
+  - /tests/ssl
+  - /tests/ssl/{id}
+  fields:
+  - test
+- entity: Synthetics tests
+  spec: openapi/splunk-observability-synthetics-tests-openapi.yml
+  paths:
+  - /tests
+  - /tests/bulk_delete
+  - /tests/pause
+  - /tests/play
+  - /tests/{id}
+  - /tests/{id}/run_now
+  fields:
+  - testIds
+  - success
+  - perPage
+  - totalCount
+  - nextPageLink
+  - tests
+  - runId
+  - testId
+  - locationId
+  - testName
+  - testType
+  - runs
+  - page
+- entity: Teams
+  spec: openapi/splunk-observability-teams-openapi.yml
+  paths:
+  - /team
+  - /team/{tid}
+  - /team/{tid}/member/{uid}
+  - /team/{tid}/members
+  fields:
+  - members
+  - description
+  - name
+  - notificationLists
+  - created
+  - creator
+  - id
+  - lastUpdated
+  - lastUpdatedBy
+- entity: Download APM traces
+  spec: openapi/splunk-observability-trace-id-openapi.yml
+  paths:
+  - /apm/trace/{traceId}/latest
+  - /apm/trace/{traceId}/segments
+  - /apm/trace/{traceId}/{segmentTimestamp}
+  fields: []
+relationships:
+- from: Dashboard
+  to: Dashboard group
+  type: belongs_to
+  via: groupId
+  evidence: POST /v2/dashboardgroup/{id}/dashboard clones a dashboard into a group
+- from: Dashboard group
+  to: Dashboard
+  type: has_many
+  via: dashboards
+  evidence: dashboard_groups spec
+- from: Dashboard
+  to: Chart
+  type: has_many
+  via: charts
+  evidence: POST /v2/dashboard/simple creates a dashboard containing new charts
+- from: Chart
+  to: SignalFlow program
+  type: has_one
+  via: programText
+  evidence: charts spec requestBody property programText
+- from: Detector
+  to: SignalFlow program
+  type: has_one
+  via: programText
+  evidence: detectors spec
+- from: Incident
+  to: Detector
+  type: belongs_to
+  via: detectorId
+  evidence: GET /v2/detector/{id}/incidents
+- from: Detector event
+  to: Detector
+  type: belongs_to
+  via: detectorId
+  evidence: GET /v2/detector/{id}/events
+- from: Muting rule
+  to: Detector
+  type: belongs_to
+  via: filters
+  evidence: incidents spec alertmuting operations
+- from: Detector
+  to: Team
+  type: has_many
+  via: teams
+  evidence: teams spec; teams are notification targets for alerts
+- from: Team
+  to: Organization member
+  type: has_many
+  via: members
+  evidence: PUT /v2/team/{id}/members
+- from: Organization member
+  to: Organization
+  type: belongs_to
+  via: organizationId
+  evidence: organizations spec
+- from: Org token
+  to: Organization
+  type: belongs_to
+  via: orgId
+  evidence: org_tokens spec
+- from: Metric time series
+  to: Metric
+  type: belongs_to
+  via: metric
+  evidence: metrics_metadata GET /v2/metrictimeseries
+- from: Metric time series
+  to: Dimension
+  type: has_many
+  via: dimensions
+  evidence: metrics_metadata GET /v2/dimension
+- from: Event
+  to: Metric time series
+  type: belongs_to
+  via: tsId
+  evidence: SignalFlow event message carries tsId
+- from: Trace
+  to: Trace segment
+  type: has_many
+  via: segmentTimestamp
+  evidence: GET /v2/apm/trace/{traceId}/segments
+- from: Synthetics run
+  to: Synthetics test
+  type: belongs_to
+  via: testId
+  evidence: synthetics_runs spec
+- from: Synthetics test
+  to: Synthetics location
+  type: has_many
+  via: locationIds
+  evidence: synthetics_locations spec
+- from: Integration
+  to: Organization
+  type: belongs_to
+  via: orgId
+  evidence: integrations spec
+- from: Navigator
+  to: Dashboard
+  type: has_many
+  via: dashboards
+  evidence: GET /v2/navigator/{id}/dashboards
+- from: SLO
+  to: Detector
+  type: has_one
+  via: detectorId
+  evidence: slo spec; SLO breaches raise detectors

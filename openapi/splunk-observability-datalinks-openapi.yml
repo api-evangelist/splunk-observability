@@ -1,0 +1,2122 @@
+openapi: 3.0.3
+info:
+  title: Splunk Observability Cloud — Data links
+  version: 1.1.0
+  description: 'API for creating, retrieving, updating, and deleting data links.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You have to have the Splunk Observability Cloud admin role to use the POST /crosslink, GET /crosslink/{id}, PUT /crosslink/{id},
+    and DELETE /crosslink/{id} operations.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference
+      pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's.
+      Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset
+      path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2
+  description: Datalinks API URL endpoint
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.
+paths:
+  /crosslink:
+    get:
+      summary: Retrieve Data Link Query
+      description: 'Retrieves one or more data links based on the search criteria specified
+
+        in the request body, in the form of a JSON array of JSON data link objects.
+
+        Note: Splunk Observability Cloud returns a maximum of 10,000 objects, even if your organization contains more than
+        10,000. To learn more, see the
+
+        Considerations for retrieve operations section in the developer guide.'
+      parameters:
+      - name: context
+        in: query
+        description: 'Scope of the search:
+
+
+          To search only the globally-accessible links, specify "global"
+
+          To search links for a particular dashboard, specify the
+
+          dashboard ID
+
+
+          If you don''t specify this parameter, it defaults to null, which
+
+          implies "global".'
+        schema:
+          type: string
+      - name: propertyName
+        in: query
+        description: 'Key to which the data link is bound. This property is
+
+          required if you also specify propertyValue.'
+        schema:
+          type: string
+      - name: propertyValue
+        in: query
+        description: 'Specific value for the key to which the data link is bound. If you
+
+          specify propertyValue, propertyName is required.'
+        schema:
+          type: string
+      - name: order_by
+        in: query
+        description: 'Data link object property on which the API sorts the results of
+
+          the search. The default property is lastUpdated, and the default
+
+          order is ascending.
+
+          Prepend a - character to the property name to sort in descending order. For example, order_by: -lastUpdated sorts
+          the results in descending order by date updated.
+
+          If you want to apply order_by to non-custom property fields like timestamp, prepend the field with sf_. For example:
+          order_by=-sf_timestamp.'
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: 'Limits the number of results to return in the response body. The
+
+          default is 50.'
+        schema:
+          type: integer
+          format: int64
+      - name: offset
+        in: query
+        description: '0-index offset in the result set at which the API should start
+
+          returning results. To paginate the results, use limit and offset
+
+          to return sets of link data objects. The default is 0 (start at
+
+          the beginning of the result set)'
+        schema:
+          type: integer
+          format: int64
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Response body for Retrieve Data Links By Query
+                type: object
+                properties:
+                  count:
+                    title: Number of data links matched by the search criteria
+                    type: integer
+                    format: int64
+                    description: 'Number of data link objects matched by the search criteria in a search by
+
+                      query. These objects are known as the result set.
+
+                      The size of the result set isn''t necessarily the same as the number of
+
+                      data links returned to the client. For example:
+
+
+                      If the offset query parameter is 0 and the limit is 50, then
+
+                      the number of data links returned is 50, even if the result
+
+                      set (the number of links matched by the search
+
+                      criteria) contains 60 data links.
+
+                      If the offset query parameter is 50 and the limit is 50, then
+
+                      the request returns the 50th through 100th data links in the result
+
+                      set, even if the result set contains 120 data links.
+
+                      If the offset query parameter is 50, the limit is 50, and the
+
+                      size of the result set is 75, then the request returns the 50th
+
+                      through 75th data links in the result set. This is 25 links,
+
+                      even though the limit is 50 links.'
+                  results:
+                    type: array
+                    items:
+                      title: Response body that contains a single data link object
+                      type: object
+                      properties:
+                        contextId:
+                          title: Data link context designator
+                          type: string
+                          description: 'String that identifies the context of the data link. The allowed values
+
+                            are:
+
+
+                            "global": The data link is globally accessible
+
+                            "<dashboardId>": The data link is only accessible within the
+
+                            dashboard identified by the dashboard ID'
+                        id:
+                          title: Data link identifier
+                          type: string
+                          description: ID of a data link object
+                        propertyName:
+                          title: Trigger key name
+                          type: string
+                          description: 'Name (key) of the metadata that''s the trigger of a data link. If you
+
+                            specify propertyValue, you must specify propertyName. In addition,
+
+                            propertyName is required for a data link to a dashboard
+
+                            link target.'
+                        propertyValue:
+                          title: Property value for a key
+                          type: string
+                          description: 'Value of the metadata that''s the trigger of a data link. If you specify
+
+                            this property, you must also specify propertyName.'
+                        targets:
+                          title: List of data link targets
+                          type: array
+                          items:
+                            anyOf:
+                            - title: Dashboard link target
+                              type: object
+                              required:
+                              - dashboardId
+                              - dashboardGroupId
+                              - name
+                              - type
+                              properties:
+                                dashboardGroupId:
+                                  title: Target dashboard's dashboard group ID
+                                  type: string
+                                  description: ID of the dashboard link target's dashboard group
+                                dashboardGroupName:
+                                  title: Dashboard link target's dashboard group name
+                                  type: string
+                                  description: 'User-assigned name of a link target dashboard''s dashboard group.
+
+                                    Optional in a request; returned by the API in a response.'
+                                dashboardId:
+                                  title: Target dashboard's ID
+                                  type: string
+                                  description: ID of the dashboard link target
+                                dashboardName:
+                                  title: Target dashboard's name
+                                  type: string
+                                  description: 'User-assigned name of the dashboard link target.
+
+                                    Optional in a request; returned by the API in a response.'
+                                isDefault:
+                                  title: Default data link target flag
+                                  type: boolean
+                                  description: 'Flag that designates a target as the default for a data link
+
+                                    object.'
+                                name:
+                                  title: Target name
+                                  type: string
+                                  description: 'User-assigned target name. Use this value to differentiate
+
+                                    between the link targets for a data link object.'
+                                type:
+                                  title: Target type
+                                  type: string
+                                  enum:
+                                  - INTERNAL_LINK
+                                  - EXTERNAL_LINK
+                                  - SPLUNK_LINK
+                                  description: 'Target type designator, with three possible values:
+
+
+                                    Internal link target: always "INTERNAL_LINK"
+
+                                    External link target: always "EXTERNAL_LINK"
+
+                                    Splunk link target: always "SPLUNK_LINK"'
+                              description: Properties of a dashboard link target.
+                            - title: External system URL link target
+                              type: object
+                              required:
+                              - timeFormat
+                              - type
+                              - url
+                              properties:
+                                isDefault:
+                                  title: Default data link target flag
+                                  type: boolean
+                                  description: 'Flag that designates a target as the default for a data link
+
+                                    object.'
+                                minimumTimeWindow:
+                                  title: Minimum time window for an external search
+                                  type: integer
+                                  format: int64
+                                  description: 'Sets an external link''s minimum time window.
+
+                                    The value of minimumTimeWindow must be in milliseconds.
+
+                                    To learn more, refer to the section
+
+                                    Minimum time window.'
+                                name:
+                                  title: Target name
+                                  type: string
+                                  description: 'User-assigned target name. Use this value to differentiate
+
+                                    between the link targets for a data link object.'
+                                propertyKeyMapping:
+                                  title: Map between Splunk Observability Cloud property keys and external system property
+                                    names
+                                  type: object
+                                  description: "Describes the relationship between Splunk Observability Cloud metadata keys\
+                                    \ and external\nsystem properties when the key names are different, in the form of a\n\
+                                    JSON object. The following JSON demonstrates the syntax:\n{\n  \"<key_name\": \"external_system_property_name\"\
+                                    \n}"
+                                timeFormat:
+                                  title: Format for start and end timestamp
+                                  type: string
+                                  enum:
+                                  - ISO8601
+                                  - Epoch
+                                  - EpochSeconds
+                                  description: 'Time format Splunk Observability Cloud uses to encode the minimum time window
+                                    starting
+
+                                    and ending timestamps on the link URL.
+
+                                    You can choose one of three formats:
+
+
+                                    "ISO8601": Timestamps are encoded using ISO8601 format.
+
+                                    "Epoch": Timestamps are encoded in *nix time in milliseconds.
+
+                                    "EpochSeconds": Timestamps are encoded in *nix time in seconds.
+
+                                    Splunk link targets always use this format.'
+                                type:
+                                  title: Target type
+                                  type: string
+                                  enum:
+                                  - INTERNAL_LINK
+                                  - EXTERNAL_LINK
+                                  - SPLUNK_LINK
+                                  description: 'Target type designator, with three possible values:
+
+
+                                    Internal link target: always "INTERNAL_LINK"
+
+                                    External link target: always "EXTERNAL_LINK"
+
+                                    Splunk link target: always "SPLUNK_LINK"'
+                                url:
+                                  title: URL of an external data link target
+                                  type: string
+                                  format: uri
+                                  description: 'URL string for a Splunk instance or external system data link target.
+
+                                    For an external system data link, you can specify a URL template.
+
+                                    To learn more, refer to following sections:
+
+
+                                    Splunk link targets
+
+                                    External link targets'
+                              description: Properties of an external system URL link target
+                            - title: Splunk instance link target
+                              type: object
+                              required:
+                              - type
+                              - url
+                              - name
+                              properties:
+                                isDefault:
+                                  title: Default data link target flag
+                                  type: boolean
+                                  description: 'Flag that designates a target as the default for a data link
+
+                                    object.'
+                                minimumTimeWindow:
+                                  title: Minimum time window for an external search
+                                  type: integer
+                                  format: int64
+                                  description: 'Sets an external link''s minimum time window.
+
+                                    The value of minimumTimeWindow must be in milliseconds.
+
+                                    To learn more, refer to the section
+
+                                    Minimum time window.'
+                                name:
+                                  title: Target name
+                                  type: string
+                                  description: 'User-assigned target name. Use this value to differentiate
+
+                                    between the link targets for a data link object.'
+                                propertyKeyMapping:
+                                  title: Map between Splunk Observability Cloud property keys and external system property
+                                    names
+                                  type: object
+                                  description: "Describes the relationship between Splunk Observability Cloud metadata keys\
+                                    \ and external\nsystem properties when the key names are different, in the form of a\n\
+                                    JSON object. The following JSON demonstrates the syntax:\n{\n  \"<key_name\": \"external_system_property_name\"\
+                                    \n}"
+                                timeFormat:
+                                  title: Format for start and end timestamp
+                                  type: string
+                                  enum:
+                                  - ISO8601
+                                  - Epoch
+                                  - EpochSeconds
+                                  description: 'Time format Splunk Observability Cloud uses to encode the minimum time window
+                                    starting
+
+                                    and ending timestamps on the link URL.
+
+                                    You can choose one of three formats:
+
+
+                                    "ISO8601": Timestamps are encoded using ISO8601 format.
+
+                                    "Epoch": Timestamps are encoded in *nix time in milliseconds.
+
+                                    "EpochSeconds": Timestamps are encoded in *nix time in seconds.
+
+                                    Splunk link targets always use this format.'
+                                type:
+                                  title: Target type
+                                  type: string
+                                  enum:
+                                  - INTERNAL_LINK
+                                  - EXTERNAL_LINK
+                                  - SPLUNK_LINK
+                                  description: 'Target type designator, with three possible values:
+
+
+                                    Internal link target: always "INTERNAL_LINK"
+
+                                    External link target: always "EXTERNAL_LINK"
+
+                                    Splunk link target: always "SPLUNK_LINK"'
+                              description: Properties of Splunk instance link target
+                          description: 'List of data link targets, in the form of a JSON array of
+
+                            JSON objects'
+                      description: Single data link object, in the form of a JSON object
+                    minItems: 0
+                    description: List of data link property objects, in the form of a JSON array
+                description: 'Specifies the properties returned by a retrieve by query request,
+
+                  in the form of a JSON object'
+              examples:
+                example:
+                  value:
+                    count: 0
+                    results:
+                    - contextId: string
+                      id: string
+                      propertyName: string
+                      propertyValue: string
+                      targets:
+                      - dashboardGroupId: string
+                        dashboardGroupName: string
+                        dashboardId: string
+                        dashboardName: string
+                        isDefault: true
+                        name: string
+                        type: INTERNAL_LINK
+      security:
+      - SessionToken: []
+      tags:
+      - Data links
+    post:
+      summary: Create Data Link
+      description: 'Creates one or more data link targets based on the properties specified in the
+
+        request body. A single request can create any number of targets, and
+
+        each target can be one of three types:
+
+
+        Link to a dashboard in the organization
+
+        Link to an external URL, optionally using Handlebars or Moustache
+
+        variables
+
+        Link to a Splunk instance'
+      parameters:
+      - name: X-SF-TOKEN
+        in: header
+        description: 'Authentication token. Must be a session token (User API access
+
+          token) associated with an administrator.'
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: Request body for Create Data Link
+              type: object
+              required:
+              - contextId
+              properties:
+                contextId:
+                  title: Data link context designator
+                  type: string
+                  description: 'String that identifies the context of the data link. The allowed values
+
+                    are:
+
+
+                    "global": The data link is globally accessible
+
+                    "<dashboardId>": The data link is only accessible within the
+
+                    dashboard identified by the dashboard ID'
+                propertyName:
+                  title: Trigger key name
+                  type: string
+                  description: 'Name (key) of the metadata that''s the trigger of a data link. If you
+
+                    specify propertyValue, you must specify propertyName. In addition,
+
+                    propertyName is required for a data link to a dashboard
+
+                    link target.'
+                propertyValue:
+                  title: Property value for a key
+                  type: string
+                  description: 'Value of the metadata that''s the trigger of a data link. If you specify
+
+                    this property, you must also specify propertyName.'
+                targets:
+                  title: List of data link targets
+                  type: array
+                  items:
+                    anyOf:
+                    - title: Dashboard link target
+                      type: object
+                      required:
+                      - dashboardId
+                      - dashboardGroupId
+                      - name
+                      - type
+                      properties:
+                        dashboardGroupId:
+                          title: Target dashboard's dashboard group ID
+                          type: string
+                          description: ID of the dashboard link target's dashboard group
+                        dashboardGroupName:
+                          title: Dashboard link target's dashboard group name
+                          type: string
+                          description: 'User-assigned name of a link target dashboard''s dashboard group.
+
+                            Optional in a request; returned by the API in a response.'
+                        dashboardId:
+                          title: Target dashboard's ID
+                          type: string
+                          description: ID of the dashboard link target
+                        dashboardName:
+                          title: Target dashboard's name
+                          type: string
+                          description: 'User-assigned name of the dashboard link target.
+
+                            Optional in a request; returned by the API in a response.'
+                        isDefault:
+                          title: Default data link target flag
+                          type: boolean
+                          description: 'Flag that designates a target as the default for a data link
+
+                            object.'
+                        name:
+                          title: Target name
+                          type: string
+                          description: 'User-assigned target name. Use this value to differentiate
+
+                            between the link targets for a data link object.'
+                        type:
+                          title: Target type
+                          type: string
+                          enum:
+                          - INTERNAL_LINK
+                          - EXTERNAL_LINK
+                          - SPLUNK_LINK
+                          description: 'Target type designator, with three possible values:
+
+
+                            Internal link target: always "INTERNAL_LINK"
+
+                            External link target: always "EXTERNAL_LINK"
+
+                            Splunk link target: always "SPLUNK_LINK"'
+                      description: Properties of a dashboard link target.
+                    - title: External system URL link target
+                      type: object
+                      required:
+                      - timeFormat
+                      - type
+                      - url
+                      properties:
+                        isDefault:
+                          title: Default data link target flag
+                          type: boolean
+                          description: 'Flag that designates a target as the default for a data link
+
+                            object.'
+                        minimumTimeWindow:
+                          title: Minimum time window for an external search
+                          type: integer
+                          format: int64
+                          description: 'Sets an external link''s minimum time window.
+
+                            The value of minimumTimeWindow must be in milliseconds.
+
+                            To learn more, refer to the section
+
+                            Minimum time window.'
+                        name:
+                          title: Target name
+                          type: string
+                          description: 'User-assigned target name. Use this value to differentiate
+
+                            between the link targets for a data link object.'
+                        propertyKeyMapping:
+                          title: Map between Splunk Observability Cloud property keys and external system property names
+                          type: object
+                          description: "Describes the relationship between Splunk Observability Cloud metadata keys and external\n\
+                            system properties when the key names are different, in the form of a\nJSON object. The following\
+                            \ JSON demonstrates the syntax:\n{\n  \"<key_name\": \"external_system_property_name\"\n}"
+                        timeFormat:
+                          title: Format for start and end timestamp
+                          type: string
+                          enum:
+                          - ISO8601
+                          - Epoch
+                          - EpochSeconds
+                          description: 'Time format Splunk Observability Cloud uses to encode the minimum time window starting
+
+                            and ending timestamps on the link URL.
+
+                            You can choose one of three formats:
+
+
+                            "ISO8601": Timestamps are encoded using ISO8601 format.
+
+                            "Epoch": Timestamps are encoded in *nix time in milliseconds.
+
+                            "EpochSeconds": Timestamps are encoded in *nix time in seconds.
+
+                            Splunk link targets always use this format.'
+                        type:
+                          title: Target type
+                          type: string
+                          enum:
+                          - INTERNAL_LINK
+                          - EXTERNAL_LINK
+                          - SPLUNK_LINK
+                          description: 'Target type designator, with three possible values:
+
+
+                            Internal link target: always "INTERNAL_LINK"
+
+                            External link target: always "EXTERNAL_LINK"
+
+                            Splunk link target: always "SPLUNK_LINK"'
+                        url:
+                          title: URL of an external data link target
+                          type: string
+                          format: uri
+                          description: 'URL string for a Splunk instance or external system data link target.
+
+                            For an external system data link, you can specify a URL template.
+
+                            To learn more, refer to following sections:
+
+
+                            Splunk link targets
+
+                            External link targets'
+                      description: Properties of an external system URL link target
+                    - title: Splunk instance link target
+                      type: object
+                      required:
+                      - type
+                      - url
+                      - name
+                      properties:
+                        isDefault:
+                          title: Default data link target flag
+                          type: boolean
+                          description: 'Flag that designates a target as the default for a data link
+
+                            object.'
+                        minimumTimeWindow:
+                          title: Minimum time window for an external search
+                          type: integer
+                          format: int64
+                          description: 'Sets an external link''s minimum time window.
+
+                            The value of minimumTimeWindow must be in milliseconds.
+
+                            To learn more, refer to the section
+
+                            Minimum time window.'
+                        name:
+                          title: Target name
+                          type: string
+                          description: 'User-assigned target name. Use this value to differentiate
+
+                            between the link targets for a data link object.'
+                        propertyKeyMapping:
+                          title: Map between Splunk Observability Cloud property keys and external system property names
+                          type: object
+                          description: "Describes the relationship between Splunk Observability Cloud metadata keys and external\n\
+                            system properties when the key names are different, in the form of a\nJSON object. The following\
+                            \ JSON demonstrates the syntax:\n{\n  \"<key_name\": \"external_system_property_name\"\n}"
+                        timeFormat:
+                          title: Format for start and end timestamp
+                          type: string
+                          enum:
+                          - ISO8601
+                          - Epoch
+                          - EpochSeconds
+                          description: 'Time format Splunk Observability Cloud uses to encode the minimum time window starting
+
+                            and ending timestamps on the link URL.
+
+                            You can choose one of three formats:
+
+
+                            "ISO8601": Timestamps are encoded using ISO8601 format.
+
+                            "Epoch": Timestamps are encoded in *nix time in milliseconds.
+
+                            "EpochSeconds": Timestamps are encoded in *nix time in seconds.
+
+                            Splunk link targets always use this format.'
+                        type:
+                          title: Target type
+                          type: string
+                          enum:
+                          - INTERNAL_LINK
+                          - EXTERNAL_LINK
+                          - SPLUNK_LINK
+                          description: 'Target type designator, with three possible values:
+
+
+                            Internal link target: always "INTERNAL_LINK"
+
+                            External link target: always "EXTERNAL_LINK"
+
+                            Splunk link target: always "SPLUNK_LINK"'
+                      description: Properties of Splunk instance link target
+                  description: 'List of data link targets, in the form of a JSON array of
+
+                    JSON objects'
+              description: 'Request body for creating a data link object. The object can define
+
+                one or more link targets for a single trigger and data link context.'
+            examples:
+              example:
+                value:
+                  contextId: string
+                  propertyName: string
+                  propertyValue: string
+                  targets:
+                  - dashboardGroupId: string
+                    dashboardGroupName: string
+                    dashboardId: string
+                    dashboardName: string
+                    isDefault: true
+                    name: string
+                    type: INTERNAL_LINK
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Response body that contains a single data link object
+                type: object
+                properties:
+                  contextId:
+                    title: Data link context designator
+                    type: string
+                    description: 'String that identifies the context of the data link. The allowed values
+
+                      are:
+
+
+                      "global": The data link is globally accessible
+
+                      "<dashboardId>": The data link is only accessible within the
+
+                      dashboard identified by the dashboard ID'
+                  id:
+                    title: Data link identifier
+                    type: string
+                    description: ID of a data link object
+                  propertyName:
+                    title: Trigger key name
+                    type: string
+                    description: 'Name (key) of the metadata that''s the trigger of a data link. If you
+
+                      specify propertyValue, you must specify propertyName. In addition,
+
+                      propertyName is required for a data link to a dashboard
+
+                      link target.'
+                  propertyValue:
+                    title: Property value for a key
+                    type: string
+                    description: 'Value of the metadata that''s the trigger of a data link. If you specify
+
+                      this property, you must also specify propertyName.'
+                  targets:
+                    title: List of data link targets
+                    type: array
+                    items:
+                      anyOf:
+                      - title: Dashboard link target
+                        type: object
+                        required:
+                        - dashboardId
+                        - dashboardGroupId
+                        - name
+                        - type
+                        properties:
+                          dashboardGroupId:
+                            title: Target dashboard's dashboard group ID
+                            type: string
+                            description: ID of the dashboard link target's dashboard group
+                          dashboardGroupName:
+                            title: Dashboard link target's dashboard group name
+                            type: string
+                            description: 'User-assigned name of a link target dashboard''s dashboard group.
+
+                              Optional in a request; returned by the API in a response.'
+                          dashboardId:
+                            title: Target dashboard's ID
+                            type: string
+                            description: ID of the dashboard link target
+                          dashboardName:
+                            title: Target dashboard's name
+                            type: string
+                            description: 'User-assigned name of the dashboard link target.
+
+                              Optional in a request; returned by the API in a response.'
+                          isDefault:
+                            title: Default data link target flag
+                            type: boolean
+                            description: 'Flag that designates a target as the default for a data link
+
+                              object.'
+                          name:
+                            title: Target name
+                            type: string
+                            description: 'User-assigned target name. Use this value to differentiate
+
+                              between the link targets for a data link object.'
+                          type:
+                            title: Target type
+                            type: string
+                            enum:
+                            - INTERNAL_LINK
+                            - EXTERNAL_LINK
+                            - SPLUNK_LINK
+                            description: 'Target type designator, with three possible values:
+
+
+                              Internal link target: always "INTERNAL_LINK"
+
+                              External link target: always "EXTERNAL_LINK"
+
+                              Splunk link target: always "SPLUNK_LINK"'
+                        description: Properties of a dashboard link target.
+                      - title: External system URL link target
+                        type: object
+                        required:
+                        - timeFormat
+                        - type
+                        - url
+                        properties:
+                          isDefault:
+                            title: Default data link target flag
+                            type: boolean
+                            description: 'Flag that designates a target as the default for a data link
+
+                              object.'
+                          minimumTimeWindow:
+                            title: Minimum time window for an external search
+                            type: integer
+                            format: int64
+                            description: 'Sets an external link''s minimum time window.
+
+                              The value of minimumTimeWindow must be in milliseconds.
+
+                              To learn more, refer to the section
+
+                              Minimum time window.'
+                          name:
+                            title: Target name
+                            type: string
+                            description: 'User-assigned target name. Use this value to differentiate
+
+                              between the link targets for a data link object.'
+                          propertyKeyMapping:
+                            title: Map between Splunk Observability Cloud property keys and external system property names
+                            type: object
+                            description: "Describes the relationship between Splunk Observability Cloud metadata keys and\
+                              \ external\nsystem properties when the key names are different, in the form of a\nJSON object.\
+                              \ The following JSON demonstrates the syntax:\n{\n  \"<key_name\": \"external_system_property_name\"\
+                              \n}"
+                          timeFormat:
+                            title: Format for start and end timestamp
+                            type: string
+                            enum:
+                            - ISO8601
+                            - Epoch
+                            - EpochSeconds
+                            description: 'Time format Splunk Observability Cloud uses to encode the minimum time window starting
+
+                              and ending timestamps on the link URL.
+
+                              You can choose one of three formats:
+
+
+                              "ISO8601": Timestamps are encoded using ISO8601 format.
+
+                              "Epoch": Timestamps are encoded in *nix time in milliseconds.
+
+                              "EpochSeconds": Timestamps are encoded in *nix time in seconds.
+
+                              Splunk link targets always use this format.'
+                          type:
+                            title: Target type
+                            type: string
+                            enum:
+                            - INTERNAL_LINK
+                            - EXTERNAL_LINK
+                            - SPLUNK_LINK
+                            description: 'Target type designator, with three possible values:
+
+
+                              Internal link target: always "INTERNAL_LINK"
+
+                              External link target: always "EXTERNAL_LINK"
+
+                              Splunk link target: always "SPLUNK_LINK"'
+                          url:
+                            title: URL of an external data link target
+                            type: string
+                            format: uri
+                            description: 'URL string for a Splunk instance or external system data link target.
+
+                              For an external system data link, you can specify a URL template.
+
+                              To learn more, refer to following sections:
+
+
+                              Splunk link targets
+
+                              External link targets'
+                        description: Properties of an external system URL link target
+                      - title: Splunk instance link target
+                        type: object
+                        required:
+                        - type
+                        - url
+                        - name
+                        properties:
+                          isDefault:
+                            title: Default data link target flag
+                            type: boolean
+                            description: 'Flag that designates a target as the default for a data link
+
+                              object.'
+                          minimumTimeWindow:
+                            title: Minimum time window for an external search
+                            type: integer
+                            format: int64
+                            description: 'Sets an external link''s minimum time window.
+
+                              The value of minimumTimeWindow must be in milliseconds.
+
+                              To learn more, refer to the section
+
+                              Minimum time window.'
+                          name:
+                            title: Target name
+                            type: string
+                            description: 'User-assigned target name. Use this value to differentiate
+
+                              between the link targets for a data link object.'
+                          propertyKeyMapping:
+                            title: Map between Splunk Observability Cloud property keys and external system property names
+                            type: object
+                            description: "Describes the relationship between Splunk Observability Cloud metadata keys and\
+                              \ external\nsystem properties when the key names are different, in the form of a\nJSON object.\
+                              \ The following JSON demonstrates the syntax:\n{\n  \"<key_name\": \"external_system_property_name\"\
+                              \n}"
+                          timeFormat:
+                            title: Format for start and end timestamp
+                            type: string
+                            enum:
+                            - ISO8601
+                            - Epoch
+                            - EpochSeconds
+                            description: 'Time format Splunk Observability Cloud uses to encode the minimum time window starting
+
+                              and ending timestamps on the link URL.
+
+                              You can choose one of three formats:
+
+
+                              "ISO8601": Timestamps are encoded using ISO8601 format.
+
+                              "Epoch": Timestamps are encoded in *nix time in milliseconds.
+
+                              "EpochSeconds": Timestamps are encoded in *nix time in seconds.
+
+                              Splunk link targets always use this format.'
+                          type:
+                            title: Target type
+                            type: string
+                            enum:
+                            - INTERNAL_LINK
+                            - EXTERNAL_LINK
+                            - SPLUNK_LINK
+                            description: 'Target type designator, with three possible values:
+
+
+                              Internal link target: always "INTERNAL_LINK"
+
+                              External link target: always "EXTERNAL_LINK"
+
+                              Splunk link target: always "SPLUNK_LINK"'
+                        description: Properties of Splunk instance link target
+                    description: 'List of data link targets, in the form of a JSON array of
+
+                      JSON objects'
+                description: Single data link object, in the form of a JSON object
+              examples:
+                example:
+                  value:
+                    contextId: string
+                    id: string
+                    propertyName: string
+                    propertyValue: string
+                    targets:
+                    - dashboardGroupId: string
+                      dashboardGroupName: string
+                      dashboardId: string
+                      dashboardName: string
+                      isDefault: true
+                      name: string
+                      type: INTERNAL_LINK
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    title: HTTP response code
+                    type: integer
+                    format: int64
+                    example: 400
+                    description: HTTP response code returned by the API. Always 400
+                  message:
+                    title: Error message associated with HTTP response code 400
+                    type: string
+                    enum:
+                    - Cannot create multiple cross links for the same property-value combination
+                    - Cross link must have a target
+                    - Cross link may not have multiple default targets
+                    - Cross link targets must have a label
+                    - Invalid crosslink target dashboard group
+                    - Invalid crosslink target dashboard
+                    - urlTemplate is missing
+                    - urlTemplate is invalid
+                    - 'urlTemplate is invalid: <Error Message>'
+                    - timeFormat is invalid
+                    - minimumTimeWindow is invalid
+                    - instanceUrl is missing
+                    - instanceUrl is invalid
+                    - propertyKeyMapping key is empty
+                    - propertyKeyMapping value is empty
+              examples:
+                example:
+                  value:
+                    code: 400
+                    message: Cannot create multiple cross links for the same property-value combination
+      security:
+      - SessionToken: []
+      tags:
+      - Data links
+  /crosslink/{id}:
+    get:
+      summary: Retrieve Data Link ID
+      description: 'Retrieves properties of the data link specified by the {id} path
+
+        parameter'
+      parameters:
+      - name: id
+        in: path
+        description: ID of an existing data link
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Response body that contains a single data link object
+                type: object
+                properties:
+                  contextId:
+                    title: Data link context designator
+                    type: string
+                    description: 'String that identifies the context of the data link. The allowed values
+
+                      are:
+
+
+                      "global": The data link is globally accessible
+
+                      "<dashboardId>": The data link is only accessible within the
+
+                      dashboard identified by the dashboard ID'
+                  id:
+                    title: Data link identifier
+                    type: string
+                    description: ID of a data link object
+                  propertyName:
+                    title: Trigger key name
+                    type: string
+                    description: 'Name (key) of the metadata that''s the trigger of a data link. If you
+
+                      specify propertyValue, you must specify propertyName. In addition,
+
+                      propertyName is required for a data link to a dashboard
+
+                      link target.'
+                  propertyValue:
+                    title: Property value for a key
+                    type: string
+                    description: 'Value of the metadata that''s the trigger of a data link. If you specify
+
+                      this property, you must also specify propertyName.'
+                  targets:
+                    title: List of data link targets
+                    type: array
+                    items:
+                      anyOf:
+                      - title: Dashboard link target
+                        type: object
+                        required:
+                        - dashboardId
+                        - dashboardGroupId
+                        - name
+                        - type
+                        properties:
+                          dashboardGroupId:
+                            title: Target dashboard's dashboard group ID
+                            type: string
+                            description: ID of the dashboard link target's dashboard group
+                          dashboardGroupName:
+                            title: Dashboard link target's dashboard group name
+                            type: string
+                            description: 'User-assigned name of a link target dashboard''s dashboard group.
+
+                              Optional in a request; returned by the API in a response.'
+                          dashboardId:
+                            title: Target dashboard's ID
+                            type: string
+                            description: ID of the dashboard link target
+                          dashboardName:
+                            title: Target dashboard's name
+                            type: string
+                            description: 'User-assigned name of the dashboard link target.
+
+                              Optional in a request; returned by the API in a response.'
+                          isDefault:
+                            title: Default data link target flag
+                            type: boolean
+                            description: 'Flag that designates a target as the default for a data link
+
+                              object.'
+                          name:
+                            title: Target name
+                            type: string
+                            description: 'User-assigned target name. Use this value to differentiate
+
+                              between the link targets for a data link object.'
+                          type:
+                            title: Target type
+                            type: string
+                            enum:
+                            - INTERNAL_LINK
+                            - EXTERNAL_LINK
+                            - SPLUNK_LINK
+                            description: 'Target type designator, with three possible values:
+
+
+                              Internal link target: always "INTERNAL_LINK"
+
+                              External link target: always "EXTERNAL_LINK"
+
+                              Splunk link target: always "SPLUNK_LINK"'
+                        description: Properties of a dashboard link target.
+                      - title: External system URL link target
+                        type: object
+                        required:
+                        - timeFormat
+                        - type
+                        - url
+                        properties:
+                          isDefault:
+                            title: Default data link target flag
+                            type: boolean
+                            description: 'Flag that designates a target as the default for a data link
+
+                              object.'
+                          minimumTimeWindow:
+                            title: Minimum time window for an external search
+                            type: integer
+                            format: int64
+                            description: 'Sets an external link''s minimum time window.
+
+                              The value of minimumTimeWindow must be in milliseconds.
+
+                              To learn more, refer to the section
+
+                              Minimum time window.'
+                          name:
+                            title: Target name
+                            type: string
+                            description: 'User-assigned target name. Use this value to differentiate
+
+                              between the link targets for a data link object.'
+                          propertyKeyMapping:
+                            title: Map between Splunk Observability Cloud property keys and external system property names
+                            type: object
+                            description: "Describes the relationship between Splunk Observability Cloud metadata keys and\
+                              \ external\nsystem properties when the key names are different, in the form of a\nJSON object.\
+                              \ The following JSON demonstrates the syntax:\n{\n  \"<key_name\": \"external_system_property_name\"\
+                              \n}"
+                          timeFormat:
+                            title: Format for start and end timestamp
+                            type: string
+                            enum:
+                            - ISO8601
+                            - Epoch
+                            - EpochSeconds
+                            description: 'Time format Splunk Observability Cloud uses to encode the minimum time window starting
+
+                              and ending timestamps on the link URL.
+
+                              You can choose one of three formats:
+
+
+                              "ISO8601": Timestamps are encoded using ISO8601 format.
+
+                              "Epoch": Timestamps are encoded in *nix time in milliseconds.
+
+                              "EpochSeconds": Timestamps are encoded in *nix time in seconds.
+
+                              Splunk link targets always use this format.'
+                          type:
+                            title: Target type
+                            type: string
+                            enum:
+                            - INTERNAL_LINK
+                            - EXTERNAL_LINK
+                            - SPLUNK_LINK
+                            description: 'Target type designator, with three possible values:
+
+
+                              Internal link target: always "INTERNAL_LINK"
+
+                              External link target: always "EXTERNAL_LINK"
+
+                              Splunk link target: always "SPLUNK_LINK"'
+                          url:
+                            title: URL of an external data link target
+                            type: string
+                            format: uri
+                            description: 'URL string for a Splunk instance or external system data link target.
+
+                              For an external system data link, you can specify a URL template.
+
+                              To learn more, refer to following sections:
+
+
+                              Splunk link targets
+
+                              External link targets'
+                        description: Properties of an external system URL link target
+                      - title: Splunk instance link target
+                        type: object
+                        required:
+                        - type
+                        - url
+                        - name
+                        properties:
+                          isDefault:
+                            title: Default data link target flag
+                            type: boolean
+                            description: 'Flag that designates a target as the default for a data link
+
+                              object.'
+                          minimumTimeWindow:
+                            title: Minimum time window for an external search
+                            type: integer
+                            format: int64
+                            description: 'Sets an external link''s minimum time window.
+
+                              The value of minimumTimeWindow must be in milliseconds.
+
+                              To learn more, refer to the section
+
+                              Minimum time window.'
+                          name:
+                            title: Target name
+                            type: string
+                            description: 'User-assigned target name. Use this value to differentiate
+
+                              between the link targets for a data link object.'
+                          propertyKeyMapping:
+                            title: Map between Splunk Observability Cloud property keys and external system property names
+                            type: object
+                            description: "Describes the relationship between Splunk Observability Cloud metadata keys and\
+                              \ external\nsystem properties when the key names are different, in the form of a\nJSON object.\
+                              \ The following JSON demonstrates the syntax:\n{\n  \"<key_name\": \"external_system_property_name\"\
+                              \n}"
+                          timeFormat:
+                            title: Format for start and end timestamp
+                            type: string
+                            enum:
+                            - ISO8601
+                            - Epoch
+                            - EpochSeconds
+                            description: 'Time format Splunk Observability Cloud uses to encode the minimum time window starting
+
+                              and ending timestamps on the link URL.
+
+                              You can choose one of three formats:
+
+
+                              "ISO8601": Timestamps are encoded using ISO8601 format.
+
+                              "Epoch": Timestamps are encoded in *nix time in milliseconds.
+
+                              "EpochSeconds": Timestamps are encoded in *nix time in seconds.
+
+                              Splunk link targets always use this format.'
+                          type:
+                            title: Target type
+                            type: string
+                            enum:
+                            - INTERNAL_LINK
+                            - EXTERNAL_LINK
+                            - SPLUNK_LINK
+                            description: 'Target type designator, with three possible values:
+
+
+                              Internal link target: always "INTERNAL_LINK"
+
+                              External link target: always "EXTERNAL_LINK"
+
+                              Splunk link target: always "SPLUNK_LINK"'
+                        description: Properties of Splunk instance link target
+                    description: 'List of data link targets, in the form of a JSON array of
+
+                      JSON objects'
+                description: Single data link object, in the form of a JSON object
+              examples:
+                example:
+                  value:
+                    contextId: string
+                    id: string
+                    propertyName: string
+                    propertyValue: string
+                    targets:
+                    - dashboardGroupId: string
+                      dashboardGroupName: string
+                      dashboardId: string
+                      dashboardName: string
+                      isDefault: true
+                      name: string
+                      type: INTERNAL_LINK
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    title: HTTP response code
+                    type: integer
+                    format: int64
+                    example: 404
+                    description: HTTP response code returned by the API. Always 404.
+                  message:
+                    title: Error message
+                    type: string
+                    enum:
+                    - Cross link not found
+                    example: Cross link not found
+                    description: Error message returned by the API. Always "Cross link not found".
+              examples:
+                example:
+                  value:
+                    code: 404
+                    message: Cross link not found
+      security:
+      - SessionToken: []
+      tags:
+      - Data links
+    put:
+      summary: Update Data Link ID
+      description: 'Updates the properties of the data link specified by the {id} path
+
+        parameter. This method uses overwrite semantics. If you don''t
+
+        specify an existing property in the request body, the API either deletes
+
+        the property from the data link or sets it to null. To keep existing
+
+        values:
+
+
+        Use GET /v2/crosslink/{id} to retrieve the values.
+
+        Update the response body with the new and updated values you want.
+
+        Use PUT /v2/crosslink/{id} to update the data link.'
+      parameters:
+      - name: id
+        in: path
+        description: ID of an existing data link
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: 'Authentication token. Must be a session token (User API access
+
+          token) associated with an administrator.'
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: Request body for Create Data Link
+              type: object
+              required:
+              - contextId
+              properties:
+                contextId:
+                  title: Data link context designator
+                  type: string
+                  description: 'String that identifies the context of the data link. The allowed values
+
+                    are:
+
+
+                    "global": The data link is globally accessible
+
+                    "<dashboardId>": The data link is only accessible within the
+
+                    dashboard identified by the dashboard ID'
+                propertyName:
+                  title: Trigger key name
+                  type: string
+                  description: 'Name (key) of the metadata that''s the trigger of a data link. If you
+
+                    specify propertyValue, you must specify propertyName. In addition,
+
+                    propertyName is required for a data link to a dashboard
+
+                    link target.'
+                propertyValue:
+                  title: Property value for a key
+                  type: string
+                  description: 'Value of the metadata that''s the trigger of a data link. If you specify
+
+                    this property, you must also specify propertyName.'
+                targets:
+                  title: List of data link targets
+                  type: array
+                  items:
+                    anyOf:
+                    - title: Dashboard link target
+                      type: object
+                      required:
+                      - dashboardId
+                      - dashboardGroupId
+                      - name
+                      - type
+                      properties:
+                        dashboardGroupId:
+                          title: Target dashboard's dashboard group ID
+                          type: string
+                          description: ID of the dashboard link target's dashboard group
+                        dashboardGroupName:
+                          title: Dashboard link target's dashboard group name
+                          type: string
+                          description: 'User-assigned name of a link target dashboard''s dashboard group.
+
+                            Optional in a request; returned by the API in a response.'
+                        dashboardId:
+                          title: Target dashboard's ID
+                          type: string
+                          description: ID of the dashboard link target
+                        dashboardName:
+                          title: Target dashboard's name
+                          type: string
+                          description: 'User-assigned name of the dashboard link target.
+
+                            Optional in a request; returned by the API in a response.'
+                        isDefault:
+                          title: Default data link target flag
+                          type: boolean
+                          description: 'Flag that designates a target as the default for a data link
+
+                            object.'
+                        name:
+                          title: Target name
+                          type: string
+                          description: 'User-assigned target name. Use this value to differentiate
+
+                            between the link targets for a data link object.'
+                        type:
+                          title: Target type
+                          type: string
+                          enum:
+                          - INTERNAL_LINK
+                          - EXTERNAL_LINK
+                          - SPLUNK_LINK
+                          description: 'Target type designator, with three possible values:
+
+
+                            Internal link target: always "INTERNAL_LINK"
+
+                            External link target: always "EXTERNAL_LINK"
+
+                            Splunk link target: always "SPLUNK_LINK"'
+                      description: Properties of a dashboard link target.
+                    - title: External system URL link target
+                      type: object
+                      required:
+                      - timeFormat
+                      - type
+                      - url
+                      properties:
+                        isDefault:
+                          title: Default data link target flag
+                          type: boolean
+                          description: 'Flag that designates a target as the default for a data link
+
+                            object.'
+                        minimumTimeWindow:
+                          title: Minimum time window for an external search
+                          type: integer
+                          format: int64
+                          description: 'Sets an external link''s minimum time window.
+
+                            The value of minimumTimeWindow must be in milliseconds.
+
+                            To learn more, refer to the section
+
+                            Minimum time window.'
+                        name:
+                          title: Target name
+                          type: string
+                          description: 'User-assigned target name. Use this value to differentiate
+
+                            between the link targets for a data link object.'
+                        propertyKeyMapping:
+                          title: Map between Splunk Observability Cloud property keys and external system property names
+                          type: object
+                          description: "Describes the relationship between Splunk Observability Cloud metadata keys and external\n\
+                            system properties when the key names are different, in the form of a\nJSON object. The following\
+                            \ JSON demonstrates the syntax:\n{\n  \"<key_name\": \"external_system_property_name\"\n}"
+                        timeFormat:
+                          title: Format for start and end timestamp
+                          type: string
+                          enum:
+                          - ISO8601
+                          - Epoch
+                          - EpochSeconds
+                          description: 'Time format Splunk Observability Cloud uses to encode the minimum time window starting
+
+                            and ending timestamps on the link URL.
+
+                            You can choose one of three formats:
+
+
+                            "ISO8601": Timestamps are encoded using ISO8601 format.
+
+                            "Epoch": Timestamps are encoded in *nix time in milliseconds.
+
+                            "EpochSeconds": Timestamps are encoded in *nix time in seconds.
+
+                            Splunk link targets always use this format.'
+                        type:
+                          title: Target type
+                          type: string
+                          enum:
+                          - INTERNAL_LINK
+                          - EXTERNAL_LINK
+                          - SPLUNK_LINK
+                          description: 'Target type designator, with three possible values:
+
+
+                            Internal link target: always "INTERNAL_LINK"
+
+                            External link target: always "EXTERNAL_LINK"
+
+                            Splunk link target: always "SPLUNK_LINK"'
+                        url:
+                          title: URL of an external data link target
+                          type: string
+                          format: uri
+                          description: 'URL string for a Splunk instance or external system data link target.
+
+                            For an external system data link, you can specify a URL template.
+
+                            To learn more, refer to following sections:
+
+
+                            Splunk link targets
+
+                            External link targets'
+                      description: Properties of an external system URL link target
+                    - title: Splunk instance link target
+                      type: object
+                      required:
+                      - type
+                      - url
+                      - name
+                      properties:
+                        isDefault:
+                          title: Default data link target flag
+                          type: boolean
+                          description: 'Flag that designates a target as the default for a data link
+
+                            object.'
+                        minimumTimeWindow:
+                          title: Minimum time window for an external search
+                          type: integer
+                          format: int64
+                          description: 'Sets an external link''s minimum time window.
+
+                            The value of minimumTimeWindow must be in milliseconds.
+
+                            To learn more, refer to the section
+
+                            Minimum time window.'
+                        name:
+                          title: Target name
+                          type: string
+                          description: 'User-assigned target name. Use this value to differentiate
+
+                            between the link targets for a data link object.'
+                        propertyKeyMapping:
+                          title: Map between Splunk Observability Cloud property keys and external system property names
+                          type: object
+                          description: "Describes the relationship between Splunk Observability Cloud metadata keys and external\n\
+                            system properties when the key names are different, in the form of a\nJSON object. The following\
+                            \ JSON demonstrates the syntax:\n{\n  \"<key_name\": \"external_system_property_name\"\n}"
+                        timeFormat:
+                          title: Format for start and end timestamp
+                          type: string
+                          enum:
+                          - ISO8601
+                          - Epoch
+                          - EpochSeconds
+                          description: 'Time format Splunk Observability Cloud uses to encode the minimum time window starting
+
+                            and ending timestamps on the link URL.
+
+                            You can choose one of three formats:
+
+
+                            "ISO8601": Timestamps are encoded using ISO8601 format.
+
+                            "Epoch": Timestamps are encoded in *nix time in milliseconds.
+
+                            "EpochSeconds": Timestamps are encoded in *nix time in seconds.
+
+                            Splunk link targets always use this format.'
+                        type:
+                          title: Target type
+                          type: string
+                          enum:
+                          - INTERNAL_LINK
+                          - EXTERNAL_LINK
+                          - SPLUNK_LINK
+                          description: 'Target type designator, with three possible values:
+
+
+                            Internal link target: always "INTERNAL_LINK"
+
+                            External link target: always "EXTERNAL_LINK"
+
+                            Splunk link target: always "SPLUNK_LINK"'
+                      description: Properties of Splunk instance link target
+                  description: 'List of data link targets, in the form of a JSON array of
+
+                    JSON objects'
+              description: 'Request body for creating a data link object. The object can define
+
+                one or more link targets for a single trigger and data link context.'
+            examples:
+              example:
+                value:
+                  contextId: string
+                  propertyName: string
+                  propertyValue: string
+                  targets:
+                  - dashboardGroupId: string
+                    dashboardGroupName: string
+                    dashboardId: string
+                    dashboardName: string
+                    isDefault: true
+                    name: string
+                    type: INTERNAL_LINK
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Response body that contains a single data link object
+                type: object
+                properties:
+                  contextId:
+                    title: Data link context designator
+                    type: string
+                    description: 'String that identifies the context of the data link. The allowed values
+
+                      are:
+
+
+                      "global": The data link is globally accessible
+
+                      "<dashboardId>": The data link is only accessible within the
+
+                      dashboard identified by the dashboard ID'
+                  id:
+                    title: Data link identifier
+                    type: string
+                    description: ID of a data link object
+                  propertyName:
+                    title: Trigger key name
+                    type: string
+                    description: 'Name (key) of the metadata that''s the trigger of a data link. If you
+
+                      specify propertyValue, you must specify propertyName. In addition,
+
+                      propertyName is required for a data link to a dashboard
+
+                      link target.'
+                  propertyValue:
+                    title: Property value for a key
+                    type: string
+                    description: 'Value of the metadata that''s the trigger of a data link. If you specify
+
+                      this property, you must also specify propertyName.'
+                  targets:
+                    title: List of data link targets
+                    type: array
+                    items:
+                      anyOf:
+                      - title: Dashboard link target
+                        type: object
+                        required:
+                        - dashboardId
+                        - dashboardGroupId
+                        - name
+                        - type
+                        properties:
+                          dashboardGroupId:
+                            title: Target dashboard's dashboard group ID
+                            type: string
+                            description: ID of the dashboard link target's dashboard group
+                          dashboardGroupName:
+                            title: Dashboard link target's dashboard group name
+                            type: string
+                            description: 'User-assigned name of a link target dashboard''s dashboard group.
+
+                              Optional in a request; returned by the API in a response.'
+                          dashboardId:
+                            title: Target dashboard's ID
+                            type: string
+                            description: ID of the dashboard link target
+                          dashboardName:
+                            title: Target dashboard's name
+                            type: string
+                            description: 'User-assigned name of the dashboard link target.
+
+                              Optional in a request; returned by the API in a response.'
+                          isDefault:
+                            title: Default data link target flag
+                            type: boolean
+                            description: 'Flag that designates a target as the default for a data link
+
+                              object.'
+                          name:
+                            title: Target name
+                            type: string
+                            description: 'User-assigned target name. Use this value to differentiate
+
+                              between the link targets for a data link object.'
+                          type:
+                            title: Target type
+                            type: string
+                            enum:
+                            - INTERNAL_LINK
+                            - EXTERNAL_LINK
+                            - SPLUNK_LINK
+                            description: 'Target type designator, with three possible values:
+
+
+                              Internal link target: always "INTERNAL_LINK"
+
+                              External link target: always "EXTERNAL_LINK"
+
+                              Splunk link target: always "SPLUNK_LINK"'
+                        description: Properties of a dashboard link target.
+                      - title: External system URL link target
+                        type: object
+                        required:
+                        - timeFormat
+                        - type
+                        - url
+                        properties:
+                          isDefault:
+                            title: Default data link target flag
+                            type: boolean
+                            description: 'Flag that designates a target as the default for a data link
+
+                              object.'
+                          minimumTimeWindow:
+                            title: Minimum time window for an external search
+                            type: integer
+                            format: int64
+                            description: 'Sets an external link''s minimum time window.
+
+                              The value of minimumTimeWindow must be in milliseconds.
+
+                              To learn more, refer to the section
+
+                              Minimum time window.'
+                          name:
+                            title: Target name
+                            type: string
+                            description: 'User-assigned target name. Use this value to differentiate
+
+                              between the link targets for a data link object.'
+                          propertyKeyMapping:
+                            title: Map between Splunk Observability Cloud property keys and external system property names
+                            type: object
+                            description: "Describes the relationship between Splunk Observability Cloud metadata keys and\
+                              \ external\nsystem properties when the key names are different, in the form of a\nJSON object.\
+                              \ The following JSON demonstrates the syntax:\n{\n  \"<key_name\": \"external_system_property_name\"\
+                              \n}"
+                          timeFormat:
+                            title: Format for start and end timestamp
+                            type: string
+                            enum:
+                            - ISO8601
+                            - Epoch
+                            - EpochSeconds
+                            description: 'Time format Splunk Observability Cloud uses to encode the minimum time window starting
+
+                              and ending timestamps on the link URL.
+
+                              You can choose one of three formats:
+
+
+                              "ISO8601": Timestamps are encoded using ISO8601 format.
+
+                              "Epoch": Timestamps are encoded in *nix time in milliseconds.
+
+                              "EpochSeconds": Timestamps are encoded in *nix time in seconds.
+
+                              Splunk link targets always use this format.'
+                          type:
+                            title: Target type
+                            type: string
+                            enum:
+                            - INTERNAL_LINK
+                            - EXTERNAL_LINK
+                            - SPLUNK_LINK
+                            description: 'Target type designator, with three possible values:
+
+
+                              Internal link target: always "INTERNAL_LINK"
+
+                              External link target: always "EXTERNAL_LINK"
+
+                              Splunk link target: always "SPLUNK_LINK"'
+                          url:
+                            title: URL of an external data link target
+                            type: string
+                            format: uri
+                            description: 'URL string for a Splunk instance or external system data link target.
+
+                              For an external system data link, you can specify a URL template.
+
+                              To learn more, refer to following sections:
+
+
+                              Splunk link targets
+
+                              External link targets'
+                        description: Properties of an external system URL link target
+                      - title: Splunk instance link target
+                        type: object
+                        required:
+                        - type
+                        - url
+                        - name
+                        properties:
+                          isDefault:
+                            title: Default data link target flag
+                            type: boolean
+                            description: 'Flag that designates a target as the default for a data link
+
+                              object.'
+                          minimumTimeWindow:
+                            title: Minimum time window for an external search
+                            type: integer
+                            format: int64
+                            description: 'Sets an external link''s minimum time window.
+
+                              The value of minimumTimeWindow must be in milliseconds.
+
+                              To learn more, refer to the section
+
+                              Minimum time window.'
+                          name:
+                            title: Target name
+                            type: string
+                            description: 'User-assigned target name. Use this value to differentiate
+
+                              between the link targets for a data link object.'
+                          propertyKeyMapping:
+                            title: Map between Splunk Observability Cloud property keys and external system property names
+                            type: object
+                            description: "Describes the relationship between Splunk Observability Cloud metadata keys and\
+                              \ external\nsystem properties when the key names are different, in the form of a\nJSON object.\
+                              \ The following JSON demonstrates the syntax:\n{\n  \"<key_name\": \"external_system_property_name\"\
+                              \n}"
+                          timeFormat:
+                            title: Format for start and end timestamp
+                            type: string
+                            enum:
+                            - ISO8601
+                            - Epoch
+                            - EpochSeconds
+                            description: 'Time format Splunk Observability Cloud uses to encode the minimum time window starting
+
+                              and ending timestamps on the link URL.
+
+                              You can choose one of three formats:
+
+
+                              "ISO8601": Timestamps are encoded using ISO8601 format.
+
+                              "Epoch": Timestamps are encoded in *nix time in milliseconds.
+
+                              "EpochSeconds": Timestamps are encoded in *nix time in seconds.
+
+                              Splunk link targets always use this format.'
+                          type:
+                            title: Target type
+                            type: string
+                            enum:
+                            - INTERNAL_LINK
+                            - EXTERNAL_LINK
+                            - SPLUNK_LINK
+                            description: 'Target type designator, with three possible values:
+
+
+                              Internal link target: always "INTERNAL_LINK"
+
+                              External link target: always "EXTERNAL_LINK"
+
+                              Splunk link target: always "SPLUNK_LINK"'
+                        description: Properties of Splunk instance link target
+                    description: 'List of data link targets, in the form of a JSON array of
+
+                      JSON objects'
+                description: Single data link object, in the form of a JSON object
+              examples:
+                example:
+                  value:
+                    contextId: string
+                    id: string
+                    propertyName: string
+                    propertyValue: string
+                    targets:
+                    - dashboardGroupId: string
+                      dashboardGroupName: string
+                      dashboardId: string
+                      dashboardName: string
+                      isDefault: true
+                      name: string
+                      type: INTERNAL_LINK
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    title: HTTP response code
+                    type: integer
+                    format: int64
+                    example: 400
+                    description: HTTP response code returned by the API. Always 400
+                  message:
+                    title: Error message associated with HTTP response code 400
+                    type: string
+                    enum:
+                    - Cannot create multiple cross links for the same property-value combination
+                    - Cross link must have a target
+                    - Cross link may not have multiple default targets
+                    - Cross link targets must have a label
+                    - Invalid crosslink target dashboard group
+                    - Invalid crosslink target dashboard
+                    - urlTemplate is missing
+                    - urlTemplate is invalid
+                    - 'urlTemplate is invalid: <Error Message>'
+                    - timeFormat is invalid
+                    - minimumTimeWindow is invalid
+                    - instanceUrl is missing
+                    - instanceUrl is invalid
+                    - propertyKeyMapping key is empty
+                    - propertyKeyMapping value is empty
+              examples:
+                example:
+                  value:
+                    code: 400
+                    message: Cannot create multiple cross links for the same property-value combination
+      security:
+      - SessionToken: []
+      tags:
+      - Data links
+    delete:
+      description: 'Deletes the data link specified by the {id} path parameter. This
+
+        method doesn''t use a request body. It returns ''204'' if the method
+
+        succeeds.'
+      parameters:
+      - name: id
+        in: path
+        description: ID of an existing data link
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: 'Authentication token. Must be a session token (User API access
+
+          token) associated with an administrator.'
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: HTTP 204 response
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    title: HTTP response code
+                    type: integer
+                    format: int64
+                    example: 404
+                    description: HTTP response code returned by the API. Always 404.
+                  message:
+                    title: Error message
+                    type: string
+                    enum:
+                    - Cross link not found
+                    example: Cross link not found
+                    description: Error message returned by the API. Always "Cross link not found".
+              examples:
+                example:
+                  value:
+                    code: 404
+                    message: Cross link not found
+      security:
+      - SessionToken: []
+      tags:
+      - Data links

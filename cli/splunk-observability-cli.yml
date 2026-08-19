@@ -1,0 +1,40 @@
+generated: '2026-08-19'
+method: searched
+source: https://github.com/signalfx/splunk-rum-cli, https://www.npmjs.com/package/@splunk/rum-cli
+note: >-
+  Splunk ships no general-purpose CLI for the Splunk Observability Cloud control-plane API. There
+  is no `splunk-o11y` or `signalfx` command that wraps charts, dashboards, detectors or synthetics
+  — infrastructure-as-code is expected to go through the Terraform provider
+  (splunk-terraform/signalfx, catalogued in packages/) instead. The one first-party CLI that exists
+  is narrow: it uploads symbolication artifacts to the RUM backend.
+clis:
+  - name: splunk-rum
+    package: "@splunk/rum-cli"
+    registry: npm
+    version: 1.0.1
+    published: '2026-07-20'
+    install:
+      - npm install -g "@splunk/rum-cli"
+    repository: https://github.com/signalfx/splunk-rum-cli
+    docs: https://quickdraw.splunk.com/redirect/?product=Observability&location=rum.buildintegration&version=current
+    license: Apache-2.0
+    status: under development
+    status_note: The repository README carries an "under development" status badge.
+    purpose: >-
+      Uploads Android mapping files, iOS dSYM files and browser source map files to the Splunk
+      Observability Cloud backend so RUM can deobfuscate and symbolicate stack traces.
+    capabilities:
+      - Upload and list Android Proguard mapping files
+      - Upload and list iOS dSYM mapping files
+      - Perform JavaScript bundle modifications to enable automatic source mapping
+      - Upload JavaScript source map files
+    discover_commands: Run `splunk-rum` with no arguments for the command overview.
+retired:
+  - name: signalflow-cli
+    repository: https://github.com/signalfx/signalflow-cli
+    status: archived
+    last_push: '2021-12-20'
+    registry: none
+    note: >-
+      Python command-line client for SignalFlow Analytics. Archived; not published to PyPI under
+      this name. Recorded as history, not as an option.

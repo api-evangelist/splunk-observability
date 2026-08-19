@@ -1,0 +1,21 @@
+generated: '2026-08-19'
+method: searched
+source: https://www.splunk.com/en_us/products/pricing/observability.html, https://www.splunk.com/en_us/download/o11y-cloud-free-trial.html
+has_sandbox: false
+note: >-
+  Splunk Observability Cloud has NO sandbox or test mode. There is no test-vs-live key prefix, no
+  magic test identifier, no fixture or trigger tooling, and no time-simulation facility. The only
+  non-production path Splunk offers is a free trial of the real product, which provisions a real
+  organization in a real realm against real telemetry. Every token is a live token: an org token
+  and a session token are distinguished by lifetime and scope, not by environment.
+free_trial:
+  offered: true
+  url: https://www.splunk.com/en_us/download/o11y-cloud-free-trial.html
+  note: A free trial is advertised on every plan on the pricing page.
+test_credentials: []
+test_values: []
+implication_for_agents: >-
+  There is no safe rehearsal environment. Because there is also no idempotency contract (see
+  conventions/), an agent that retries a create against Splunk Observability Cloud creates a second
+  real object in a real organization. Validate destructive flows against a trial organization, and
+  prefer PUT /{id} over repeated POST.

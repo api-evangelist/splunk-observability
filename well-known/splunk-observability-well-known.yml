@@ -1,0 +1,71 @@
+generated: '2026-08-19'
+method: searched
+source: probed /.well-known/* on every host named by apis.yml and by the OpenAPI servers[] blocks
+note: >-
+  Only splunk.com serves a real /.well-known/ document (an RFC 9116 security.txt, PGP-signed).
+  The API hosts (api./ingest./backfill./stream.<REALM>.observability.splunkcloud.com and the legacy
+  signalfx.com hosts) return a JSON 404 for every well-known path. The developer portal
+  dev.splunk.com is a soft-200 farm: every path, including invented ones, returns an identical
+  6,638-byte Next.js shell with content-type text/html, so its 200s are NOT documents and are
+  recorded as misses.
+hosts:
+  - host: https://www.splunk.com
+    documents:
+      - path: /.well-known/security.txt
+        status: 200
+        content_type: text/plain; charset=utf-8
+        file: splunk-observability-security.txt
+      - {path: /.well-known/openid-configuration, status: 404}
+      - {path: /.well-known/oauth-authorization-server, status: 404}
+      - {path: /.well-known/oauth-protected-resource, status: 404}
+      - {path: /.well-known/api-catalog, status: 404}
+      - {path: /.well-known/ai-plugin.json, status: 404}
+      - {path: /.well-known/agent-card.json, status: 404}
+      - {path: /.well-known/agent.json, status: 404}
+      - {path: /llms.txt, status: 404}
+  - host: https://api.us0.observability.splunkcloud.com
+    documents:
+      - {path: /.well-known/security.txt, status: 404}
+      - {path: /.well-known/openid-configuration, status: 404}
+      - {path: /.well-known/oauth-authorization-server, status: 404}
+      - {path: /.well-known/oauth-protected-resource, status: 404}
+      - {path: /.well-known/api-catalog, status: 404}
+      - {path: /.well-known/ai-plugin.json, status: 404}
+      - {path: /.well-known/agent-card.json, status: 404}
+      - {path: /.well-known/agent.json, status: 404}
+      - {path: /llms.txt, status: 404}
+  - host: https://api.us1.signalfx.com
+    documents:
+      - {path: /.well-known/security.txt, status: 404}
+      - {path: /.well-known/oauth-authorization-server, status: 404}
+      - {path: /.well-known/oauth-protected-resource, status: 404}
+      - {path: /.well-known/api-catalog, status: 404}
+      - {path: /.well-known/agent-card.json, status: 404}
+      - {path: /.well-known/agent.json, status: 404}
+      - {path: /llms.txt, status: 404}
+  - host: https://app.us1.signalfx.com
+    documents:
+      - {path: /.well-known/security.txt, status: 404}
+      - {path: /.well-known/agent-card.json, status: 404}
+      - {path: /.well-known/agent.json, status: 404}
+      - {path: /llms.txt, status: 404}
+  - host: https://dev.splunk.com
+    note: >-
+      Every path returns HTTP 200 with the same 6,638-byte SPA shell (verified against the invented
+      control path /observability/nonsense-invented-path-xyz/). Treated as a miss on every path.
+    documents:
+      - {path: /.well-known/security.txt, status: 200, soft_404: true, content_type: text/html}
+      - {path: /.well-known/agent-card.json, status: 200, soft_404: true, content_type: text/html}
+      - {path: /.well-known/agent.json, status: 200, soft_404: true, content_type: text/html}
+      - {path: /llms.txt, status: 200, soft_404: true, content_type: text/html}
+  - host: https://region-pdx10.api.scs.splunk.com
+    note: MCP gateway host; the well-known paths answer HTTP 400.
+    documents:
+      - {path: /.well-known/oauth-authorization-server, status: 400}
+      - {path: /.well-known/oauth-protected-resource, status: 400}
+      - {path: /.well-known/agent-card.json, status: 400}
+a2a_agent_card:
+  found: false
+  note: >-
+    No /.well-known/agent-card.json or /.well-known/agent.json was found on any host. No a2a/
+    artifact was written — an agent card is only ever recorded when the provider serves one.

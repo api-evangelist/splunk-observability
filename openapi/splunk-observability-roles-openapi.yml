@@ -1,0 +1,442 @@
+openapi: 3.0.3
+info:
+  title: Splunk Observability Cloud — Role
+  version: 1.0.0
+  description: 'API for assigning, retrieving, and removing roles associated with an organization, user, or token.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You have to have the Splunk Observability Cloud admin role to use the PATCH /roles/assign and PATCH /roles/dismiss operations.
+
+    You have to have the Splunk Observability Cloud admin or power role to use the GET /roles and GET /roles/{roleId} operations.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference
+      pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's.
+      Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset
+      path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2
+  description: Role API endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.
+paths:
+  /role:
+    get:
+      summary: Retrieve Roles
+      description: 'Get all the roles that you''ve defined for your organization, in the form of a JSON object. You can only
+        make this
+
+        request if you''re an admin of the organization.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: 'Format of the request payload. The only allowed value is
+
+          ''application/json'''
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: Authentication token. Can be a session token (user API access token) or an organization access token
+          with authScope set to API.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  title: Properties of a role
+                  type: object
+                  properties:
+                    capabilities:
+                      type: array
+                      items:
+                        type: string
+                        example: EXAMPLE_CAPABILITY1
+                      description: List of capabilities
+                    created:
+                      type: string
+                      example: 232329
+                      description: 'Time of creation, in milliseconds
+
+                        This value is set by the system, and you can''t change it.'
+                    creator:
+                      type: string
+                      example: user1
+                      description: 'User who created the role, if applicable
+
+                        This value is set by the system, and you can''t change it.'
+                    description:
+                      type: string
+                      example: Built-in admin role
+                      description: Description of the role
+                    id:
+                      type: string
+                      example: Dkf34203
+                      description: Role identifier
+                    immutable:
+                      type: boolean
+                      example: true
+                      description: Whether the role is immutable
+                    lastUpdated:
+                      type: string
+                      example: 34343
+                      description: 'Time of update, in milliseconds
+
+                        This value is set by the system, and you can''t change it.'
+                    lastUpdatedBy:
+                      type: string
+                      example: User1
+                      description: 'Last user to update the role
+
+                        This value is set by the system, and you can''t change it.'
+                    organizationId:
+                      type: string
+                      example: F2394DY
+                      description: Organization identifier
+                    title:
+                      type: string
+                      example: Title1
+                      description: Title of the role
+                  description: 'Properties of an Splunk Observability Cloud role as defined in the system,
+
+                    including capabilities, a description, and whether the role is
+
+                    immutable.'
+              examples:
+                example:
+                  value:
+                  - capabilities:
+                    - EXAMPLE_CAPABILITY1
+                    created: 232329
+                    creator: user1
+                    description: Built-in admin role
+                    id: Dkf34203
+                    immutable: true
+                    lastUpdated: 34343
+                    lastUpdatedBy: User1
+                    organizationId: F2394DY
+                    title: Title1
+        '404':
+          description: HTTP 404 response
+        '500':
+          description: HTTP 500 response
+      security:
+      - SessionToken: []
+      tags:
+      - Role
+  /role/{roleId}:
+    get:
+      summary: Retrieve role information
+      description: 'Returns information on a specific role, as defined by the role ID.
+
+        To learn more about built-in roles, see About roles and permissions
+
+        in the user documentation.'
+      parameters:
+      - name: X-SF-Token
+        in: header
+        description: Authentication token. Can be a session token (user API access token) or an organization access token
+          with authScope set to API.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Properties of a role
+                type: object
+                properties:
+                  capabilities:
+                    type: array
+                    items:
+                      type: string
+                      example: EXAMPLE_CAPABILITY1
+                    description: List of capabilities
+                  created:
+                    type: string
+                    example: 232329
+                    description: 'Time of creation, in milliseconds
+
+                      This value is set by the system, and you can''t change it.'
+                  creator:
+                    type: string
+                    example: user1
+                    description: 'User who created the role, if applicable
+
+                      This value is set by the system, and you can''t change it.'
+                  description:
+                    type: string
+                    example: Built-in admin role
+                    description: Description of the role
+                  id:
+                    type: string
+                    example: Dkf34203
+                    description: Role identifier
+                  immutable:
+                    type: boolean
+                    example: true
+                    description: Whether the role is immutable
+                  lastUpdated:
+                    type: string
+                    example: 34343
+                    description: 'Time of update, in milliseconds
+
+                      This value is set by the system, and you can''t change it.'
+                  lastUpdatedBy:
+                    type: string
+                    example: User1
+                    description: 'Last user to update the role
+
+                      This value is set by the system, and you can''t change it.'
+                  organizationId:
+                    type: string
+                    example: F2394DY
+                    description: Organization identifier
+                  title:
+                    type: string
+                    example: Title1
+                    description: Title of the role
+                description: 'Properties of an Splunk Observability Cloud role as defined in the system,
+
+                  including capabilities, a description, and whether the role is
+
+                  immutable.'
+              examples:
+                example:
+                  value:
+                    capabilities:
+                    - EXAMPLE_CAPABILITY1
+                    created: 232329
+                    creator: user1
+                    description: Built-in admin role
+                    id: Dkf34203
+                    immutable: true
+                    lastUpdated: 34343
+                    lastUpdatedBy: User1
+                    organizationId: F2394DY
+                    title: Title1
+        '404':
+          description: HTTP 404 response
+        '500':
+          description: HTTP 500 response
+      security:
+      - SessionToken: []
+      tags:
+      - Role
+  /role/assign:
+    patch:
+      summary: Assign Roles
+      description: 'Assigns role to users or tokens. The request body is an object of type OrgUser or NamedToken, a list of
+        user or
+
+        token IDs, and a list of roles you want to assign to the users or tokens specified in the request body.
+
+        To assign roles using this endpoint, you need a session token (User API access token) for a user who has administrator
+        access.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: 'Format of the request payload. The only allowed value is
+
+          ''application/json'''
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: Authentication token. Must be a session token (User API access token) associated with an administrator.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: List of roles to assign or remove
+              type: object
+              required:
+              - objectType
+              - objectIds
+              - roleNames
+              properties:
+                objectType:
+                  type: string
+                  enum:
+                  - OrgUser
+                  - NamedToken
+                  description: 'Object type in the request body. Accepted values
+
+                    are OrgUser for users and NamedToken for tokens. All IDs specified
+
+                    in the objectIds array must conform to the type set in objectType. For example, if you specify "objectType":
+                    "OrgUser" then all the strings
+
+                    in the objectIDs array must be existing organization user IDs.'
+                objectIds:
+                  type: array
+                  items:
+                    format: string
+                    example: ObjectID1
+                  description: 'List of user IDs or tokens IDs to which the request applies. The values in the array must
+                    all correspond to
+
+                    the type specified in objectType. For example, if you specify "objectType": "OrgUser" then all the strings
+
+                    in the array must be existing organization user IDs.'
+                roleNames:
+                  type: array
+                  items:
+                    type: string
+                    example: RoleName1
+                  description: List of roles to either assign or remove.
+              description: 'Object that contains a set of roles that the system either assigns or
+
+                removes, depending on the request. A request body can only specify a single object type, either OrgUser or
+                NamedToken.'
+            examples:
+              example:
+                value:
+                  objectIds:
+                  - ObjectID1
+                  objectType: OrgUser
+                  roleNames:
+                  - RoleName1
+      responses:
+        '200':
+          description: HTTP 200 response
+        '400':
+          description: HTTP 400 response
+        '500':
+          description: HTTP 500 response
+      security:
+      - SessionToken: []
+      tags:
+      - Role
+  /role/dismiss:
+    patch:
+      summary: Remove Roles
+      description: 'Removes roles to users or tokens. The request body is composed of an
+
+        object that can be of type OrgUser or NamedToken, a list of user or
+
+        token IDs, and a list of roles to be removed.
+
+        To learn more about built-in roles, see About roles and permissions.
+
+        in the user documentation.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: 'Format of the request payload. The only allowed value is
+
+          ''application/json'''
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: Authentication token. Must be a session token (User API access token) associated with an administrator.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: List of roles to assign or remove
+              type: object
+              required:
+              - objectType
+              - objectIds
+              - roleNames
+              properties:
+                objectType:
+                  type: string
+                  enum:
+                  - OrgUser
+                  - NamedToken
+                  description: 'Object type in the request body. Accepted values
+
+                    are OrgUser for users and NamedToken for tokens. All IDs specified
+
+                    in the objectIds array must conform to the type set in objectType. For example, if you specify "objectType":
+                    "OrgUser" then all the strings
+
+                    in the objectIDs array must be existing organization user IDs.'
+                objectIds:
+                  type: array
+                  items:
+                    format: string
+                    example: ObjectID1
+                  description: 'List of user IDs or tokens IDs to which the request applies. The values in the array must
+                    all correspond to
+
+                    the type specified in objectType. For example, if you specify "objectType": "OrgUser" then all the strings
+
+                    in the array must be existing organization user IDs.'
+                roleNames:
+                  type: array
+                  items:
+                    type: string
+                    example: RoleName1
+                  description: List of roles to either assign or remove.
+              description: 'Object that contains a set of roles that the system either assigns or
+
+                removes, depending on the request. A request body can only specify a single object type, either OrgUser or
+                NamedToken.'
+            examples:
+              example:
+                value:
+                  objectIds:
+                  - ObjectID1
+                  objectType: OrgUser
+                  roleNames:
+                  - RoleName1
+      responses:
+        '200':
+          description: HTTP 200 response
+        '400':
+          description: HTTP 400 response
+        '500':
+          description: HTTP 500 response
+      security:
+      - SessionToken: []
+      tags:
+      - Role

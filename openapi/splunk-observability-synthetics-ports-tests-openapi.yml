@@ -1,0 +1,1317 @@
+openapi: 3.0.3
+info:
+  title: Splunk Observability Cloud — Synthetics Port tests
+  version: 1.0.1
+  description: 'API for creating, updating, retrieving, and deleting Port tests in Splunk Synthetic Monitoring.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You have to have the Splunk Observability Cloud admin or power role to use the POST /tests/port/try_now, POST /tests/port/validate,
+    PUT /tests/port/{id}/validate, POST /tests/port, PUT /tests/port/{id}, and DELETE /tests/port/{id} operations.
+
+    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the GET /tests/port/{id} operation.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference
+      pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's.
+      Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset
+      path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2/synthetics
+  description: Endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.
+paths:
+  /tests/port:
+    post:
+      summary: createPortTest
+      description: 'Creates a new Port test, based on the specifications in the request body.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                test:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: My Port test
+                    locationIds:
+                      type: array
+                      items:
+                        type: string
+                      example:
+                      - aws-us-east-1
+                      title: LocationIds
+                      description: An array of location IDs where the test runs.
+                    frequency:
+                      type: integer
+                      format: int32
+                      example: 5
+                      title: Frequency
+                      description: How often to run your test.
+                    schedulingStrategy:
+                      type: string
+                      example: round_robin
+                      title: SchedulingStrategy
+                      description: 'Type of scheduling strategy. This can only be:
+
+
+                        round_robin
+
+                        concurrent'
+                    protocol:
+                      type: string
+                      example: tcp
+                    host:
+                      type: string
+                      example: splunk.com
+                    port:
+                      type: integer
+                      format: int32
+                    active:
+                      type: boolean
+                      example: true
+                    automaticRetries:
+                      default: 0
+                      type: integer
+                      example: 1
+                      description: Automatically retry if the run fails
+                    customProperties:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - key
+                        - value
+                        properties:
+                          key:
+                            type: string
+                            example: Env
+                          value:
+                            type: string
+                            example: production
+                      title: CustomProperties
+                      description: An array of custom properties.  The section Custom Properties Criteria lists the requirements
+                        for custom property names and values.
+              title: PortTestValidateRequest
+              description: Request body to validate Port tests.
+            examples:
+              example:
+                value:
+                  test:
+                    active: true
+                    automaticRetries: 1
+                    customProperties:
+                    - key: Env
+                      value: production
+                    frequency: 5
+                    host: splunk.com
+                    locationIds:
+                    - aws-us-east-1
+                    name: My Port test
+                    port: 0
+                    protocol: tcp
+                    schedulingStrategy: round_robin
+      responses:
+        '201':
+          description: HTTP 201 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  test:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        format: int32
+                        example: 1
+                      name:
+                        type: string
+                        example: My Port test
+                      active:
+                        type: boolean
+                        example: true
+                      automaticRetries:
+                        default: 0
+                        type: integer
+                        example: 1
+                        description: Automatically retry if the run fails
+                      frequency:
+                        type: integer
+                        format: int32
+                        example: 5
+                        title: Frequency
+                        description: How often to run your test.
+                      schedulingStrategy:
+                        type: string
+                        example: round_robin
+                        title: SchedulingStrategy
+                        description: 'Type of scheduling strategy. This can only be:
+
+
+                          round_robin
+
+                          concurrent'
+                      createdAt:
+                        type: string
+                        readOnly: true
+                        example: '2022-09-14T14:35:37.801Z'
+                        title: CreatedAt
+                        description: 'Timestamp of when the test was last updated, in UTC.
+
+                          This field is read-only, and the system always sets the value.'
+                      createdBy:
+                        type: string
+                        readOnly: true
+                        example: abcdefgh1234
+                        title: CreatedBy
+                        description: 'Member ID of who created the test.
+
+                          This field is read-only, and the system always sets the value.'
+                      updatedAt:
+                        type: string
+                        readOnly: true
+                        example: '2022-09-14T14:35:38.099Z'
+                        title: UpdatedAt
+                        description: 'Timestamp of when the test was last updated, in UTC.
+
+                          This field is read-only, and the system always sets the value.'
+                      updatedBy:
+                        type: string
+                        readOnly: true
+                        example: abcdefgh1234
+                        title: UpdatedBy
+                        description: 'Member ID of who last updated the test.
+
+                          This field is read-only, and the system always sets the value.'
+                      locationIds:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                        - aws-us-east-1
+                        title: LocationIds
+                        description: An array of location IDs where the test runs.
+                      type:
+                        type: string
+                        example: http
+                      protocol:
+                        type: string
+                        example: tcp
+                      host:
+                        type: string
+                        example: splunk.com
+                      port:
+                        type: integer
+                        format: int32
+                        example: 443
+                      customProperties:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                          - key
+                          - value
+                          properties:
+                            key:
+                              type: string
+                              example: Env
+                            value:
+                              type: string
+                              example: production
+                        title: CustomProperties
+                        description: An array of custom properties.  The section Custom Properties Criteria lists the requirements
+                          for custom property names and values.
+                      lastRunStatus:
+                        type: string
+                        example: success
+                        enum:
+                        - pending
+                        - success
+                        - failed
+                        title: LastRunStatus
+                        description: Status of the last test run.
+                      lastRunAt:
+                        type: string
+                        readOnly: true
+                        example: '2022-09-14T14:36:45.156Z'
+                        title: LastRunAt
+                        description: 'Timestamp of when the test was last run, in UTC.
+
+                          This field is read-only, and the system always sets the value.'
+                type: object
+              examples:
+                example:
+                  value:
+                    test:
+                      active: true
+                      automaticRetries: 1
+                      createdAt: '2022-09-14T14:35:37.801Z'
+                      createdBy: abcdefgh1234
+                      customProperties:
+                      - key: Env
+                        value: production
+                      frequency: 5
+                      host: splunk.com
+                      id: 1
+                      lastRunAt: '2022-09-14T14:36:45.156Z'
+                      lastRunStatus: success
+                      locationIds:
+                      - aws-us-east-1
+                      name: My Port test
+                      port: 443
+                      protocol: tcp
+                      schedulingStrategy: round_robin
+                      type: http
+                      updatedAt: '2022-09-14T14:35:38.099Z'
+                      updatedBy: abcdefgh1234
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Can't create a Port test.
+                  details:
+                    type: object
+                    properties:
+                      device:
+                        type: array
+                        items:
+                          type: string
+                          example: must exist
+                        description: 'This is a dynamic schema that consists of:
+
+                          "fieldName": ["reason"]'
+                type: object
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details:
+                      device:
+                      - must exist
+                    message: Can't create a Port test.
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics Port tests
+  /tests/port/{id}:
+    get:
+      summary: getSinglePortTest
+      description: 'Retrieves a single Port test.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin, power, or read_only role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of a Port to retrieve.
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  test:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        format: int32
+                        example: 1
+                      name:
+                        type: string
+                        example: My Port test
+                      active:
+                        type: boolean
+                        example: true
+                      automaticRetries:
+                        default: 0
+                        type: integer
+                        example: 1
+                        description: Automatically retry if the run fails
+                      frequency:
+                        type: integer
+                        format: int32
+                        example: 5
+                        title: Frequency
+                        description: How often to run your test.
+                      schedulingStrategy:
+                        type: string
+                        example: round_robin
+                        title: SchedulingStrategy
+                        description: 'Type of scheduling strategy. This can only be:
+
+
+                          round_robin
+
+                          concurrent'
+                      createdAt:
+                        type: string
+                        readOnly: true
+                        example: '2022-09-14T14:35:37.801Z'
+                        title: CreatedAt
+                        description: 'Timestamp of when the test was last updated, in UTC.
+
+                          This field is read-only, and the system always sets the value.'
+                      createdBy:
+                        type: string
+                        readOnly: true
+                        example: abcdefgh1234
+                        title: CreatedBy
+                        description: 'Member ID of who created the test.
+
+                          This field is read-only, and the system always sets the value.'
+                      updatedAt:
+                        type: string
+                        readOnly: true
+                        example: '2022-09-14T14:35:38.099Z'
+                        title: UpdatedAt
+                        description: 'Timestamp of when the test was last updated, in UTC.
+
+                          This field is read-only, and the system always sets the value.'
+                      updatedBy:
+                        type: string
+                        readOnly: true
+                        example: abcdefgh1234
+                        title: UpdatedBy
+                        description: 'Member ID of who last updated the test.
+
+                          This field is read-only, and the system always sets the value.'
+                      locationIds:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                        - aws-us-east-1
+                        title: LocationIds
+                        description: An array of location IDs where the test runs.
+                      type:
+                        type: string
+                        example: http
+                      protocol:
+                        type: string
+                        example: tcp
+                      host:
+                        type: string
+                        example: splunk.com
+                      port:
+                        type: integer
+                        format: int32
+                        example: 443
+                      customProperties:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                          - key
+                          - value
+                          properties:
+                            key:
+                              type: string
+                              example: Env
+                            value:
+                              type: string
+                              example: production
+                        title: CustomProperties
+                        description: An array of custom properties.  The section Custom Properties Criteria lists the requirements
+                          for custom property names and values.
+                      lastRunStatus:
+                        type: string
+                        example: success
+                        enum:
+                        - pending
+                        - success
+                        - failed
+                        title: LastRunStatus
+                        description: Status of the last test run.
+                      lastRunAt:
+                        type: string
+                        readOnly: true
+                        example: '2022-09-14T14:36:45.156Z'
+                        title: LastRunAt
+                        description: 'Timestamp of when the test was last run, in UTC.
+
+                          This field is read-only, and the system always sets the value.'
+                title: PortTestResponse
+              examples:
+                example:
+                  value:
+                    test:
+                      active: true
+                      automaticRetries: 1
+                      createdAt: '2022-09-14T14:35:37.801Z'
+                      createdBy: abcdefgh1234
+                      customProperties:
+                      - key: Env
+                        value: production
+                      frequency: 5
+                      host: splunk.com
+                      id: 1
+                      lastRunAt: '2022-09-14T14:36:45.156Z'
+                      lastRunStatus: success
+                      locationIds:
+                      - aws-us-east-1
+                      name: My Port test
+                      port: 443
+                      protocol: tcp
+                      schedulingStrategy: round_robin
+                      type: http
+                      updatedAt: '2022-09-14T14:35:38.099Z'
+                      updatedBy: abcdefgh1234
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Can't find test.
+                  details:
+                    type: object
+                    example: '{}'
+                title: NotFound
+                description: Not Found
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Can't find test.
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics Port tests
+    put:
+      summary: updateSinglePortTest
+      description: 'Update an existing Port test.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the Port test you want to validate.
+        required: true
+        schema:
+          type: integer
+          example: 1
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                test:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: My Port test
+                    locationIds:
+                      type: array
+                      items:
+                        type: string
+                      example:
+                      - aws-us-east-1
+                      title: LocationIds
+                      description: An array of location IDs where the test runs.
+                    frequency:
+                      type: integer
+                      format: int32
+                      example: 5
+                      title: Frequency
+                      description: How often to run your test.
+                    schedulingStrategy:
+                      type: string
+                      example: round_robin
+                      title: SchedulingStrategy
+                      description: 'Type of scheduling strategy. This can only be:
+
+
+                        round_robin
+
+                        concurrent'
+                    protocol:
+                      type: string
+                      example: tcp
+                    host:
+                      type: string
+                      example: splunk.com
+                    port:
+                      type: integer
+                      format: int32
+                    active:
+                      type: boolean
+                      example: true
+                    automaticRetries:
+                      default: 0
+                      type: integer
+                      example: 1
+                      description: Automatically retry if the run fails
+                    customProperties:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - key
+                        - value
+                        properties:
+                          key:
+                            type: string
+                            example: Env
+                          value:
+                            type: string
+                            example: production
+                      title: CustomProperties
+                      description: An array of custom properties.  The section Custom Properties Criteria lists the requirements
+                        for custom property names and values.
+              title: PortTestValidateRequest
+              description: Request body to validate Port tests.
+            examples:
+              example:
+                value:
+                  test:
+                    active: true
+                    automaticRetries: 1
+                    customProperties:
+                    - key: Env
+                      value: production
+                    frequency: 5
+                    host: splunk.com
+                    locationIds:
+                    - aws-us-east-1
+                    name: My Port test
+                    port: 0
+                    protocol: tcp
+                    schedulingStrategy: round_robin
+      responses:
+        '200':
+          description: HTTP 200 response
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Can't find test.
+                  details:
+                    type: object
+                    example: '{}'
+                title: NotFound
+                description: Not Found
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Can't find test.
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Could not create API test.
+                  details:
+                    type: object
+                    properties:
+                      device:
+                        type: array
+                        items:
+                          type: string
+                          example: must exist
+                        description: 'This is a dynamic schema that consists of:
+
+                          "fieldName": ["reason"]'
+                title: UnprocessableEntity
+                description: UnprocessableEntity
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details:
+                      device:
+                      - must exist
+                    message: Could not create API test.
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics Port tests
+    delete:
+      summary: deletePortTest
+      description: 'Deletes a Port test.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of a test.
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: HTTP 204 response
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics Port tests
+  /tests/port/{id}/validate:
+    put:
+      summary: validateSinglePortTest
+      description: 'Validate an port test. This can also be a PATCH operation.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the Port test you want to validate.
+        required: true
+        schema:
+          type: integer
+          example: 1
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                test:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: My Port test
+                    locationIds:
+                      type: array
+                      items:
+                        type: string
+                      example:
+                      - aws-us-east-1
+                      title: LocationIds
+                      description: An array of location IDs where the test runs.
+                    frequency:
+                      type: integer
+                      format: int32
+                      example: 5
+                      title: Frequency
+                      description: How often to run your test.
+                    schedulingStrategy:
+                      type: string
+                      example: round_robin
+                      title: SchedulingStrategy
+                      description: 'Type of scheduling strategy. This can only be:
+
+
+                        round_robin
+
+                        concurrent'
+                    protocol:
+                      type: string
+                      example: tcp
+                    host:
+                      type: string
+                      example: splunk.com
+                    port:
+                      type: integer
+                      format: int32
+                    active:
+                      type: boolean
+                      example: true
+                    automaticRetries:
+                      default: 0
+                      type: integer
+                      example: 1
+                      description: Automatically retry if the run fails
+                    customProperties:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - key
+                        - value
+                        properties:
+                          key:
+                            type: string
+                            example: Env
+                          value:
+                            type: string
+                            example: production
+                      title: CustomProperties
+                      description: An array of custom properties.  The section Custom Properties Criteria lists the requirements
+                        for custom property names and values.
+              title: PortTestValidateRequest
+              description: Request body to validate Port tests.
+            examples:
+              example:
+                value:
+                  test:
+                    active: true
+                    automaticRetries: 1
+                    customProperties:
+                    - key: Env
+                      value: production
+                    frequency: 5
+                    host: splunk.com
+                    locationIds:
+                    - aws-us-east-1
+                    name: My Port test
+                    port: 0
+                    protocol: tcp
+                    schedulingStrategy: round_robin
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Port test is not valid.
+                  details:
+                    type: object
+                    properties:
+                      frequency:
+                        type: array
+                        items:
+                          type: string
+                          example: must be greater than or equal to 1
+                    description: 'Details of why Port test is invalid. The frequency key in the example is
+
+                      dynamic. If frequency is invalid, the key will be frequency. If port
+
+                      is invalid, there will be a port key, etc.
+
+                      If the test is valid, this details field will be an empty array, [].'
+                title: ValidatePortTestResponse
+                description: Response body for validating a Port test.
+              examples:
+                example:
+                  value:
+                    details:
+                      frequency:
+                      - must be greater than or equal to 1
+                    message: Port test is not valid.
+                    valid: false
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Can't find test.
+                  details:
+                    type: object
+                    example: '{}'
+                title: NotFound
+                description: Not Found
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Can't find test.
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics Port tests
+  /tests/port/try_now:
+    post:
+      summary: createTryNowPortTest
+      description: 'Create a port test to use try now on to verify if your test passes. Run results aren''t stored.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: locationId
+        in: query
+        description: The ID of the location to run your test from.
+        required: true
+        schema:
+          type: string
+          example: aws-us-east-1
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                test:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: My Port test
+                    locationIds:
+                      type: array
+                      items:
+                        type: string
+                      example:
+                      - aws-us-east-1
+                      title: LocationIds
+                      description: An array of location IDs where the test runs.
+                    frequency:
+                      type: integer
+                      format: int32
+                      example: 5
+                      title: Frequency
+                      description: How often to run your test.
+                    schedulingStrategy:
+                      type: string
+                      example: round_robin
+                      title: SchedulingStrategy
+                      description: 'Type of scheduling strategy. This can only be:
+
+
+                        round_robin
+
+                        concurrent'
+                    protocol:
+                      type: string
+                      example: tcp
+                    host:
+                      type: string
+                      example: splunk.com
+                    port:
+                      type: integer
+                      format: int32
+                    active:
+                      type: boolean
+                      example: true
+                    automaticRetries:
+                      default: 0
+                      type: integer
+                      example: 1
+                      description: Automatically retry if the run fails
+                    customProperties:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - key
+                        - value
+                        properties:
+                          key:
+                            type: string
+                            example: Env
+                          value:
+                            type: string
+                            example: production
+                      title: CustomProperties
+                      description: An array of custom properties.  The section Custom Properties Criteria lists the requirements
+                        for custom property names and values.
+              title: PortTestValidateRequest
+              description: Request body to validate Port tests.
+            examples:
+              example:
+                value:
+                  test:
+                    active: true
+                    automaticRetries: 1
+                    customProperties:
+                    - key: Env
+                      value: production
+                    frequency: 5
+                    host: splunk.com
+                    locationIds:
+                    - aws-us-east-1
+                    name: My Port test
+                    port: 0
+                    protocol: tcp
+                    schedulingStrategy: round_robin
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runId:
+                    type: string
+                    format: uuid
+                    example: 1c4d52be-e7e1-4611-97f9-73c6ddfbeed9
+                    description: The UUID of the generated run
+                  testId:
+                    type: string
+                    format: uuid
+                    example: b8354c68-3fe8-4192-81b2-a4f7cb40e18b
+                    description: The UUID of the try now test
+                  locationId:
+                    type: string
+                    example: aws-us-east-1
+                    description: The location ID where the test was executed.
+                  testName:
+                    type: string
+                    example: My Port test
+                    description: The name of the test.
+                  testType:
+                    type: string
+                    example: port
+                    description: The type of the test.
+                title: TryNowResponse
+              examples:
+                example:
+                  value:
+                    locationId: aws-us-east-1
+                    runId: 1c4d52be-e7e1-4611-97f9-73c6ddfbeed9
+                    testId: b8354c68-3fe8-4192-81b2-a4f7cb40e18b
+                    testName: My Port test
+                    testType: port
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Could not create API test.
+                  details:
+                    type: object
+                    properties:
+                      device:
+                        type: array
+                        items:
+                          type: string
+                          example: must exist
+                        description: 'This is a dynamic schema that consists of:
+
+                          "fieldName": ["reason"]'
+                title: UnprocessableEntity
+                description: UnprocessableEntity
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details:
+                      device:
+                      - must exist
+                    message: Could not create API test.
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics Port tests
+  /tests/port/validate:
+    post:
+      summary: validatePortTest
+      description: 'Validate a Port test.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                test:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: My Port test
+                    locationIds:
+                      type: array
+                      items:
+                        type: string
+                      example:
+                      - aws-us-east-1
+                      title: LocationIds
+                      description: An array of location IDs where the test runs.
+                    frequency:
+                      type: integer
+                      format: int32
+                      example: 5
+                      title: Frequency
+                      description: How often to run your test.
+                    schedulingStrategy:
+                      type: string
+                      example: round_robin
+                      title: SchedulingStrategy
+                      description: 'Type of scheduling strategy. This can only be:
+
+
+                        round_robin
+
+                        concurrent'
+                    protocol:
+                      type: string
+                      example: tcp
+                    host:
+                      type: string
+                      example: splunk.com
+                    port:
+                      type: integer
+                      format: int32
+                    active:
+                      type: boolean
+                      example: true
+                    automaticRetries:
+                      default: 0
+                      type: integer
+                      example: 1
+                      description: Automatically retry if the run fails
+                    customProperties:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - key
+                        - value
+                        properties:
+                          key:
+                            type: string
+                            example: Env
+                          value:
+                            type: string
+                            example: production
+                      title: CustomProperties
+                      description: An array of custom properties.  The section Custom Properties Criteria lists the requirements
+                        for custom property names and values.
+              title: PortTestValidateRequest
+              description: Request body to validate Port tests.
+            examples:
+              example:
+                value:
+                  test:
+                    active: true
+                    automaticRetries: 1
+                    customProperties:
+                    - key: Env
+                      value: production
+                    frequency: 5
+                    host: splunk.com
+                    locationIds:
+                    - aws-us-east-1
+                    name: My Port test
+                    port: 0
+                    protocol: tcp
+                    schedulingStrategy: round_robin
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Port test is not valid.
+                  details:
+                    type: object
+                    properties:
+                      frequency:
+                        type: array
+                        items:
+                          type: string
+                          example: must be greater than or equal to 1
+                    description: 'Details of why Port test is invalid. The frequency key in the example is
+
+                      dynamic. If frequency is invalid, the key will be frequency. If port
+
+                      is invalid, there will be a port key, etc.
+
+                      If the test is valid, this details field will be an empty array, [].'
+                title: ValidatePortTestResponse
+                description: Response body for validating a Port test.
+              examples:
+                example:
+                  value:
+                    details:
+                      frequency:
+                      - must be greater than or equal to 1
+                    message: Port test is not valid.
+                    valid: false
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics Port tests

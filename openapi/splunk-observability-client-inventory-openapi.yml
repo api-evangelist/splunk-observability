@@ -1,0 +1,2744 @@
+openapi: 3.0.3
+info:
+  title: Splunk Observability Cloud — Client Inventory
+  version: 1.0.0
+  description: 'REST API for managing OpAMP client inventory.
+
+    Use this API to browse registered clients, inspect individual client records, and retrieve the effective configuration
+    currently associated with a client.
+
+    Deployment
+
+    This API is shared by multiple products. Public server URLs and authentication requirements are supplied by product-specific
+    publication overlays. All endpoints are relative to /fm-service/v1.
+
+    Endpoints
+
+
+    GET /clients List clients
+
+    GET /clients/metadata/values List distinct client metadata values
+
+    GET /clients/{id} Get client by ID
+
+    GET /clients/{id}/config Get client effective configuration
+
+    POST /clients/configs:batch Batch get client effective configurations
+
+
+    Splunk Observability Cloud
+
+    Replace {REALM} with your Splunk Observability Cloud realm.
+
+    Send an access token in the X-SF-TOKEN header.
+
+    Example: X-SF-TOKEN: <X-SF-TOKEN>'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference
+      pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's.
+      Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset
+      path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2/fm-service/v1
+  description: Splunk Observability Cloud Client Inventory API
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.
+paths:
+  /clients:
+    get:
+      summary: listClients
+      parameters:
+      - name: limit
+        in: query
+        description: 'Size of page (number of items to return). The server enforces a configurable maximum (default: 1000).'
+        schema:
+          default: 100
+          minimum: 1
+          type: integer
+      - name: offset
+        in: query
+        description: Offset for pagination (number of items to skip)
+        schema:
+          default: 0
+          minimum: 0
+          type: integer
+      - name: include_health
+        in: query
+        description: 'Whether to include health data in the response. Default: true. Set to false to exclude health data for
+          analytical queries.'
+        schema:
+          default: true
+          type: boolean
+      - name: healthy
+        in: query
+        description: 'Filter by top-level health status. Repeat to match any selected state. At most 10 healthy values are
+          accepted per request. When omitted, no health filtering is applied.
+
+
+          true — only clients that have reported healthy=true
+
+          false — only clients that have reported healthy=false
+
+          unknown — only clients that have never reported component health (null health)
+
+
+          Null health is treated as a distinct unknown state, not as unhealthy.'
+        schema:
+          items:
+            enum:
+            - 'true'
+            - 'false'
+            - unknown
+            type: string
+          maxItems: 10
+          type: array
+      - name: connection_health
+        in: query
+        schema:
+          items:
+            enum:
+            - active
+            - inactive
+            type: string
+          maxItems: 10
+          type: array
+      - name: filter
+        in: query
+        description: 'Filter by client metadata attribute. Repeat to apply multiple filters. Different keys = AND logic; same
+          key with multiple exact or prefix values = OR logic.
+
+          Supported value tokens:
+
+
+          key:value — exact match (e.g. env:prod)
+
+          key:value* — prefix match (e.g. host.name:prod-*)
+
+          key:value\* — exact match for a value ending in a literal * (e.g. env:prod\*)
+
+          key:* — key exists with a non-empty value
+
+          key:!* — key is missing or has an empty value
+
+
+          Limits: at most 10 filters per request.
+
+          Mixing exact, prefix, key:*, or key:!* operators on the same key returns 400.'
+        schema:
+          items:
+            pattern: ^[^:]+:.*$
+            type: string
+          maxItems: 10
+          type: array
+      - name: sort_key
+        in: query
+        description: Key to sort by. Accepts a metadata key (e.g. host.name) or a system column (instance_uid, healthy). Only
+          one sort_key is accepted per request. Clients missing the sort value, or reporting an empty metadata value, are
+          sorted last.
+        schema:
+          minLength: 1
+          type: string
+      - name: sort_dir
+        in: query
+        description: Sort direction for sort_key. Requires sort_key. Defaults to asc when sort_key is present.
+        schema:
+          default: asc
+          enum:
+          - asc
+          - desc
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  clients:
+                    items:
+                      properties:
+                        connection_health:
+                          enum:
+                          - active
+                          - inactive
+                          example: active
+                          type: string
+                          description: Derived client connection health based on the last confirmed heartbeat. Dead clients
+                            outside the liveness window are excluded from client APIs.
+                        created_at:
+                          example: '2024-01-15T10:30:00Z'
+                          format: date-time
+                          type: string
+                          description: Timestamp when client was first registered
+                        health:
+                          properties:
+                            component_health_map:
+                              additionalProperties:
+                                example:
+                                  component_health_map:
+                                    receiver:
+                                      healthy: false
+                                      last_error: receiver-error
+                                      status: failing
+                                      status_time_unix_nano: '33'
+                                  healthy: true
+                                  last_error: top-level-error
+                                  start_time_unix_nano: '11'
+                                  status: degraded
+                                  status_time_unix_nano: '22'
+                                properties:
+                                  component_health_map:
+                                    additionalProperties:
+                                      example:
+                                        component_health_map:
+                                          receiver:
+                                            healthy: false
+                                            last_error: receiver-error
+                                            status: failing
+                                            status_time_unix_nano: '33'
+                                        healthy: true
+                                        last_error: top-level-error
+                                        start_time_unix_nano: '11'
+                                        status: degraded
+                                        status_time_unix_nano: '22'
+                                      properties:
+                                        component_health_map:
+                                          additionalProperties:
+                                            example:
+                                              component_health_map:
+                                                receiver:
+                                                  healthy: false
+                                                  last_error: receiver-error
+                                                  status: failing
+                                                  status_time_unix_nano: '33'
+                                              healthy: true
+                                              last_error: top-level-error
+                                              start_time_unix_nano: '11'
+                                              status: degraded
+                                              status_time_unix_nano: '22'
+                                            properties:
+                                              component_health_map:
+                                                additionalProperties:
+                                                  example:
+                                                    component_health_map:
+                                                      receiver:
+                                                        healthy: false
+                                                        last_error: receiver-error
+                                                        status: failing
+                                                        status_time_unix_nano: '33'
+                                                    healthy: true
+                                                    last_error: top-level-error
+                                                    start_time_unix_nano: '11'
+                                                    status: degraded
+                                                    status_time_unix_nano: '22'
+                                                  properties:
+                                                    component_health_map:
+                                                      additionalProperties:
+                                                        example:
+                                                          component_health_map:
+                                                            receiver:
+                                                              healthy: false
+                                                              last_error: receiver-error
+                                                              status: failing
+                                                              status_time_unix_nano: '33'
+                                                          healthy: true
+                                                          last_error: top-level-error
+                                                          start_time_unix_nano: '11'
+                                                          status: degraded
+                                                          status_time_unix_nano: '22'
+                                                        properties:
+                                                          component_health_map:
+                                                            additionalProperties:
+                                                              example:
+                                                                component_health_map:
+                                                                  receiver:
+                                                                    healthy: false
+                                                                    last_error: receiver-error
+                                                                    status: failing
+                                                                    status_time_unix_nano: '33'
+                                                                healthy: true
+                                                                last_error: top-level-error
+                                                                start_time_unix_nano: '11'
+                                                                status: degraded
+                                                                status_time_unix_nano: '22'
+                                                              properties:
+                                                                component_health_map:
+                                                                  additionalProperties:
+                                                                    example:
+                                                                      component_health_map:
+                                                                        receiver:
+                                                                          healthy: false
+                                                                          last_error: receiver-error
+                                                                          status: failing
+                                                                          status_time_unix_nano: '33'
+                                                                      healthy: true
+                                                                      last_error: top-level-error
+                                                                      start_time_unix_nano: '11'
+                                                                      status: degraded
+                                                                      status_time_unix_nano: '22'
+                                                                    properties:
+                                                                      component_health_map:
+                                                                        additionalProperties:
+                                                                          example:
+                                                                            component_health_map: null
+                                                                            healthy: null
+                                                                            last_error: null
+                                                                            start_time_unix_nano: null
+                                                                            status: null
+                                                                            status_time_unix_nano: null
+                                                                          properties:
+                                                                            component_health_map: null
+                                                                            healthy: null
+                                                                            last_error: null
+                                                                            start_time_unix_nano: null
+                                                                            status: null
+                                                                            status_time_unix_nano: null
+                                                                          type: object
+                                                                          title: ComponentHealth
+                                                                        example:
+                                                                          receiver:
+                                                                            healthy: null
+                                                                            last_error: null
+                                                                            status: null
+                                                                            status_time_unix_nano: null
+                                                                        type: object
+                                                                        description: Map of nested component name to its health
+                                                                          object. Values use the same recursive ComponentHealth
+                                                                          schema.
+                                                                      healthy:
+                                                                        example: true
+                                                                        type: boolean
+                                                                        description: Set to true if the component is up and
+                                                                          healthy
+                                                                      last_error:
+                                                                        example: 'Failed to connect to backend: connection
+                                                                          timeout'
+                                                                        type: string
+                                                                        description: Human-readable error message if the component
+                                                                          is in erroneous state
+                                                                      start_time_unix_nano:
+                                                                        example: '1705323000000000000'
+                                                                        format: int64
+                                                                        type: string
+                                                                        description: Timestamp since the component is up,
+                                                                          UNIX Epoch time in nanoseconds.
+                                                                      status:
+                                                                        example: running
+                                                                        type: string
+                                                                        description: Component status represented as a string.
+                                                                      status_time_unix_nano:
+                                                                        example: '1706447355000000000'
+                                                                        format: int64
+                                                                        type: string
+                                                                        description: The time when the component status was
+                                                                          observed, UNIX Epoch time in nanoseconds.
+                                                                    type: object
+                                                                    title: ComponentHealth
+                                                                    description: The health of the agent and any nested sub-components.
+                                                                      The component_health_map can be nested to represent
+                                                                      multi-level component hierarchies.
+                                                                  example:
+                                                                    receiver:
+                                                                      healthy: false
+                                                                      last_error: receiver-error
+                                                                      status: failing
+                                                                      status_time_unix_nano: '33'
+                                                                  type: object
+                                                                  description: Map of nested component name to its health
+                                                                    object. Values use the same recursive ComponentHealth
+                                                                    schema.
+                                                                healthy:
+                                                                  example: true
+                                                                  type: boolean
+                                                                  description: Set to true if the component is up and healthy
+                                                                last_error:
+                                                                  example: 'Failed to connect to backend: connection timeout'
+                                                                  type: string
+                                                                  description: Human-readable error message if the component
+                                                                    is in erroneous state
+                                                                start_time_unix_nano:
+                                                                  example: '1705323000000000000'
+                                                                  format: int64
+                                                                  type: string
+                                                                  description: Timestamp since the component is up, UNIX Epoch
+                                                                    time in nanoseconds.
+                                                                status:
+                                                                  example: running
+                                                                  type: string
+                                                                  description: Component status represented as a string.
+                                                                status_time_unix_nano:
+                                                                  example: '1706447355000000000'
+                                                                  format: int64
+                                                                  type: string
+                                                                  description: The time when the component status was observed,
+                                                                    UNIX Epoch time in nanoseconds.
+                                                              type: object
+                                                              title: ComponentHealth
+                                                              description: The health of the agent and any nested sub-components.
+                                                                The component_health_map can be nested to represent multi-level
+                                                                component hierarchies.
+                                                            example:
+                                                              receiver:
+                                                                healthy: false
+                                                                last_error: receiver-error
+                                                                status: failing
+                                                                status_time_unix_nano: '33'
+                                                            type: object
+                                                            description: Map of nested component name to its health object.
+                                                              Values use the same recursive ComponentHealth schema.
+                                                          healthy:
+                                                            example: true
+                                                            type: boolean
+                                                            description: Set to true if the component is up and healthy
+                                                          last_error:
+                                                            example: 'Failed to connect to backend: connection timeout'
+                                                            type: string
+                                                            description: Human-readable error message if the component is
+                                                              in erroneous state
+                                                          start_time_unix_nano:
+                                                            example: '1705323000000000000'
+                                                            format: int64
+                                                            type: string
+                                                            description: Timestamp since the component is up, UNIX Epoch time
+                                                              in nanoseconds.
+                                                          status:
+                                                            example: running
+                                                            type: string
+                                                            description: Component status represented as a string.
+                                                          status_time_unix_nano:
+                                                            example: '1706447355000000000'
+                                                            format: int64
+                                                            type: string
+                                                            description: The time when the component status was observed,
+                                                              UNIX Epoch time in nanoseconds.
+                                                        type: object
+                                                        title: ComponentHealth
+                                                        description: The health of the agent and any nested sub-components.
+                                                          The component_health_map can be nested to represent multi-level
+                                                          component hierarchies.
+                                                      example:
+                                                        receiver:
+                                                          healthy: false
+                                                          last_error: receiver-error
+                                                          status: failing
+                                                          status_time_unix_nano: '33'
+                                                      type: object
+                                                      description: Map of nested component name to its health object. Values
+                                                        use the same recursive ComponentHealth schema.
+                                                    healthy:
+                                                      example: true
+                                                      type: boolean
+                                                      description: Set to true if the component is up and healthy
+                                                    last_error:
+                                                      example: 'Failed to connect to backend: connection timeout'
+                                                      type: string
+                                                      description: Human-readable error message if the component is in erroneous
+                                                        state
+                                                    start_time_unix_nano:
+                                                      example: '1705323000000000000'
+                                                      format: int64
+                                                      type: string
+                                                      description: Timestamp since the component is up, UNIX Epoch time in
+                                                        nanoseconds.
+                                                    status:
+                                                      example: running
+                                                      type: string
+                                                      description: Component status represented as a string.
+                                                    status_time_unix_nano:
+                                                      example: '1706447355000000000'
+                                                      format: int64
+                                                      type: string
+                                                      description: The time when the component status was observed, UNIX Epoch
+                                                        time in nanoseconds.
+                                                  type: object
+                                                  title: ComponentHealth
+                                                  description: The health of the agent and any nested sub-components. The
+                                                    component_health_map can be nested to represent multi-level component
+                                                    hierarchies.
+                                                example:
+                                                  receiver:
+                                                    healthy: false
+                                                    last_error: receiver-error
+                                                    status: failing
+                                                    status_time_unix_nano: '33'
+                                                type: object
+                                                description: Map of nested component name to its health object. Values use
+                                                  the same recursive ComponentHealth schema.
+                                              healthy:
+                                                example: true
+                                                type: boolean
+                                                description: Set to true if the component is up and healthy
+                                              last_error:
+                                                example: 'Failed to connect to backend: connection timeout'
+                                                type: string
+                                                description: Human-readable error message if the component is in erroneous
+                                                  state
+                                              start_time_unix_nano:
+                                                example: '1705323000000000000'
+                                                format: int64
+                                                type: string
+                                                description: Timestamp since the component is up, UNIX Epoch time in nanoseconds.
+                                              status:
+                                                example: running
+                                                type: string
+                                                description: Component status represented as a string.
+                                              status_time_unix_nano:
+                                                example: '1706447355000000000'
+                                                format: int64
+                                                type: string
+                                                description: The time when the component status was observed, UNIX Epoch time
+                                                  in nanoseconds.
+                                            type: object
+                                            title: ComponentHealth
+                                            description: The health of the agent and any nested sub-components. The component_health_map
+                                              can be nested to represent multi-level component hierarchies.
+                                          example:
+                                            receiver:
+                                              healthy: false
+                                              last_error: receiver-error
+                                              status: failing
+                                              status_time_unix_nano: '33'
+                                          type: object
+                                          description: Map of nested component name to its health object. Values use the same
+                                            recursive ComponentHealth schema.
+                                        healthy:
+                                          example: true
+                                          type: boolean
+                                          description: Set to true if the component is up and healthy
+                                        last_error:
+                                          example: 'Failed to connect to backend: connection timeout'
+                                          type: string
+                                          description: Human-readable error message if the component is in erroneous state
+                                        start_time_unix_nano:
+                                          example: '1705323000000000000'
+                                          format: int64
+                                          type: string
+                                          description: Timestamp since the component is up, UNIX Epoch time in nanoseconds.
+                                        status:
+                                          example: running
+                                          type: string
+                                          description: Component status represented as a string.
+                                        status_time_unix_nano:
+                                          example: '1706447355000000000'
+                                          format: int64
+                                          type: string
+                                          description: The time when the component status was observed, UNIX Epoch time in
+                                            nanoseconds.
+                                      type: object
+                                      title: ComponentHealth
+                                      description: The health of the agent and any nested sub-components. The component_health_map
+                                        can be nested to represent multi-level component hierarchies.
+                                    example:
+                                      receiver:
+                                        healthy: false
+                                        last_error: receiver-error
+                                        status: failing
+                                        status_time_unix_nano: '33'
+                                    type: object
+                                    description: Map of nested component name to its health object. Values use the same recursive
+                                      ComponentHealth schema.
+                                  healthy:
+                                    example: true
+                                    type: boolean
+                                    description: Set to true if the component is up and healthy
+                                  last_error:
+                                    example: 'Failed to connect to backend: connection timeout'
+                                    type: string
+                                    description: Human-readable error message if the component is in erroneous state
+                                  start_time_unix_nano:
+                                    example: '1705323000000000000'
+                                    format: int64
+                                    type: string
+                                    description: Timestamp since the component is up, UNIX Epoch time in nanoseconds.
+                                  status:
+                                    example: running
+                                    type: string
+                                    description: Component status represented as a string.
+                                  status_time_unix_nano:
+                                    example: '1706447355000000000'
+                                    format: int64
+                                    type: string
+                                    description: The time when the component status was observed, UNIX Epoch time in nanoseconds.
+                                type: object
+                                title: ComponentHealth
+                                description: The health of the agent and any nested sub-components. The component_health_map
+                                  can be nested to represent multi-level component hierarchies.
+                              example:
+                                receiver:
+                                  healthy: false
+                                  last_error: receiver-error
+                                  status: failing
+                                  status_time_unix_nano: '33'
+                              type: object
+                              description: Map of nested component name to its health object. Values use the same recursive
+                                ComponentHealth schema.
+                            healthy:
+                              example: true
+                              type: boolean
+                              description: Set to true if the component is up and healthy
+                            last_error:
+                              example: 'Failed to connect to backend: connection timeout'
+                              type: string
+                              description: Human-readable error message if the component is in erroneous state
+                            start_time_unix_nano:
+                              example: '1705323000000000000'
+                              format: int64
+                              type: string
+                              description: Timestamp since the component is up, UNIX Epoch time in nanoseconds.
+                            status:
+                              example: running
+                              type: string
+                              description: Component status represented as a string.
+                            status_time_unix_nano:
+                              example: '1706447355000000000'
+                              format: int64
+                              type: string
+                              description: The time when the component status was observed, UNIX Epoch time in nanoseconds.
+                          type: object
+                          description: 'Component health status from OpAMP ComponentHealth proto. For list: included by default,
+                            exclude with include_health=false. For get: always included if available.'
+                        instance_uid:
+                          example: 550e8400-e29b-41d4-a716-446655440000
+                          type: string
+                          description: Unique client identifier
+                        last_heartbeat_at:
+                          example: '2024-01-28T14:25:10Z'
+                          format: date-time
+                          type: string
+                          description: Timestamp when the server last received a heartbeat from this client.
+                        metadata:
+                          additionalProperties:
+                            type: string
+                          example:
+                            host.name: prod-collector-01
+                            os.type: linux
+                            service.name: otel-collector
+                            service.version: 0.95.0
+                          type: object
+                          description: Flat key-value attributes reported by the OpAMP client. Includes both identifying and
+                            non-identifying attributes.
+                        org_id:
+                          example: acme-corp
+                          type: string
+                          description: Organization ID the client belongs to
+                        updated_at:
+                          example: '2024-01-28T14:22:35Z'
+                          format: date-time
+                          type: string
+                          description: Timestamp of last state change from client (metadata, config, health, status, etc.)
+                      required:
+                      - instance_uid
+                      - org_id
+                      - metadata
+                      - connection_health
+                      - created_at
+                      - updated_at
+                      type: object
+                      title: Client
+                    type: array
+                  pagination:
+                    properties:
+                      has_next:
+                        example: true
+                        type: boolean
+                        description: Whether there are more items available
+                      limit:
+                        example: 100
+                        type: integer
+                        description: Number of items requested per page
+                      next_offset:
+                        example: 100
+                        type: integer
+                        description: Offset value for the next page (only present if has_next is true)
+                      offset:
+                        example: 0
+                        type: integer
+                        description: Number of items skipped
+                      total_count:
+                        example: 42573
+                        type: integer
+                        description: Total number of items matching the query
+                    required:
+                    - limit
+                    - offset
+                    - total_count
+                    type: object
+                    title: PaginationMetadata
+                required:
+                - clients
+                - pagination
+                type: object
+                title: ClientListResponse
+              examples:
+                example:
+                  value:
+                    clients:
+                    - connection_health: active
+                      created_at: '2024-01-15T10:30:00Z'
+                      health:
+                        component_health_map:
+                          receiver:
+                            healthy: false
+                            last_error: receiver-error
+                            status: failing
+                            status_time_unix_nano: '33'
+                        healthy: true
+                        last_error: 'Failed to connect to backend: connection timeout'
+                        start_time_unix_nano: '1705323000000000000'
+                        status: running
+                        status_time_unix_nano: '1706447355000000000'
+                      instance_uid: 550e8400-e29b-41d4-a716-446655440000
+                      last_heartbeat_at: '2024-01-28T14:25:10Z'
+                      metadata:
+                        host.name: prod-collector-01
+                        os.type: linux
+                        service.name: otel-collector
+                        service.version: 0.95.0
+                      org_id: acme-corp
+                      updated_at: '2024-01-28T14:22:35Z'
+                    pagination:
+                      has_next: true
+                      limit: 100
+                      next_offset: 100
+                      offset: 0
+                      total_count: 42573
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                badRequest:
+                  summary: Application-level request validation failed
+                  value:
+                    error:
+                      code: BAD_REQUEST
+                      details: {}
+                      message: Bad Request
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                malformedToken:
+                  summary: Credentials are malformed or unparseable
+                  value:
+                    error:
+                      code: AUTH_TOKEN_MALFORMED
+                      details: {}
+                      message: Credentials are malformed or unparseable
+                missingToken:
+                  summary: No credentials were provided
+                  value:
+                    error:
+                      code: AUTH_TOKEN_MISSING
+                      details: {}
+                      message: No valid credentials provided
+        '403':
+          description: HTTP 403 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                featureFlagDenied:
+                  summary: Feature is not enabled for the organization
+                  value:
+                    error:
+                      code: FORBIDDEN
+                      details: {}
+                      message: feature not available for this organization
+                filterNoMatch:
+                  summary: Authorization filter denies access
+                  value:
+                    error:
+                      code: AUTH_FILTER_NO_MATCH
+                      details: {}
+                      message: Access denied by authorization filter
+                missingScope:
+                  summary: Caller does not have the required scope
+                  value:
+                    error:
+                      code: AUTH_SCOPE_MISSING
+                      details: {}
+                      message: Required permission scope is missing
+        '500':
+          description: HTTP 500 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                internalServerError:
+                  summary: Unexpected server-side failure
+                  value:
+                    error:
+                      code: INTERNAL_SERVER_ERROR
+                      details: {}
+                      message: Internal Server Error
+        '503':
+          description: HTTP 503 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                authProviderUnavailable:
+                  summary: Authentication provider is unavailable
+                  value:
+                    error:
+                      code: AUTH_PROVIDER_ERROR
+                      details: {}
+                      message: Authentication service unavailable
+      tags:
+      - Client Inventory
+  /clients/{id}:
+    get:
+      summary: getClient
+      description: Retrieve the current record for a single client by instance UID, including metadata, timestamps, and health
+        information when available.
+      parameters:
+      - name: id
+        in: path
+        description: Client instance UID
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  connection_health:
+                    enum:
+                    - active
+                    - inactive
+                    example: active
+                    type: string
+                    description: Derived client connection health based on the last confirmed heartbeat. Dead clients outside
+                      the liveness window are excluded from client APIs.
+                  created_at:
+                    example: '2024-01-15T10:30:00Z'
+                    format: date-time
+                    type: string
+                    description: Timestamp when client was first registered
+                  health:
+                    properties:
+                      component_health_map:
+                        additionalProperties:
+                          example:
+                            component_health_map:
+                              receiver:
+                                healthy: false
+                                last_error: receiver-error
+                                status: failing
+                                status_time_unix_nano: '33'
+                            healthy: true
+                            last_error: top-level-error
+                            start_time_unix_nano: '11'
+                            status: degraded
+                            status_time_unix_nano: '22'
+                          properties:
+                            component_health_map:
+                              additionalProperties:
+                                example:
+                                  component_health_map:
+                                    receiver:
+                                      healthy: false
+                                      last_error: receiver-error
+                                      status: failing
+                                      status_time_unix_nano: '33'
+                                  healthy: true
+                                  last_error: top-level-error
+                                  start_time_unix_nano: '11'
+                                  status: degraded
+                                  status_time_unix_nano: '22'
+                                properties:
+                                  component_health_map:
+                                    additionalProperties:
+                                      example:
+                                        component_health_map:
+                                          receiver:
+                                            healthy: false
+                                            last_error: receiver-error
+                                            status: failing
+                                            status_time_unix_nano: '33'
+                                        healthy: true
+                                        last_error: top-level-error
+                                        start_time_unix_nano: '11'
+                                        status: degraded
+                                        status_time_unix_nano: '22'
+                                      properties:
+                                        component_health_map:
+                                          additionalProperties:
+                                            example:
+                                              component_health_map:
+                                                receiver:
+                                                  healthy: false
+                                                  last_error: receiver-error
+                                                  status: failing
+                                                  status_time_unix_nano: '33'
+                                              healthy: true
+                                              last_error: top-level-error
+                                              start_time_unix_nano: '11'
+                                              status: degraded
+                                              status_time_unix_nano: '22'
+                                            properties:
+                                              component_health_map:
+                                                additionalProperties:
+                                                  example:
+                                                    component_health_map:
+                                                      receiver:
+                                                        healthy: false
+                                                        last_error: receiver-error
+                                                        status: failing
+                                                        status_time_unix_nano: '33'
+                                                    healthy: true
+                                                    last_error: top-level-error
+                                                    start_time_unix_nano: '11'
+                                                    status: degraded
+                                                    status_time_unix_nano: '22'
+                                                  properties:
+                                                    component_health_map:
+                                                      additionalProperties:
+                                                        example:
+                                                          component_health_map:
+                                                            receiver:
+                                                              healthy: false
+                                                              last_error: receiver-error
+                                                              status: failing
+                                                              status_time_unix_nano: '33'
+                                                          healthy: true
+                                                          last_error: top-level-error
+                                                          start_time_unix_nano: '11'
+                                                          status: degraded
+                                                          status_time_unix_nano: '22'
+                                                        properties:
+                                                          component_health_map:
+                                                            additionalProperties:
+                                                              example:
+                                                                component_health_map:
+                                                                  receiver:
+                                                                    healthy: false
+                                                                    last_error: receiver-error
+                                                                    status: failing
+                                                                    status_time_unix_nano: '33'
+                                                                healthy: true
+                                                                last_error: top-level-error
+                                                                start_time_unix_nano: '11'
+                                                                status: degraded
+                                                                status_time_unix_nano: '22'
+                                                              properties:
+                                                                component_health_map:
+                                                                  additionalProperties:
+                                                                    example:
+                                                                      component_health_map:
+                                                                        receiver:
+                                                                          healthy: null
+                                                                          last_error: null
+                                                                          status: null
+                                                                          status_time_unix_nano: null
+                                                                      healthy: true
+                                                                      last_error: top-level-error
+                                                                      start_time_unix_nano: '11'
+                                                                      status: degraded
+                                                                      status_time_unix_nano: '22'
+                                                                    properties:
+                                                                      component_health_map: null
+                                                                      healthy:
+                                                                        example: true
+                                                                        type: boolean
+                                                                      last_error:
+                                                                        example: 'Failed to connect to backend: connection
+                                                                          timeout'
+                                                                        type: string
+                                                                      start_time_unix_nano:
+                                                                        example: '1705323000000000000'
+                                                                        format: int64
+                                                                        type: string
+                                                                      status:
+                                                                        example: running
+                                                                        type: string
+                                                                      status_time_unix_nano:
+                                                                        example: '1706447355000000000'
+                                                                        format: int64
+                                                                        type: string
+                                                                    type: object
+                                                                    title: ComponentHealth
+                                                                    description: The health of the agent and any nested sub-components.
+                                                                      The component_health_map can be nested to represent
+                                                                      multi-level component hierarchies.
+                                                                  example:
+                                                                    receiver:
+                                                                      healthy: false
+                                                                      last_error: receiver-error
+                                                                      status: failing
+                                                                      status_time_unix_nano: '33'
+                                                                  type: object
+                                                                  description: Map of nested component name to its health
+                                                                    object. Values use the same recursive ComponentHealth
+                                                                    schema.
+                                                                healthy:
+                                                                  example: true
+                                                                  type: boolean
+                                                                  description: Set to true if the component is up and healthy
+                                                                last_error:
+                                                                  example: 'Failed to connect to backend: connection timeout'
+                                                                  type: string
+                                                                  description: Human-readable error message if the component
+                                                                    is in erroneous state
+                                                                start_time_unix_nano:
+                                                                  example: '1705323000000000000'
+                                                                  format: int64
+                                                                  type: string
+                                                                  description: Timestamp since the component is up, UNIX Epoch
+                                                                    time in nanoseconds.
+                                                                status:
+                                                                  example: running
+                                                                  type: string
+                                                                  description: Component status represented as a string.
+                                                                status_time_unix_nano:
+                                                                  example: '1706447355000000000'
+                                                                  format: int64
+                                                                  type: string
+                                                                  description: The time when the component status was observed,
+                                                                    UNIX Epoch time in nanoseconds.
+                                                              type: object
+                                                              title: ComponentHealth
+                                                              description: The health of the agent and any nested sub-components.
+                                                                The component_health_map can be nested to represent multi-level
+                                                                component hierarchies.
+                                                            example:
+                                                              receiver:
+                                                                healthy: false
+                                                                last_error: receiver-error
+                                                                status: failing
+                                                                status_time_unix_nano: '33'
+                                                            type: object
+                                                            description: Map of nested component name to its health object.
+                                                              Values use the same recursive ComponentHealth schema.
+                                                          healthy:
+                                                            example: true
+                                                            type: boolean
+                                                            description: Set to true if the component is up and healthy
+                                                          last_error:
+                                                            example: 'Failed to connect to backend: connection timeout'
+                                                            type: string
+                                                            description: Human-readable error message if the component is
+                                                              in erroneous state
+                                                          start_time_unix_nano:
+                                                            example: '1705323000000000000'
+                                                            format: int64
+                                                            type: string
+                                                            description: Timestamp since the component is up, UNIX Epoch time
+                                                              in nanoseconds.
+                                                          status:
+                                                            example: running
+                                                            type: string
+                                                            description: Component status represented as a string.
+                                                          status_time_unix_nano:
+                                                            example: '1706447355000000000'
+                                                            format: int64
+                                                            type: string
+                                                            description: The time when the component status was observed,
+                                                              UNIX Epoch time in nanoseconds.
+                                                        type: object
+                                                        title: ComponentHealth
+                                                        description: The health of the agent and any nested sub-components.
+                                                          The component_health_map can be nested to represent multi-level
+                                                          component hierarchies.
+                                                      example:
+                                                        receiver:
+                                                          healthy: false
+                                                          last_error: receiver-error
+                                                          status: failing
+                                                          status_time_unix_nano: '33'
+                                                      type: object
+                                                      description: Map of nested component name to its health object. Values
+                                                        use the same recursive ComponentHealth schema.
+                                                    healthy:
+                                                      example: true
+                                                      type: boolean
+                                                      description: Set to true if the component is up and healthy
+                                                    last_error:
+                                                      example: 'Failed to connect to backend: connection timeout'
+                                                      type: string
+                                                      description: Human-readable error message if the component is in erroneous
+                                                        state
+                                                    start_time_unix_nano:
+                                                      example: '1705323000000000000'
+                                                      format: int64
+                                                      type: string
+                                                      description: Timestamp since the component is up, UNIX Epoch time in
+                                                        nanoseconds.
+                                                    status:
+                                                      example: running
+                                                      type: string
+                                                      description: Component status represented as a string.
+                                                    status_time_unix_nano:
+                                                      example: '1706447355000000000'
+                                                      format: int64
+                                                      type: string
+                                                      description: The time when the component status was observed, UNIX Epoch
+                                                        time in nanoseconds.
+                                                  type: object
+                                                  title: ComponentHealth
+                                                  description: The health of the agent and any nested sub-components. The
+                                                    component_health_map can be nested to represent multi-level component
+                                                    hierarchies.
+                                                example:
+                                                  receiver:
+                                                    healthy: false
+                                                    last_error: receiver-error
+                                                    status: failing
+                                                    status_time_unix_nano: '33'
+                                                type: object
+                                                description: Map of nested component name to its health object. Values use
+                                                  the same recursive ComponentHealth schema.
+                                              healthy:
+                                                example: true
+                                                type: boolean
+                                                description: Set to true if the component is up and healthy
+                                              last_error:
+                                                example: 'Failed to connect to backend: connection timeout'
+                                                type: string
+                                                description: Human-readable error message if the component is in erroneous
+                                                  state
+                                              start_time_unix_nano:
+                                                example: '1705323000000000000'
+                                                format: int64
+                                                type: string
+                                                description: Timestamp since the component is up, UNIX Epoch time in nanoseconds.
+                                              status:
+                                                example: running
+                                                type: string
+                                                description: Component status represented as a string.
+                                              status_time_unix_nano:
+                                                example: '1706447355000000000'
+                                                format: int64
+                                                type: string
+                                                description: The time when the component status was observed, UNIX Epoch time
+                                                  in nanoseconds.
+                                            type: object
+                                            title: ComponentHealth
+                                            description: The health of the agent and any nested sub-components. The component_health_map
+                                              can be nested to represent multi-level component hierarchies.
+                                          example:
+                                            receiver:
+                                              healthy: false
+                                              last_error: receiver-error
+                                              status: failing
+                                              status_time_unix_nano: '33'
+                                          type: object
+                                          description: Map of nested component name to its health object. Values use the same
+                                            recursive ComponentHealth schema.
+                                        healthy:
+                                          example: true
+                                          type: boolean
+                                          description: Set to true if the component is up and healthy
+                                        last_error:
+                                          example: 'Failed to connect to backend: connection timeout'
+                                          type: string
+                                          description: Human-readable error message if the component is in erroneous state
+                                        start_time_unix_nano:
+                                          example: '1705323000000000000'
+                                          format: int64
+                                          type: string
+                                          description: Timestamp since the component is up, UNIX Epoch time in nanoseconds.
+                                        status:
+                                          example: running
+                                          type: string
+                                          description: Component status represented as a string.
+                                        status_time_unix_nano:
+                                          example: '1706447355000000000'
+                                          format: int64
+                                          type: string
+                                          description: The time when the component status was observed, UNIX Epoch time in
+                                            nanoseconds.
+                                      type: object
+                                      title: ComponentHealth
+                                      description: The health of the agent and any nested sub-components. The component_health_map
+                                        can be nested to represent multi-level component hierarchies.
+                                    example:
+                                      receiver:
+                                        healthy: false
+                                        last_error: receiver-error
+                                        status: failing
+                                        status_time_unix_nano: '33'
+                                    type: object
+                                    description: Map of nested component name to its health object. Values use the same recursive
+                                      ComponentHealth schema.
+                                  healthy:
+                                    example: true
+                                    type: boolean
+                                    description: Set to true if the component is up and healthy
+                                  last_error:
+                                    example: 'Failed to connect to backend: connection timeout'
+                                    type: string
+                                    description: Human-readable error message if the component is in erroneous state
+                                  start_time_unix_nano:
+                                    example: '1705323000000000000'
+                                    format: int64
+                                    type: string
+                                    description: Timestamp since the component is up, UNIX Epoch time in nanoseconds.
+                                  status:
+                                    example: running
+                                    type: string
+                                    description: Component status represented as a string.
+                                  status_time_unix_nano:
+                                    example: '1706447355000000000'
+                                    format: int64
+                                    type: string
+                                    description: The time when the component status was observed, UNIX Epoch time in nanoseconds.
+                                type: object
+                                title: ComponentHealth
+                                description: The health of the agent and any nested sub-components. The component_health_map
+                                  can be nested to represent multi-level component hierarchies.
+                              example:
+                                receiver:
+                                  healthy: false
+                                  last_error: receiver-error
+                                  status: failing
+                                  status_time_unix_nano: '33'
+                              type: object
+                              description: Map of nested component name to its health object. Values use the same recursive
+                                ComponentHealth schema.
+                            healthy:
+                              example: true
+                              type: boolean
+                              description: Set to true if the component is up and healthy
+                            last_error:
+                              example: 'Failed to connect to backend: connection timeout'
+                              type: string
+                              description: Human-readable error message if the component is in erroneous state
+                            start_time_unix_nano:
+                              example: '1705323000000000000'
+                              format: int64
+                              type: string
+                              description: Timestamp since the component is up, UNIX Epoch time in nanoseconds.
+                            status:
+                              example: running
+                              type: string
+                              description: Component status represented as a string.
+                            status_time_unix_nano:
+                              example: '1706447355000000000'
+                              format: int64
+                              type: string
+                              description: The time when the component status was observed, UNIX Epoch time in nanoseconds.
+                          type: object
+                          title: ComponentHealth
+                          description: The health of the agent and any nested sub-components. The component_health_map can
+                            be nested to represent multi-level component hierarchies.
+                        example:
+                          receiver:
+                            healthy: false
+                            last_error: receiver-error
+                            status: failing
+                            status_time_unix_nano: '33'
+                        type: object
+                        description: Map of nested component name to its health object. Values use the same recursive ComponentHealth
+                          schema.
+                      healthy:
+                        example: true
+                        type: boolean
+                        description: Set to true if the component is up and healthy
+                      last_error:
+                        example: 'Failed to connect to backend: connection timeout'
+                        type: string
+                        description: Human-readable error message if the component is in erroneous state
+                      start_time_unix_nano:
+                        example: '1705323000000000000'
+                        format: int64
+                        type: string
+                        description: Timestamp since the component is up, UNIX Epoch time in nanoseconds.
+                      status:
+                        example: running
+                        type: string
+                        description: Component status represented as a string.
+                      status_time_unix_nano:
+                        example: '1706447355000000000'
+                        format: int64
+                        type: string
+                        description: The time when the component status was observed, UNIX Epoch time in nanoseconds.
+                    type: object
+                    description: 'Component health status from OpAMP ComponentHealth proto. For list: included by default,
+                      exclude with include_health=false. For get: always included if available.'
+                  instance_uid:
+                    example: 550e8400-e29b-41d4-a716-446655440000
+                    type: string
+                    description: Unique client identifier
+                  last_heartbeat_at:
+                    example: '2024-01-28T14:25:10Z'
+                    format: date-time
+                    type: string
+                    description: Timestamp when the server last received a heartbeat from this client.
+                  metadata:
+                    additionalProperties:
+                      type: string
+                    example:
+                      host.name: prod-collector-01
+                      os.type: linux
+                      service.name: otel-collector
+                      service.version: 0.95.0
+                    type: object
+                    description: Flat key-value attributes reported by the OpAMP client. Includes both identifying and non-identifying
+                      attributes.
+                  org_id:
+                    example: acme-corp
+                    type: string
+                    description: Organization ID the client belongs to
+                  updated_at:
+                    example: '2024-01-28T14:22:35Z'
+                    format: date-time
+                    type: string
+                    description: Timestamp of last state change from client (metadata, config, health, status, etc.)
+                required:
+                - instance_uid
+                - org_id
+                - metadata
+                - connection_health
+                - created_at
+                - updated_at
+                type: object
+                title: Client
+              examples:
+                example:
+                  value:
+                    connection_health: active
+                    created_at: '2024-01-15T10:30:00Z'
+                    health:
+                      component_health_map:
+                        receiver:
+                          healthy: false
+                          last_error: receiver-error
+                          status: failing
+                          status_time_unix_nano: '33'
+                      healthy: true
+                      last_error: 'Failed to connect to backend: connection timeout'
+                      start_time_unix_nano: '1705323000000000000'
+                      status: running
+                      status_time_unix_nano: '1706447355000000000'
+                    instance_uid: 550e8400-e29b-41d4-a716-446655440000
+                    last_heartbeat_at: '2024-01-28T14:25:10Z'
+                    metadata:
+                      host.name: prod-collector-01
+                      os.type: linux
+                      service.name: otel-collector
+                      service.version: 0.95.0
+                    org_id: acme-corp
+                    updated_at: '2024-01-28T14:22:35Z'
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                malformedToken:
+                  summary: Credentials are malformed or unparseable
+                  value:
+                    error:
+                      code: AUTH_TOKEN_MALFORMED
+                      details: {}
+                      message: Credentials are malformed or unparseable
+                missingToken:
+                  summary: No credentials were provided
+                  value:
+                    error:
+                      code: AUTH_TOKEN_MISSING
+                      details: {}
+                      message: No valid credentials provided
+        '403':
+          description: HTTP 403 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                featureFlagDenied:
+                  summary: Feature is not enabled for the organization
+                  value:
+                    error:
+                      code: FORBIDDEN
+                      details: {}
+                      message: feature not available for this organization
+                filterNoMatch:
+                  summary: Authorization filter denies access
+                  value:
+                    error:
+                      code: AUTH_FILTER_NO_MATCH
+                      details: {}
+                      message: Access denied by authorization filter
+                missingScope:
+                  summary: Caller does not have the required scope
+                  value:
+                    error:
+                      code: AUTH_SCOPE_MISSING
+                      details: {}
+                      message: Required permission scope is missing
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                notFound:
+                  summary: The requested client does not exist or is not visible to the caller
+                  value:
+                    error:
+                      code: NOT_FOUND
+                      details: {}
+                      message: Not Found
+        '500':
+          description: HTTP 500 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                internalServerError:
+                  summary: Unexpected server-side failure
+                  value:
+                    error:
+                      code: INTERNAL_SERVER_ERROR
+                      details: {}
+                      message: Internal Server Error
+        '503':
+          description: HTTP 503 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                authProviderUnavailable:
+                  summary: Authentication provider is unavailable
+                  value:
+                    error:
+                      code: AUTH_PROVIDER_ERROR
+                      details: {}
+                      message: Authentication service unavailable
+      tags:
+      - Client Inventory
+  /clients/{id}/config:
+    get:
+      summary: getClientConfig
+      description: Retrieve the effective configuration for a specific client. The response is keyed by config file name.
+        Config file bodies are returned as base64-encoded bytes. Pass stringify=true to also receive UTF-8 string content
+        for human-readable formats such as YAML or JSON.
+      parameters:
+      - name: id
+        in: path
+        description: Client instance UID
+        required: true
+        schema:
+          type: string
+      - name: stringify
+        in: query
+        description: When true, also returns config body as a UTF-8 string in the bodyStr field. Useful for human-readable
+          formats such as application/yaml or application/json.
+        schema:
+          default: false
+          type: boolean
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  properties:
+                    body:
+                      format: byte
+                      type: string
+                      description: Raw config file content, base64-encoded.
+                    bodyStr:
+                      type: string
+                      description: Config file content as a UTF-8 string. Only present when stringify=true was requested.
+                    contentType:
+                      example: application/yaml
+                      type: string
+                      description: MIME type of the config content.
+                  type: object
+                  title: AgentConfigFile
+                  description: A single config file entry within a client's effective configuration.
+                example:
+                  controller-info.xml:
+                    body: cmVjZWl2ZXJzOgogIG90bHA6IHt9Cg==
+                    bodyStr: "receivers:\n  otlp: {}\n"
+                    contentType: application/yaml
+                type: object
+                title: ClientConfigResponse
+                description: Effective configuration for a single client. Keys are config file names, values are the config
+                  file contents.
+              examples:
+                example:
+                  value:
+                    controller-info.xml:
+                      body: cmVjZWl2ZXJzOgogIG90bHA6IHt9Cg==
+                      bodyStr: "receivers:\n  otlp: {}\n"
+                      contentType: application/yaml
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                badRequest:
+                  summary: Application-level request validation failed
+                  value:
+                    error:
+                      code: BAD_REQUEST
+                      details: {}
+                      message: Bad Request
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                malformedToken:
+                  summary: Credentials are malformed or unparseable
+                  value:
+                    error:
+                      code: AUTH_TOKEN_MALFORMED
+                      details: {}
+                      message: Credentials are malformed or unparseable
+                missingToken:
+                  summary: No credentials were provided
+                  value:
+                    error:
+                      code: AUTH_TOKEN_MISSING
+                      details: {}
+                      message: No valid credentials provided
+        '403':
+          description: HTTP 403 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                featureFlagDenied:
+                  summary: Feature is not enabled for the organization
+                  value:
+                    error:
+                      code: FORBIDDEN
+                      details: {}
+                      message: feature not available for this organization
+                filterNoMatch:
+                  summary: Authorization filter denies access
+                  value:
+                    error:
+                      code: AUTH_FILTER_NO_MATCH
+                      details: {}
+                      message: Access denied by authorization filter
+                missingScope:
+                  summary: Caller does not have the required scope
+                  value:
+                    error:
+                      code: AUTH_SCOPE_MISSING
+                      details: {}
+                      message: Required permission scope is missing
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                notFound:
+                  summary: The requested client does not exist or is not visible to the caller
+                  value:
+                    error:
+                      code: NOT_FOUND
+                      details: {}
+                      message: Not Found
+        '500':
+          description: HTTP 500 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                internalServerError:
+                  summary: Unexpected server-side failure
+                  value:
+                    error:
+                      code: INTERNAL_SERVER_ERROR
+                      details: {}
+                      message: Internal Server Error
+        '503':
+          description: HTTP 503 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                authProviderUnavailable:
+                  summary: Authentication provider is unavailable
+                  value:
+                    error:
+                      code: AUTH_PROVIDER_ERROR
+                      details: {}
+                      message: Authentication service unavailable
+      tags:
+      - Client Inventory
+  /clients/configs:batch:
+    post:
+      summary: batchGetConfigs
+      description: Retrieve effective configurations for multiple clients in a single request. The response returns a map
+        of clientId to configuration for found clients and lists missing client IDs in notFound.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                clientIds:
+                  example:
+                  - 550e8400-e29b-41d4-a716-446655440000
+                  - 550e8400-e29b-41d4-a716-446655440001
+                  items:
+                    type: string
+                  type: array
+                  description: 'List of client instance UIDs to fetch effective configurations for. The server enforces a
+                    configurable maximum number of client IDs per request (default: 1000).'
+                stringify:
+                  default: false
+                  type: boolean
+                  description: When true, also returns each config body as a UTF-8 string in the bodyStr field.
+              required:
+              - clientIds
+              type: object
+              title: BatchGetConfigRequest
+            examples:
+              basicBatch:
+                summary: Fetch configs for multiple clients
+                value:
+                  clientIds:
+                  - 550e8400-e29b-41d4-a716-446655440000
+                  - 550e8400-e29b-41d4-a716-446655440001
+              stringifiedBatch:
+                summary: Fetch configs and include UTF-8 string content
+                value:
+                  clientIds:
+                  - 550e8400-e29b-41d4-a716-446655440000
+                  - 550e8400-e29b-41d4-a716-446655440001
+                  stringify: true
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  configs:
+                    additionalProperties:
+                      additionalProperties:
+                        properties:
+                          body:
+                            format: byte
+                            type: string
+                            description: Raw config file content, base64-encoded.
+                          bodyStr:
+                            type: string
+                            description: Config file content as a UTF-8 string. Only present when stringify=true was requested.
+                          contentType:
+                            example: application/yaml
+                            type: string
+                            description: MIME type of the config content.
+                        type: object
+                        title: AgentConfigFile
+                        description: A single config file entry within a client's effective configuration.
+                      example:
+                        controller-info.xml:
+                          body: cmVjZWl2ZXJzOgogIG90bHA6IHt9Cg==
+                          bodyStr: "receivers:\n  otlp: {}\n"
+                          contentType: application/yaml
+                      type: object
+                      title: ClientConfigResponse
+                      description: Effective configuration for a single client. Keys are config file names, values are the
+                        config file contents.
+                    type: object
+                    description: Map of clientId to its effective configuration.
+                  notFound:
+                    items:
+                      type: string
+                    type: array
+                    description: Client IDs from the request that were not found.
+                type: object
+                title: BatchGetConfigResponse
+              examples:
+                example:
+                  value:
+                    notFound:
+                    - string
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                badRequest:
+                  summary: Application-level request validation failed
+                  value:
+                    error:
+                      code: BAD_REQUEST
+                      details: {}
+                      message: Bad Request
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                malformedToken:
+                  summary: Credentials are malformed or unparseable
+                  value:
+                    error:
+                      code: AUTH_TOKEN_MALFORMED
+                      details: {}
+                      message: Credentials are malformed or unparseable
+                missingToken:
+                  summary: No credentials were provided
+                  value:
+                    error:
+                      code: AUTH_TOKEN_MISSING
+                      details: {}
+                      message: No valid credentials provided
+        '403':
+          description: HTTP 403 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                featureFlagDenied:
+                  summary: Feature is not enabled for the organization
+                  value:
+                    error:
+                      code: FORBIDDEN
+                      details: {}
+                      message: feature not available for this organization
+                filterNoMatch:
+                  summary: Authorization filter denies access
+                  value:
+                    error:
+                      code: AUTH_FILTER_NO_MATCH
+                      details: {}
+                      message: Access denied by authorization filter
+                missingScope:
+                  summary: Caller does not have the required scope
+                  value:
+                    error:
+                      code: AUTH_SCOPE_MISSING
+                      details: {}
+                      message: Required permission scope is missing
+        '500':
+          description: HTTP 500 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                internalServerError:
+                  summary: Unexpected server-side failure
+                  value:
+                    error:
+                      code: INTERNAL_SERVER_ERROR
+                      details: {}
+                      message: Internal Server Error
+        '503':
+          description: HTTP 503 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                authProviderUnavailable:
+                  summary: Authentication provider is unavailable
+                  value:
+                    error:
+                      code: AUTH_PROVIDER_ERROR
+                      details: {}
+                      message: Authentication service unavailable
+      tags:
+      - Client Inventory
+  /clients/metadata/values:
+    get:
+      summary: listClientMetadataValues
+      description: 'Retrieve the distinct, non-empty values that clients in the caller''s tenant report for a single metadata
+        key. Values are returned in ascending lexicographic order and paginated with the same limit/offset shape as GET /clients.
+
+        The total_count in the pagination envelope is the total number of distinct values, not the number of clients.
+
+        Empty values and clients where the key is absent are excluded. Dead clients (outside the liveness window) are excluded.
+
+        The filter= and healthy= parameters narrow which clients are considered before the distinct values are computed. They
+        accept the same grammar as GET /clients.'
+      parameters:
+      - name: key
+        in: query
+        description: Metadata key whose distinct values to return (e.g. env, host.name, k8s.io/name). Passing the key as a
+          query parameter (rather than a path segment) allows slash-delimited keys to be expressed without percent-encoding
+          path separators.
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      - name: limit
+        in: query
+        description: 'Size of page (number of values to return). The server enforces a configurable maximum (default: 1000).'
+        schema:
+          default: 100
+          minimum: 1
+          type: integer
+      - name: offset
+        in: query
+        description: Offset for pagination (number of values to skip).
+        schema:
+          default: 0
+          minimum: 0
+          type: integer
+      - name: healthy
+        in: query
+        description: Restrict which clients are considered. Same semantics as GET /clients. Repeat to match any selected health
+          state. At most 10 healthy values are accepted per request.
+        schema:
+          items:
+            enum:
+            - 'true'
+            - 'false'
+            - unknown
+            type: string
+          maxItems: 10
+          type: array
+      - name: connection_health
+        in: query
+        description: Restrict which clients are considered by derived connection health. Same semantics as GET /clients. Repeat
+          to match any selected connection state.
+        schema:
+          items:
+            enum:
+            - active
+            - inactive
+            type: string
+          maxItems: 10
+          type: array
+      - name: filter
+        in: query
+        description: Filter by client metadata attribute. Repeat to apply multiple filters. Same grammar as GET /clients.
+        schema:
+          items:
+            pattern: ^[^:]+:.*$
+            type: string
+          maxItems: 10
+          type: array
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  pagination:
+                    properties:
+                      has_next:
+                        example: true
+                        type: boolean
+                        description: Whether there are more items available
+                      limit:
+                        example: 100
+                        type: integer
+                        description: Number of items requested per page
+                      next_offset:
+                        example: 100
+                        type: integer
+                        description: Offset value for the next page (only present if has_next is true)
+                      offset:
+                        example: 0
+                        type: integer
+                        description: Number of items skipped
+                      total_count:
+                        example: 42573
+                        type: integer
+                        description: Total number of items matching the query
+                    required:
+                    - limit
+                    - offset
+                    - total_count
+                    type: object
+                    title: PaginationMetadata
+                  values:
+                    items:
+                      type: string
+                    type: array
+                    description: Distinct, non-empty values for the requested metadata key, sorted ascending.
+                required:
+                - values
+                - pagination
+                type: object
+                title: MetadataValuesResponse
+              examples:
+                example:
+                  value:
+                    pagination:
+                      has_next: true
+                      limit: 100
+                      next_offset: 100
+                      offset: 0
+                      total_count: 42573
+                    values:
+                    - string
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                badRequest:
+                  summary: Application-level request validation failed
+                  value:
+                    error:
+                      code: BAD_REQUEST
+                      details: {}
+                      message: Bad Request
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                malformedToken:
+                  summary: Credentials are malformed or unparseable
+                  value:
+                    error:
+                      code: AUTH_TOKEN_MALFORMED
+                      details: {}
+                      message: Credentials are malformed or unparseable
+                missingToken:
+                  summary: No credentials were provided
+                  value:
+                    error:
+                      code: AUTH_TOKEN_MISSING
+                      details: {}
+                      message: No valid credentials provided
+        '403':
+          description: HTTP 403 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                featureFlagDenied:
+                  summary: Feature is not enabled for the organization
+                  value:
+                    error:
+                      code: FORBIDDEN
+                      details: {}
+                      message: feature not available for this organization
+                filterNoMatch:
+                  summary: Authorization filter denies access
+                  value:
+                    error:
+                      code: AUTH_FILTER_NO_MATCH
+                      details: {}
+                      message: Access denied by authorization filter
+                missingScope:
+                  summary: Caller does not have the required scope
+                  value:
+                    error:
+                      code: AUTH_SCOPE_MISSING
+                      details: {}
+                      message: Required permission scope is missing
+        '500':
+          description: HTTP 500 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                internalServerError:
+                  summary: Unexpected server-side failure
+                  value:
+                    error:
+                      code: INTERNAL_SERVER_ERROR
+                      details: {}
+                      message: Internal Server Error
+        '503':
+          description: HTTP 503 response
+          content:
+            application/json:
+              schema:
+                example:
+                  error:
+                    code: BAD_REQUEST
+                    details: {}
+                    message: Bad Request
+                properties:
+                  error:
+                    properties:
+                      code:
+                        example: BAD_REQUEST
+                        type: string
+                        description: Machine-readable error code
+                      details:
+                        additionalProperties: true
+                        example: {}
+                        type: object
+                        description: Additional error details
+                      message:
+                        example: Bad Request
+                        type: string
+                        description: Human-readable error message
+                    required:
+                    - code
+                    - message
+                    type: object
+                required:
+                - error
+                type: object
+                title: Error
+              examples:
+                authProviderUnavailable:
+                  summary: Authentication provider is unavailable
+                  value:
+                    error:
+                      code: AUTH_PROVIDER_ERROR
+                      details: {}
+                      message: Authentication service unavailable
+      tags:
+      - Client Inventory

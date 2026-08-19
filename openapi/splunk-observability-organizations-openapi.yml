@@ -1,0 +1,2163 @@
+openapi: 3.0.3
+info:
+  title: Splunk Observability Cloud — Organizations
+  version: 3.5.0
+  description: 'API for creating, updating, retrieving, and deleting organizations.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You have to have the Splunk Observability Cloud admin role to use the PATCH /organization/custom-categories, POST /organization/member/,
+    POST /organization/members, POST /organization/orgMembers, PUT /organization/member/{id}, and DELETE /organization/member/{id}
+    operations.
+
+    You have to have the Splunk Observability Cloud admin or power role to use the GET /organization/custom-categories operation.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference
+      pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's.
+      Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset
+      path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2
+  description: Organizations API endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.
+paths:
+  /organization:
+    get:
+      summary: Retrieve Organization
+      description: 'Gets the organization object for your organization. You can only get
+
+        the object if you''re a member of the organization; Splunk Observability Cloud looks at the
+
+        access token you use in your request to determine your membership.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: 'Format of the request payload. The only allowed value is
+
+          ''application/json'''
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: Either a session token (user API access token) or an organization token (access token) that has the API
+          authentication scope.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Organization properties
+                type: object
+                properties:
+                  creator:
+                    title: ID of the organization creator
+                    type: string
+                    readOnly: true
+                    description: 'ID of the user that created the organization
+
+                      object.
+
+                      The system sets this value, and you can''t change it.'
+                  lastUpdatedBy:
+                    title: ID of the user who last updated the organization object.
+                    type: string
+                    readOnly: true
+                    description: 'ID of the user that last updated the organization
+
+                      object.
+
+                      The system sets this value, and you can''t change it.'
+                  created:
+                    title: Organization creation time
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1531690230000
+                    description: 'The organization creation date and time, in *nix time in milliseconds.
+
+                      The system sets this value, and you can''t change it.'
+                  lastUpdated:
+                    title: Organization last updated time
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1554240630000
+                    description: 'The date and time that the organization was last updated, in *nix
+
+                      time in milliseconds.
+
+                      The system sets this value, and you can''t change it.'
+                  id:
+                    title: The organization ID
+                    type: string
+                    readOnly: true
+                    description: 'ID for this organization
+
+                      The system sets this value, and you can''t change it.'
+                  organizationName:
+                    title: Organization name
+                    type: string
+                    description: Descriptive name of the organization
+                  accountType:
+                    title: Account type for the organization
+                    type: string
+                    description: The type of account for the customer that owns the organization
+                  accountStatus:
+                    title: Account status for the organization
+                    type: string
+                    description: Specifies the status of the account that owns the organization
+                  accountKey:
+                    title: Account key for the organization
+                    type: string
+                    readOnly: true
+                    description: 'The authentication key for the account that owns the organization.
+
+                      The system sets this value, and you can''t change it.'
+                  accountRenews:
+                    title: Account renewal status for the organization
+                    type: string
+                    description: The renewal status for the account that owns the organization
+                  accountValidUntil:
+                    title: Account validity date and time for the organization.
+                    type: integer
+                    format: int64
+                    example: 1626384630000
+                    description: 'Specifies a date and time after which the account that owns the
+
+                      organization becomes invalid, in *nix time in milliseconds.'
+                  dpmLimit:
+                    title: Limit of the number of data points per minute
+                    type: integer
+                    format: int32
+                    readOnly: true
+                    description: 'Specifies the number of data points per minute that the
+
+                      organization can receive.
+
+                      The system sets this value, and you can''t change it.'
+                  tokensExpiringInSevenDays:
+                    title: Organization access tokens that expire in seven days or less
+                    type: array
+                    items:
+                      type: string
+                    example:
+                    - token1
+                    - token2
+                    readOnly: true
+                    description: 'Organization access tokens that expire in seven days or less
+
+                      The system sets this value, and you can''t change it.'
+                  tokensExpiringInThirtyDays:
+                    title: Organization access tokens that expire in 30 days or less
+                    type: array
+                    items:
+                      type: string
+                    example:
+                    - token1
+                    - token2
+                    - token3
+                    readOnly: true
+                    description: 'Organization access tokens that expire in 30 days or less
+
+                      The system sets this value, and you can''t change it.'
+                  url:
+                    title: The URL of the Splunk Observability Cloud organization
+                    type: array
+                    items:
+                      type: string
+                    example:
+                    - https://app.<REALM>.observability.splunkcloud.com
+                    - https://<CUSTOM_DOMAIN>.<REALM>.observability.splunkcloud.com
+                    readOnly: true
+                    description: 'The URL of the Splunk Observability Cloud organization
+
+                      The system sets this value, and you can''t change it.'
+                description: Properties of your organization
+              examples:
+                example:
+                  value:
+                    accountKey: string
+                    accountRenews: string
+                    accountStatus: string
+                    accountType: string
+                    accountValidUntil: 1626384630000
+                    created: 1531690230000
+                    creator: string
+                    dpmLimit: 0
+                    id: string
+                    lastUpdated: 1554240630000
+                    lastUpdatedBy: string
+                    organizationName: string
+                    tokensExpiringInSevenDays:
+                    - token1
+                    - token2
+                    tokensExpiringInThirtyDays:
+                    - token1
+                    - token2
+                    - token3
+                    url:
+                    - https://app.<REALM>.observability.splunkcloud.com
+                    - https://<CUSTOM_DOMAIN>.<REALM>.observability.splunkcloud.com
+      security:
+      - SessionToken: []
+      tags:
+      - Organizations
+  /organization/custom-categories:
+    get:
+      summary: Retrieve Custom Categories
+      description: 'Get all custom categories for your organization.
+
+        Custom categories appear in the UI. They''re a feature of an
+
+        organization that help you identify metrics associated with a dimension
+
+        or custom property.
+
+        To learn more about custom categories, see Manage custom categories
+
+        in the user documentation.
+
+        Note: Splunk Observability Cloud returns a maximum of 10,000 custom categories, even if your organization contains
+        more than 10,000. To learn more, see the
+
+        Considerations for retrieve operations section in the developer guide.
+
+        To make this request, you need the admin RBAC role.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request payload. The only allowed value is 'application/json'
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: 'Either a session token (user API access token) or an organization token (access token) that has the
+          API authentication scope.
+
+          The token needs to be associated with a user that has the RBAC admin role. To ensure this requirement, create the
+          token yourself.'
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Custom categories for an organization
+                type: array
+                items:
+                  title: Custom category for your organization
+                  type: object
+                  required:
+                  - name
+                  properties:
+                    name:
+                      type: string
+                      example: aws-availability-zone
+                      description: Dimension or custom property name
+                    alias:
+                      type: string
+                      example: AWS availability zone
+                      description: 'Alias (label) for this category, used in the UI. GET doesn''t
+
+                        return this property if it doesn''t have an existing value.'
+                    description:
+                      type: string
+                      example: AWS zones where this metric is available
+                      description: 'Text description of the category. Not visible in the UI. GET
+
+                        doesn''t return this property if it doesn''t have an existing value.'
+                  example:
+                    name: aws-availability-zone
+                    alias: AWS availability zone
+                    description: AWS zones where this metric is available
+                  description: Specification of a custom category, in the form of a JSON object
+                maxItems: 10
+                minItems: 0
+              examples:
+                example:
+                  value:
+                  - alias: AWS availability zone
+                    description: AWS zones where this metric is available
+                    name: aws-availability-zone
+      security:
+      - SessionToken: []
+      tags:
+      - Organizations
+    patch:
+      summary: Manage Custom Category
+      description: 'Creates, updates, or deletes one or more custom categories for your
+
+        organization. Custom categories appear in the UI. They''re a feature of an
+
+        organization that help you identify metrics associated with a dimension
+
+        or custom property.
+
+        To learn more about custom categories, see Manage custom categories
+
+        in the user documentation.
+
+        This operation has overwrite semantics. The array of custom
+
+        category objects in the request body replaces your existing custom
+
+        categories. Existing custom categories that aren''t in the request are
+
+        deleted. For this reason, follow these steps to modify your custom
+
+        categories:
+
+
+        Use the GET /organization/custom-categories operation to
+
+        retrieve any existing categories. Store the response body in an
+
+        array.
+
+        To create a custom category, add a custom category object to
+
+        the stored array. The object must have a name that''s not used by
+
+        another custom category.
+
+        To update a custom category, update its object in the stored
+
+        array.
+
+        To delete a custom category, delete its object in the stored
+
+        array.
+
+        Add the stored array to the request body of the PATCH operation.
+
+
+        Note: You can specify a custom category name (dimensions or custom property key)
+
+        only once in a PATCH request. For example, you can''t create a custom category
+
+        and then update it in the same request.
+
+        To make this request, you need the admin RBAC role.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: 'Format of the request payload. The only allowed value is
+
+          ''application/json'''
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: 'Either a session token (user API access token) or an organization token (access token) that has the
+          API authentication scope.
+
+          The token needs to be associated with a user that has the RBAC admin role. To ensure this requirement, create the
+          token yourself.'
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: Custom categories for an organization
+              type: array
+              items:
+                title: Custom category for your organization
+                type: object
+                required:
+                - name
+                properties:
+                  name:
+                    type: string
+                    example: aws-availability-zone
+                    description: Dimension or custom property name
+                  alias:
+                    type: string
+                    example: AWS availability zone
+                    description: 'Alias (label) for this category, used in the UI. GET doesn''t
+
+                      return this property if it doesn''t have an existing value.'
+                  description:
+                    type: string
+                    example: AWS zones where this metric is available
+                    description: 'Text description of the category. Not visible in the UI. GET
+
+                      doesn''t return this property if it doesn''t have an existing value.'
+                example:
+                  name: aws-availability-zone
+                  alias: AWS availability zone
+                  description: AWS zones where this metric is available
+                description: Specification of a custom category, in the form of a JSON object
+              maxItems: 10
+              minItems: 0
+            examples:
+              example:
+                value:
+                - alias: AWS availability zone
+                  description: AWS zones where this metric is available
+                  name: aws-availability-zone
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Custom categories for an organization
+                type: array
+                items:
+                  title: Custom category for your organization
+                  type: object
+                  required:
+                  - name
+                  properties:
+                    name:
+                      type: string
+                      example: aws-availability-zone
+                      description: Dimension or custom property name
+                    alias:
+                      type: string
+                      example: AWS availability zone
+                      description: 'Alias (label) for this category, used in the UI. GET doesn''t
+
+                        return this property if it doesn''t have an existing value.'
+                    description:
+                      type: string
+                      example: AWS zones where this metric is available
+                      description: 'Text description of the category. Not visible in the UI. GET
+
+                        doesn''t return this property if it doesn''t have an existing value.'
+                  example:
+                    name: aws-availability-zone
+                    alias: AWS availability zone
+                    description: AWS zones where this metric is available
+                  description: Specification of a custom category, in the form of a JSON object
+                maxItems: 10
+                minItems: 0
+              examples:
+                example:
+                  value:
+                  - alias: AWS availability zone
+                    description: AWS zones where this metric is available
+                    name: aws-availability-zone
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Unauthorized request to update org settings
+                  type: object
+                  properties:
+                    code:
+                      type: integer
+                      format: HTTPResponseCode
+                      example: 400
+                      description: HTTP response code. Always 400.
+                    message:
+                      type: string
+                      example: Unauthorized request to update org settings
+                      description: 'The user associated with the authentication token you provided isn''t
+
+                        authorized to update settings for the organization. The message value is
+
+                        "Unauthorized request to update org settings"'
+                  description: 'Error occurred while trying to create, update, or delete a custom
+
+                    category. In the request header, you specified an authentication token
+
+                    that isn''t authorized for the operation.'
+                - title: Only up to 10 custom categories allowed
+                  type: object
+                  properties:
+                    code:
+                      type: integer
+                      format: HTTPResponseCode
+                      example: 400
+                      description: HTTP response code. Always 400.
+                    message:
+                      type: string
+                      example: Only up to 10 custom categories allowed
+                      description: 'Creating the custom category would exceed the limit of 10 custom categories per
+
+                        organization. The message value is "Only up to 10 custom categories allowed"'
+                  description: 'Error occurred while trying to create a custom category. Creating the
+
+                    custom category would exceed the limit of 10 custom categories per
+
+                    organization.'
+                - title: Invalid custom category property
+                  type: object
+                  properties:
+                    code:
+                      type: integer
+                      format: HTTPResponseCode
+                      example: 400
+                      description: HTTP response code. Always 400.
+                    message:
+                      type: string
+                      example: Invalid custom category property
+                      description: 'The property name or dimension name you specified is misspelled or otherwise
+
+                        badly formatted. The message value is "Invalid custom category property".'
+                  description: 'Error occurred while trying to create a custom category. The
+
+                    property name or dimension name you specified is invalid.'
+                - title: Invalid custom category item
+                  type: object
+                  properties:
+                    code:
+                      type: integer
+                      format: HTTPResponseCode
+                      example: 400
+                      description: HTTP response code. Always 400.
+                    message:
+                      type: string
+                      example: Invalid custom category item
+                      description: 'You didn''t specify the name property for the custom category. The message
+
+                        value is "Invalid custom category item".'
+                  description: 'Error occurred while trying to create, update, or delete a custom
+
+                    category. You didn''t specify the name property for the custom category.'
+                - title: Repeated custom category item {category name}
+                  type: object
+                  properties:
+                    code:
+                      type: integer
+                      format: HTTPResponseCode
+                      example: 400
+                      description: HTTP response code. Always 400.
+                    message:
+                      type: string
+                      example: Repeated custom category item {category name}
+                      description: 'You specified the same name in more that one custom category object
+
+                        in this request. The name you used is included in the error message.
+
+                        The message value is "Repeated custom category item {name}"'
+                  description: 'Error occurred while trying to create custom categories. You
+
+                    specified the same name in more than one custom category object in this
+
+                    request. The name you used is included in the error message.'
+              examples:
+                Unauthorized request to update org settings:
+                  value:
+                    code: 400
+                    message: Unauthorized request to update org settings
+                Only up to 10 custom categories allowed:
+                  value:
+                    code: 400
+                    message: Only up to 10 custom categories allowed
+                Invalid custom category property:
+                  value:
+                    code: 400
+                    message: Invalid custom category property
+                Invalid custom category item:
+                  value:
+                    code: 400
+                    message: Invalid custom category item
+                Repeated custom category item {category name}:
+                  value:
+                    code: 400
+                    message: Repeated custom category item {category name}
+      security:
+      - SessionToken: []
+      tags:
+      - Organizations
+  /organization/member:
+    get:
+      summary: Retrieve Organization Members
+      description: 'Retrieves one or more members of the organization, based on the
+
+        search criteria specified in the query parameters.
+
+        Note: Splunk Observability Cloud returns a maximum of 10,000 members, even if your organization contains more than
+        10,000. To learn more, see the
+
+        Considerations for retrieve operations section in the developer guide.
+
+        To make this request, you need the admin RBAC role.'
+      parameters:
+      - name: offset
+        in: query
+        description: 'The object in the result set at which the API should start returning
+
+          results to you. Each object is an organization ID.
+
+          member.'
+        schema:
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: The number of results to return from the result set.
+        schema:
+          type: integer
+          format: int32
+      - name: query
+        in: query
+        description: 'Search criteria that selects the members you want the API to
+
+          return. You can search for values of any of the properties of an
+
+          organization object.
+
+          Search criteria have the following rules:
+
+
+          To search for a property, specify its name. The result is all of
+
+          the members that have that property.
+
+          To search for specific values of a dimension or property, specify
+
+          the name and value as <name>:<value>. If <value> contains
+
+          non-alphanumeric characters, encode the non-alphanumeric characters and surround the value with
+
+          double quotes. For example, the region custom property value US East must be passed in the parameter as region:"US%20East".
+
+          To search for names or values using wildcards, use * as the
+
+          wildcard character.
+
+          You can do range searches using the syntax
+
+          <name>:[<lower> to <upper>] (The value of
+
+          <lower> must be less than or equal to <upper>). This works for
+
+          numeric and alphabetic values.
+
+          To search for the existence of a property, use
+
+          _exists_ and _missing_.
+
+          A single property name and value (or wildcards) make up a
+
+          predicate that implicitly returns a boolean.
+
+          Join predicates with the NOT, AND, and OR boolean operators.
+
+          Use parentheses ''('' and '')'' to change the evaluation order.'
+        schema:
+          type: string
+      - name: order_by
+        in: query
+        description: 'The member object property on which the API should sort the results.
+
+          You don''t have to include this property in your query, but the value
+
+          must be a valid organization property.
+
+          Prepend a - character to the property name to sort in descending order. If you want to apply order_by to non-custom
+          property fields like timestamp, prepend the field with sf_. For example: order_by=-sf_timestamp.'
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: 'Format of the request payload. The only allowed value is
+
+          ''application/json'''
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: 'Either a session token (user API access token) or an organization token (access token) that has the
+          API authentication scope.
+
+          The token needs to be associated with a user that has the RBAC admin role. To ensure this requirement, create the
+          token yourself.'
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Results of a GET for `/organization/member`
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      title: Properties of a single organization member
+                      type: object
+                      properties:
+                        creator:
+                          type: string
+                          readOnly: true
+                          description: ID of the user that created this member
+                        lastUpdatedBy:
+                          type: string
+                          readOnly: true
+                          description: ID of the user that last updated this member
+                        created:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1533676829319
+                          description: 'The member creation date and time, in *nix time in milliseconds.
+
+                            The system sets this value, and you can''t change it.'
+                        lastUpdated:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1557696630000
+                          description: 'The date and time that the member was last updated, in *nix time in milliseconds.
+
+                            The system sets this value, and you can''t change it.'
+                        id:
+                          type: string
+                          readOnly: true
+                          description: ID of the member
+                        userId:
+                          type: string
+                          readOnly: true
+                          description: User ID
+                        organizationId:
+                          type: string
+                          readOnly: true
+                          description: 'Organization ID for the organization that the
+
+                            member belongs to'
+                        email:
+                          type: string
+                          description: 'Email address for the user associated with this member
+
+                            record'
+                        fullName:
+                          type: string
+                          description: Full name of the user associated with this member record
+                        phone:
+                          type: string
+                          description: Phone number of the user associated with this member record
+                        title:
+                          type: string
+                          description: Job title of the user associated with this member record
+                        roles:
+                          type: object
+                          properties:
+                            roles:
+                              type: array
+                              items:
+                                title: Properties of a role
+                                type: object
+                                properties:
+                                  capabilities:
+                                    type: array
+                                    items:
+                                      type: string
+                                      example: EXAMPLE_CAPABILITY1
+                                    description: List of capabilities
+                                  created:
+                                    type: string
+                                    example: 232329
+                                    readOnly: true
+                                    description: 'The time the role was created, in *nix time in milliseconds.
+
+                                      The system sets this value, and you can''t change it.'
+                                  creator:
+                                    type: string
+                                    example: XXZZZZyyZZ
+                                    readOnly: true
+                                    description: 'User who created the role, if applicable
+
+                                      The system sets this value, and you can''t change it.'
+                                  description:
+                                    type: string
+                                    example: Built-in admin role
+                                    description: Description of the role
+                                  id:
+                                    type: string
+                                    example: Dkf34203
+                                    readOnly: true
+                                    description: 'Role identifier
+
+                                      The system sets this value, and you can''t change it.'
+                                  immutable:
+                                    type: boolean
+                                    example: true
+                                    description: Whether the role is immutable
+                                  lastUpdated:
+                                    type: string
+                                    example: 34343
+                                    readOnly: true
+                                    description: 'Time of update, in milliseconds
+
+                                      The system sets this value, and you can''t change it.'
+                                  lastUpdatedBy:
+                                    type: string
+                                    example: User1
+                                    readOnly: true
+                                    description: 'Last user to update the role
+
+                                      The system sets this value, and you can''t change it.'
+                                  organizationId:
+                                    type: string
+                                    example: F2394DY
+                                    readOnly: true
+                                    description: 'Organization identifier
+
+                                      The system sets this value, and you can''t change it.'
+                                  title:
+                                    type: string
+                                    example: DevOps user
+                                    description: Title of the role
+                                description: 'Properties of an Splunk Observability Cloud role as defined in the system,
+
+                                  including capabilities, a description, and whether the role is
+
+                                  immutable.'
+                              description: List of roles and their capabilities. See About roles in Splunk Observability Cloud
+                                for more information.
+                          title: Roles
+                          description: List of roles. See About roles in Splunk Observability Cloud for more information.
+                        admin:
+                          type: boolean
+                          default: false
+                          description: This is a legacy setting and will be deprecated. Use roles instead.
+                      description: 'Properties containing data that Splunk Observability Cloud maintains for each member
+
+                        of an organization.'
+                    title: OrgMemberObjectArray
+                    description: 'Array of members. Each element contains a single result for the
+
+                      query, in the form of a member object.'
+                  count:
+                    type: integer
+                    format: int32
+                    description: 'The number of member objects in the result set produced by the
+
+                      query.
+
+                      Note: This number is not necessarily the same as the number of
+
+                      objects returned to you. If you specify an offset or limit for the
+
+                      query, the number of objects you receive is less than count.'
+                description: 'The results of a GET for /organization/member. This is a JSON object
+
+                  that has two properties:
+
+
+                  results: Array of member objects
+
+                  count: Number of member objects in the result set'
+              examples:
+                example:
+                  value:
+                    count: 0
+                    results:
+                    - admin: true
+                      created: 1533676829319
+                      creator: string
+                      email: string
+                      fullName: string
+                      id: string
+                      lastUpdated: 1557696630000
+                      lastUpdatedBy: string
+                      organizationId: string
+                      phone: string
+                      roles:
+                        roles:
+                        - capabilities:
+                          - EXAMPLE_CAPABILITY1
+                          created: 232329
+                          creator: XXZZZZyyZZ
+                          description: Built-in admin role
+                          id: Dkf34203
+                          immutable: true
+                          lastUpdated: 34343
+                          lastUpdatedBy: User1
+                          organizationId: F2394DY
+                          title: DevOps user
+                      title: string
+                      userId: string
+      security:
+      - SessionToken: []
+      tags:
+      - Organizations
+    post:
+      summary: Invite Member
+      description: 'Invites a user to the organization. To make this request, you
+
+        must have administrative access for this organization.
+
+        Note:
+
+
+        You can only invite an email address to an organization once within one minute. If you try to invite the same email
+        address multiple times in one minute, the API returns an error.
+
+        You can only send 5000 invitations for an organization within 24 hours. If you exceed this limit, the API returns
+        an error.
+
+
+        To make this request, you need the admin RBAC role.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request payload. The only allowed value is 'application/json'
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: 'Either a session token (user API access token) or an organization token (access token) that has the
+          API authentication scope.
+
+          The token needs to be associated with a user that has the RBAC admin role. To ensure this requirement, create the
+          token yourself.'
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - email
+              properties:
+                email:
+                  type: string
+                  description: 'Person''s email address. Splunk Observability Cloud sends a special
+
+                    invitation email to this address; this is the only way that
+
+                    the person can join the organization.'
+                fullName:
+                  type: string
+                  description: Person's full name
+                title:
+                  type: string
+                  description: Person's job title
+                phone:
+                  type: string
+                  description: x-Person's telephone number
+                admin:
+                  type: boolean
+                  default: false
+                  description: This is a legacy setting and will be deprecated. Use roles instead.
+            examples:
+              example:
+                value:
+                  admin: true
+                  email: string
+                  fullName: string
+                  phone: string
+                  title: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    description: 'User email address. Splunk Observability Cloud sends an invitation link
+
+                      to the address. When users click this link, the Splunk Observability Cloud
+
+                      login page appears. Users must set a password before they can
+
+                      join the organization.
+
+                      The invitation link is the only way that users can join the organization.'
+                  fullName:
+                    type: string
+                    description: User's full name
+                  title:
+                    type: string
+                    description: User's job title
+                  phone:
+                    type: string
+                    description: User's telephone number
+                  roles:
+                    type: object
+                    properties:
+                      roles:
+                        type: array
+                        items:
+                          title: Properties of a role
+                          type: object
+                          properties:
+                            capabilities:
+                              type: array
+                              items:
+                                type: string
+                                example: EXAMPLE_CAPABILITY1
+                              description: List of capabilities
+                            created:
+                              type: string
+                              example: 232329
+                              readOnly: true
+                              description: 'The time the role was created, in *nix time in milliseconds.
+
+                                The system sets this value, and you can''t change it.'
+                            creator:
+                              type: string
+                              example: XXZZZZyyZZ
+                              readOnly: true
+                              description: 'User who created the role, if applicable
+
+                                The system sets this value, and you can''t change it.'
+                            description:
+                              type: string
+                              example: Built-in admin role
+                              description: Description of the role
+                            id:
+                              type: string
+                              example: Dkf34203
+                              readOnly: true
+                              description: 'Role identifier
+
+                                The system sets this value, and you can''t change it.'
+                            immutable:
+                              type: boolean
+                              example: true
+                              description: Whether the role is immutable
+                            lastUpdated:
+                              type: string
+                              example: 34343
+                              readOnly: true
+                              description: 'Time of update, in milliseconds
+
+                                The system sets this value, and you can''t change it.'
+                            lastUpdatedBy:
+                              type: string
+                              example: User1
+                              readOnly: true
+                              description: 'Last user to update the role
+
+                                The system sets this value, and you can''t change it.'
+                            organizationId:
+                              type: string
+                              example: F2394DY
+                              readOnly: true
+                              description: 'Organization identifier
+
+                                The system sets this value, and you can''t change it.'
+                            title:
+                              type: string
+                              example: DevOps user
+                              description: Title of the role
+                          description: 'Properties of an Splunk Observability Cloud role as defined in the system,
+
+                            including capabilities, a description, and whether the role is
+
+                            immutable.'
+                        description: List of roles and their capabilities. See About roles in Splunk Observability Cloud for
+                          more information.
+                    title: Roles
+                    description: List of roles. See About roles in Splunk Observability Cloud for more information.
+                  admin:
+                    type: boolean
+                    default: false
+                    description: This is a legacy setting and will be deprecated. Use roles instead.
+              examples:
+                example:
+                  value:
+                    admin: true
+                    email: string
+                    fullName: string
+                    phone: string
+                    roles:
+                      roles:
+                      - capabilities:
+                        - EXAMPLE_CAPABILITY1
+                        created: 232329
+                        creator: XXZZZZyyZZ
+                        description: Built-in admin role
+                        id: Dkf34203
+                        immutable: true
+                        lastUpdated: 34343
+                        lastUpdatedBy: User1
+                        organizationId: F2394DY
+                        title: DevOps user
+                    title: string
+        '400':
+          description: HTTP 400 response
+        '429':
+          description: HTTP 429 response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Same email invited within one minute
+                  type: object
+                  properties:
+                    code:
+                      type: integer
+                      format: HTTPResponseCode
+                      example: 429
+                      description: HTTP response code. Always 429.
+                    message:
+                      type: string
+                      example: Email {invited email address} was already invited to this org recently; please wait before
+                        inviting them again.
+                      description: Inviting the same email address more than once within one minute causes the API to throw
+                        an error. The message value is "Email {invited email address} was already invited to this org recently;
+                        please wait before inviting them again."
+                  description: You tried to invite the same email address multiple times to an organization within one minute.
+                - title: Invitation limit exceeded within 24 hours
+                  type: object
+                  properties:
+                    code:
+                      type: integer
+                      format: HTTPResponseCode
+                      example: 429
+                      description: HTTP response code. Always 429.
+                    message:
+                      type: string
+                      example: Too many invites sent; please wait before inviting more users to this org.
+                      description: Sending more than 5000 invitations for an organization within 24 hours causes the API to
+                        throw an error. The message value is "Too many invites sent; please wait before inviting more users
+                        to this org.”
+                  description: You tried to send more than 5000 invitations for an organization within 24 hours.
+              examples:
+                Same email invited within one minute:
+                  value:
+                    code: 429
+                    message: Email {invited email address} was already invited to this org recently; please wait before inviting
+                      them again.
+                Invitation limit exceeded within 24 hours:
+                  value:
+                    code: 429
+                    message: Too many invites sent; please wait before inviting more users to this org.
+      security:
+      - SessionToken: []
+      tags:
+      - Organizations
+  /organization/member/{id}:
+    get:
+      summary: Retrieve Member Using Member ID
+      description: 'Retrieves the user object for an organization user.
+
+        Specify the member by member ID, using the id path parameter.
+
+        To make this request, you need the admin RBAC role.'
+      parameters:
+      - name: id
+        in: path
+        description: 'The member ID of the member whose information you
+
+          want to retrieve.'
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: Format of the request payload. The only allowed value is 'application/json'
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: 'Either a session token (user API access token) or an organization token (access token) that has the
+          API authentication scope.
+
+          The token needs to be associated with a user that has the RBAC admin role. To ensure this requirement, create the
+          token yourself.'
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Properties of a single organization member
+                type: object
+                properties:
+                  creator:
+                    type: string
+                    example: XXXyyZZZ
+                    readOnly: true
+                    description: 'ID of the user that created this member
+
+                      The system sets this value, and you can''t change it.'
+                  lastUpdatedBy:
+                    type: string
+                    readOnly: true
+                    description: 'ID of the user that last updated this member
+
+                      The system sets this value, and you can''t change it.'
+                  created:
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1533676829319
+                    description: 'The member creation date and time, in *nix time in milliseconds.
+
+                      The system sets this value, and you can''t change it.'
+                  lastUpdated:
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1557696630000
+                    description: 'The date and time that the member was last updated, in *nix time in milliseconds.
+
+                      The system sets this value, and you can''t change it.'
+                  id:
+                    type: string
+                    readOnly: true
+                    description: 'ID of the member
+
+                      The system sets this value, and you can''t change it.'
+                  userId:
+                    type: string
+                    readOnly: true
+                    description: 'User ID
+
+                      The system sets this value, and you can''t change it.'
+                  organizationId:
+                    type: string
+                    readOnly: true
+                    description: 'Organization ID for the organization that the
+
+                      member belongs to
+
+                      The system sets this value, and you can''t change it.'
+                  email:
+                    type: string
+                    description: 'Email address for the user associated with this member
+
+                      record'
+                  fullName:
+                    type: string
+                    description: Full name of the user associated with this member record
+                  phone:
+                    type: string
+                    description: Phone number of the user associated with this member record
+                  title:
+                    type: string
+                    description: Job title of the user associated with this member record
+                  admin:
+                    type: boolean
+                    default: false
+                    description: This is a legacy setting and will be deprecated. Use roles instead.
+                description: 'Properties containing data that Splunk Observability Cloud maintains for each member
+
+                  of an organization.'
+              examples:
+                example:
+                  value:
+                    admin: true
+                    created: 1533676829319
+                    creator: XXXyyZZZ
+                    email: string
+                    fullName: string
+                    id: string
+                    lastUpdated: 1557696630000
+                    lastUpdatedBy: string
+                    organizationId: string
+                    phone: string
+                    title: string
+                    userId: string
+      security:
+      - SessionToken: []
+      tags:
+      - Organizations
+    put:
+      summary: Update Member Admin Access Using ID
+      description: 'Update the administrative access flag for a member of the
+
+        organization. Specify the member by member ID, using the id path
+
+        parameter.
+
+        To make this request, you need the admin RBAC role.'
+      parameters:
+      - name: id
+        in: path
+        description: 'The member ID of the member whose access you
+
+          want to update.'
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: 'Format of the request payload. The only allowed value is
+
+          ''application/json'''
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: 'Either a session token (user API access token) or an organization token (access token) that has the
+          API authentication scope.
+
+          The token needs to be associated with a user that has the RBAC admin role. To ensure this requirement, create the
+          token yourself.'
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                admin:
+                  type: boolean
+                  default: false
+                  description: This is a legacy setting and will be deprecated. Use roles instead.
+            examples:
+              example:
+                value:
+                  admin: true
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Properties of a single organization member
+                type: object
+                properties:
+                  creator:
+                    type: string
+                    example: XXXyyZZZ
+                    readOnly: true
+                    description: 'ID of the user that created this member
+
+                      The system sets this value, and you can''t change it.'
+                  lastUpdatedBy:
+                    type: string
+                    readOnly: true
+                    description: 'ID of the user that last updated this member
+
+                      The system sets this value, and you can''t change it.'
+                  created:
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1533676829319
+                    description: 'The member creation date and time, in *nix time in milliseconds.
+
+                      The system sets this value, and you can''t change it.'
+                  lastUpdated:
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1557696630000
+                    description: 'The date and time that the member was last updated, in *nix time in milliseconds.
+
+                      The system sets this value, and you can''t change it.'
+                  id:
+                    type: string
+                    readOnly: true
+                    description: 'ID of the member
+
+                      The system sets this value, and you can''t change it.'
+                  userId:
+                    type: string
+                    readOnly: true
+                    description: 'User ID
+
+                      The system sets this value, and you can''t change it.'
+                  organizationId:
+                    type: string
+                    readOnly: true
+                    description: 'Organization ID for the organization that the
+
+                      member belongs to
+
+                      The system sets this value, and you can''t change it.'
+                  email:
+                    type: string
+                    description: 'Email address for the user associated with this member
+
+                      record'
+                  fullName:
+                    type: string
+                    description: Full name of the user associated with this member record
+                  phone:
+                    type: string
+                    description: Phone number of the user associated with this member record
+                  title:
+                    type: string
+                    description: Job title of the user associated with this member record
+                  admin:
+                    type: boolean
+                    default: false
+                    description: This is a legacy setting and will be deprecated. Use roles instead.
+                description: 'Properties containing data that Splunk Observability Cloud maintains for each member
+
+                  of an organization.'
+              examples:
+                example:
+                  value:
+                    admin: true
+                    created: 1533676829319
+                    creator: XXXyyZZZ
+                    email: string
+                    fullName: string
+                    id: string
+                    lastUpdated: 1557696630000
+                    lastUpdatedBy: string
+                    organizationId: string
+                    phone: string
+                    title: string
+                    userId: string
+      security:
+      - SessionToken: []
+      tags:
+      - Organizations
+    delete:
+      summary: Delete Member Using ID
+      description: 'Deletes a member from the organization. The user retains access to
+
+        other organizations that he or she belongs to.
+
+        Specify the member by member ID, using the id path parameter.
+
+        To make this request, you need the admin RBAC role.'
+      parameters:
+      - name: id
+        in: path
+        description: 'The member ID of the member whose access you
+
+          want to update.'
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: 'Either a session token (user API access token) or an organization token (access token) that has the
+          API authentication scope.
+
+          The token needs to be associated with a user that has the RBAC admin role. To ensure this requirement, create the
+          token yourself.'
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: HTTP 204 response
+      security:
+      - SessionToken: []
+      tags:
+      - Organizations
+  /organization/members:
+    post:
+      summary: Invite Members
+      description: 'Deprecated. Use /organization/orgMembers instead. Invites users to your organization.
+
+        Note:
+
+
+        You can only invite an email address to an organization once within one minute. If you try to invite the same email
+        address multiple times in one minute, the API returns an error.
+
+        You can only send 5000 invitations for an organization within 24 hours. If you exceed this limit, the API returns
+        an error.
+
+
+        To make this request, you need the admin RBAC role.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request payload. The only allowed value is 'application/json'
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: 'Either a session token (user API access token) or an organization token (access token) that has the
+          API authentication scope.
+
+          The token needs to be associated with a user that has the RBAC admin role. To ensure this requirement, create the
+          token yourself.'
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - members
+              properties:
+                members:
+                  type: array
+                  items:
+                    type: array
+                    items:
+                      title: Properties of a single organization member
+                      type: object
+                      properties:
+                        creator:
+                          type: string
+                          example: XXXyyZZZ
+                          readOnly: true
+                          description: 'ID of the user that created this member
+
+                            The system sets this value, and you can''t change it.'
+                        lastUpdatedBy:
+                          type: string
+                          readOnly: true
+                          description: 'ID of the user that last updated this member
+
+                            The system sets this value, and you can''t change it.'
+                        created:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1533676829319
+                          description: 'The member creation date and time, in *nix time in milliseconds.
+
+                            The system sets this value, and you can''t change it.'
+                        lastUpdated:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1557696630000
+                          description: 'The date and time that the member was last updated, in *nix time in milliseconds.
+
+                            The system sets this value, and you can''t change it.'
+                        id:
+                          type: string
+                          readOnly: true
+                          description: 'ID of the member
+
+                            The system sets this value, and you can''t change it.'
+                        userId:
+                          type: string
+                          readOnly: true
+                          description: 'User ID
+
+                            The system sets this value, and you can''t change it.'
+                        organizationId:
+                          type: string
+                          readOnly: true
+                          description: 'Organization ID for the organization that the
+
+                            member belongs to
+
+                            The system sets this value, and you can''t change it.'
+                        email:
+                          type: string
+                          description: 'Email address for the user associated with this member
+
+                            record'
+                        fullName:
+                          type: string
+                          description: Full name of the user associated with this member record
+                        phone:
+                          type: string
+                          description: Phone number of the user associated with this member record
+                        title:
+                          type: string
+                          description: Job title of the user associated with this member record
+                        admin:
+                          type: boolean
+                          default: false
+                          description: This is a legacy setting and will be deprecated. Use roles instead.
+                      description: 'Properties containing data that Splunk Observability Cloud maintains for each member
+
+                        of an organization.'
+                    title: MemberObjectArray
+                    description: 'Array of members. Each element contains a single result for the
+
+                      query, in the form of a member object.'
+                  description: 'Array of invitation objects for the people you want to invite.
+
+                    Each object must contain the email property.'
+            examples:
+              example:
+                value:
+                  members:
+                  - - admin: true
+                      created: 1533676829319
+                      creator: XXXyyZZZ
+                      email: string
+                      fullName: string
+                      id: string
+                      lastUpdated: 1557696630000
+                      lastUpdatedBy: string
+                      organizationId: string
+                      phone: string
+                      title: string
+                      userId: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  members:
+                    type: array
+                    items:
+                      title: Properties of a single organization member
+                      type: object
+                      properties:
+                        creator:
+                          type: string
+                          example: XXXyyZZZ
+                          readOnly: true
+                          description: 'ID of the user that created this member
+
+                            The system sets this value, and you can''t change it.'
+                        lastUpdatedBy:
+                          type: string
+                          readOnly: true
+                          description: 'ID of the user that last updated this member
+
+                            The system sets this value, and you can''t change it.'
+                        created:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1533676829319
+                          description: 'The member creation date and time, in *nix time in milliseconds.
+
+                            The system sets this value, and you can''t change it.'
+                        lastUpdated:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1557696630000
+                          description: 'The date and time that the member was last updated, in *nix time in milliseconds.
+
+                            The system sets this value, and you can''t change it.'
+                        id:
+                          type: string
+                          readOnly: true
+                          description: 'ID of the member
+
+                            The system sets this value, and you can''t change it.'
+                        userId:
+                          type: string
+                          readOnly: true
+                          description: 'User ID
+
+                            The system sets this value, and you can''t change it.'
+                        organizationId:
+                          type: string
+                          readOnly: true
+                          description: 'Organization ID for the organization that the
+
+                            member belongs to
+
+                            The system sets this value, and you can''t change it.'
+                        email:
+                          type: string
+                          description: 'Email address for the user associated with this member
+
+                            record'
+                        fullName:
+                          type: string
+                          description: Full name of the user associated with this member record
+                        phone:
+                          type: string
+                          description: Phone number of the user associated with this member record
+                        title:
+                          type: string
+                          description: Job title of the user associated with this member record
+                        admin:
+                          type: boolean
+                          default: false
+                          description: This is a legacy setting and will be deprecated. Use roles instead.
+                      description: 'Properties containing data that Splunk Observability Cloud maintains for each member
+
+                        of an organization.'
+                    description: 'Array of user objects for the members that the request
+
+                      invited.'
+              examples:
+                example:
+                  value:
+                    members:
+                    - admin: true
+                      created: 1533676829319
+                      creator: XXXyyZZZ
+                      email: string
+                      fullName: string
+                      id: string
+                      lastUpdated: 1557696630000
+                      lastUpdatedBy: string
+                      organizationId: string
+                      phone: string
+                      title: string
+                      userId: string
+        '400':
+          description: HTTP 400 response
+        '429':
+          description: HTTP 429 response
+      security:
+      - SessionToken: []
+      tags:
+      - Organizations
+  /organization/orgMembers:
+    post:
+      summary: Invite Org Members
+      description: 'Invites users to your organization.
+
+        Note:
+
+
+        You can only invite an email address to an organization once within one minute. If you try to invite the same email
+        address multiple times in one minute, the API returns an error.
+
+        You can only send 5000 invitations for an organization within 24 hours. If you exceed this limit, the API returns
+        an error.
+
+
+        To make this request, you need the admin RBAC role.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request payload. The only allowed value is 'application/json'
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: 'Either a session token (user API access token) or an organization token (access token) that has the
+          API authentication scope.
+
+          The token needs to be associated with a user that has the RBAC admin role. To ensure this requirement, create the
+          token yourself.'
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - members
+              properties:
+                members:
+                  type: array
+                  items:
+                    type: array
+                    items:
+                      title: Properties of a single organization member
+                      type: object
+                      properties:
+                        creator:
+                          type: string
+                          readOnly: true
+                          description: ID of the user that created this member
+                        lastUpdatedBy:
+                          type: string
+                          readOnly: true
+                          description: ID of the user that last updated this member
+                        created:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1533676829319
+                          description: 'The member creation date and time, in *nix time in milliseconds.
+
+                            The system sets this value, and you can''t change it.'
+                        lastUpdated:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1557696630000
+                          description: 'The date and time that the member was last updated, in *nix time in milliseconds.
+
+                            The system sets this value, and you can''t change it.'
+                        id:
+                          type: string
+                          readOnly: true
+                          description: ID of the member
+                        userId:
+                          type: string
+                          readOnly: true
+                          description: User ID
+                        organizationId:
+                          type: string
+                          readOnly: true
+                          description: 'Organization ID for the organization that the
+
+                            member belongs to'
+                        email:
+                          type: string
+                          description: 'Email address for the user associated with this member
+
+                            record'
+                        fullName:
+                          type: string
+                          description: Full name of the user associated with this member record
+                        phone:
+                          type: string
+                          description: Phone number of the user associated with this member record
+                        title:
+                          type: string
+                          description: Job title of the user associated with this member record
+                        roles:
+                          type: object
+                          properties:
+                            roles:
+                              type: array
+                              items:
+                                title: Properties of a role
+                                type: object
+                                properties:
+                                  capabilities:
+                                    type: array
+                                    items:
+                                      type: string
+                                      example: EXAMPLE_CAPABILITY1
+                                    description: List of capabilities
+                                  created:
+                                    type: string
+                                    example: 232329
+                                    readOnly: true
+                                    description: 'The time the role was created, in *nix time in milliseconds.
+
+                                      The system sets this value, and you can''t change it.'
+                                  creator:
+                                    type: string
+                                    example: XXZZZZyyZZ
+                                    readOnly: true
+                                    description: 'User who created the role, if applicable
+
+                                      The system sets this value, and you can''t change it.'
+                                  description:
+                                    type: string
+                                    example: Built-in admin role
+                                    description: Description of the role
+                                  id:
+                                    type: string
+                                    example: Dkf34203
+                                    readOnly: true
+                                    description: 'Role identifier
+
+                                      The system sets this value, and you can''t change it.'
+                                  immutable:
+                                    type: boolean
+                                    example: true
+                                    description: Whether the role is immutable
+                                  lastUpdated:
+                                    type: string
+                                    example: 34343
+                                    readOnly: true
+                                    description: 'Time of update, in milliseconds
+
+                                      The system sets this value, and you can''t change it.'
+                                  lastUpdatedBy:
+                                    type: string
+                                    example: User1
+                                    readOnly: true
+                                    description: 'Last user to update the role
+
+                                      The system sets this value, and you can''t change it.'
+                                  organizationId:
+                                    type: string
+                                    example: F2394DY
+                                    readOnly: true
+                                    description: 'Organization identifier
+
+                                      The system sets this value, and you can''t change it.'
+                                  title:
+                                    type: string
+                                    example: DevOps user
+                                    description: Title of the role
+                                description: 'Properties of an Splunk Observability Cloud role as defined in the system,
+
+                                  including capabilities, a description, and whether the role is
+
+                                  immutable.'
+                              description: List of roles and their capabilities. See About roles in Splunk Observability Cloud
+                                for more information.
+                          title: Roles
+                          description: List of roles. See About roles in Splunk Observability Cloud for more information.
+                        admin:
+                          type: boolean
+                          default: false
+                          description: This is a legacy setting and will be deprecated. Use roles instead.
+                      description: 'Properties containing data that Splunk Observability Cloud maintains for each member
+
+                        of an organization.'
+                    title: OrgMemberObjectArray
+                    description: 'Array of members. Each element contains a single result for the
+
+                      query, in the form of a member object.'
+                  description: 'Array of invitation objects for the people you want to invite.
+
+                    Each object must contain the email property.'
+            examples:
+              example:
+                value:
+                  members:
+                  - - admin: true
+                      created: 1533676829319
+                      creator: string
+                      email: string
+                      fullName: string
+                      id: string
+                      lastUpdated: 1557696630000
+                      lastUpdatedBy: string
+                      organizationId: string
+                      phone: string
+                      roles:
+                        roles:
+                        - capabilities:
+                          - EXAMPLE_CAPABILITY1
+                          created: 232329
+                          creator: XXZZZZyyZZ
+                          description: Built-in admin role
+                          id: Dkf34203
+                          immutable: true
+                          lastUpdated: 34343
+                          lastUpdatedBy: User1
+                          organizationId: F2394DY
+                          title: DevOps user
+                      title: string
+                      userId: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  members:
+                    type: array
+                    items:
+                      title: Properties of a single organization member
+                      type: object
+                      properties:
+                        creator:
+                          type: string
+                          readOnly: true
+                          description: ID of the user that created this member
+                        lastUpdatedBy:
+                          type: string
+                          readOnly: true
+                          description: ID of the user that last updated this member
+                        created:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1533676829319
+                          description: 'The member creation date and time, in *nix time in milliseconds.
+
+                            The system sets this value, and you can''t change it.'
+                        lastUpdated:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1557696630000
+                          description: 'The date and time that the member was last updated, in *nix time in milliseconds.
+
+                            The system sets this value, and you can''t change it.'
+                        id:
+                          type: string
+                          readOnly: true
+                          description: ID of the member
+                        userId:
+                          type: string
+                          readOnly: true
+                          description: User ID
+                        organizationId:
+                          type: string
+                          readOnly: true
+                          description: 'Organization ID for the organization that the
+
+                            member belongs to'
+                        email:
+                          type: string
+                          description: 'Email address for the user associated with this member
+
+                            record'
+                        fullName:
+                          type: string
+                          description: Full name of the user associated with this member record
+                        phone:
+                          type: string
+                          description: Phone number of the user associated with this member record
+                        title:
+                          type: string
+                          description: Job title of the user associated with this member record
+                        roles:
+                          type: object
+                          properties:
+                            roles:
+                              type: array
+                              items:
+                                title: Properties of a role
+                                type: object
+                                properties:
+                                  capabilities:
+                                    type: array
+                                    items:
+                                      type: string
+                                      example: EXAMPLE_CAPABILITY1
+                                    description: List of capabilities
+                                  created:
+                                    type: string
+                                    example: 232329
+                                    readOnly: true
+                                    description: 'The time the role was created, in *nix time in milliseconds.
+
+                                      The system sets this value, and you can''t change it.'
+                                  creator:
+                                    type: string
+                                    example: XXZZZZyyZZ
+                                    readOnly: true
+                                    description: 'User who created the role, if applicable
+
+                                      The system sets this value, and you can''t change it.'
+                                  description:
+                                    type: string
+                                    example: Built-in admin role
+                                    description: Description of the role
+                                  id:
+                                    type: string
+                                    example: Dkf34203
+                                    readOnly: true
+                                    description: 'Role identifier
+
+                                      The system sets this value, and you can''t change it.'
+                                  immutable:
+                                    type: boolean
+                                    example: true
+                                    description: Whether the role is immutable
+                                  lastUpdated:
+                                    type: string
+                                    example: 34343
+                                    readOnly: true
+                                    description: 'Time of update, in milliseconds
+
+                                      The system sets this value, and you can''t change it.'
+                                  lastUpdatedBy:
+                                    type: string
+                                    example: User1
+                                    readOnly: true
+                                    description: 'Last user to update the role
+
+                                      The system sets this value, and you can''t change it.'
+                                  organizationId:
+                                    type: string
+                                    example: F2394DY
+                                    readOnly: true
+                                    description: 'Organization identifier
+
+                                      The system sets this value, and you can''t change it.'
+                                  title:
+                                    type: string
+                                    example: DevOps user
+                                    description: Title of the role
+                                description: 'Properties of an Splunk Observability Cloud role as defined in the system,
+
+                                  including capabilities, a description, and whether the role is
+
+                                  immutable.'
+                              description: List of roles and their capabilities. See About roles in Splunk Observability Cloud
+                                for more information.
+                          title: Roles
+                          description: List of roles. See About roles in Splunk Observability Cloud for more information.
+                        admin:
+                          type: boolean
+                          default: false
+                          description: This is a legacy setting and will be deprecated. Use roles instead.
+                      description: 'Properties containing data that Splunk Observability Cloud maintains for each member
+
+                        of an organization.'
+                    description: 'Array of user objects for the members that the request
+
+                      invited.'
+              examples:
+                example:
+                  value:
+                    members:
+                    - admin: true
+                      created: 1533676829319
+                      creator: string
+                      email: string
+                      fullName: string
+                      id: string
+                      lastUpdated: 1557696630000
+                      lastUpdatedBy: string
+                      organizationId: string
+                      phone: string
+                      roles:
+                        roles:
+                        - capabilities:
+                          - EXAMPLE_CAPABILITY1
+                          created: 232329
+                          creator: XXZZZZyyZZ
+                          description: Built-in admin role
+                          id: Dkf34203
+                          immutable: true
+                          lastUpdated: 34343
+                          lastUpdatedBy: User1
+                          organizationId: F2394DY
+                          title: DevOps user
+                      title: string
+                      userId: string
+        '400':
+          description: HTTP 400 response
+        '429':
+          description: HTTP 429 response
+        '500':
+          description: HTTP 500 response
+      security:
+      - SessionToken: []
+      tags:
+      - Organizations

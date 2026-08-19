@@ -1,0 +1,830 @@
+openapi: 3.0.3
+info:
+  title: Splunk Observability Cloud — APM service topology
+  version: 3.0.1
+  description: 'APIs to retrieve the upstream and downstream dependencies for a given service, as well as to retrieve the
+    complete graph-based topology of all services in a given environment and time window. You can also use tagFilters to filter
+    this topology by indexed span tags.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the APM Service Topology endpoints.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference
+      pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's.
+      Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset
+      path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2
+  description: Base API URL for the APM service topology endpoint
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.
+paths:
+  /apm/topology:
+    post:
+      summary: Retrieve service topology
+      description: 'Retrieves the topology of all services for which the tag filters, environment, and time range match the
+        provided parameters, providing the information necessary to reconstruct a graph of all active services requested.
+
+        This operation uses the POST method because it sends search criteria for retrieval in the request body.
+
+        Note: For this operation, the API returns a maximum of 1,000 objects, even if your organization contains more than
+        1,000.'
+      parameters:
+      - name: X-SF-Token
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - timeRange
+              properties:
+                timeRange:
+                  type: string
+                  format: date-time
+                  example: 2021-01-23T12:00:00Z/2021-01-24T00:00:00Z
+                  title: TimeRange
+                  description: 'Time range boundary for matching service dependencies, in either of these
+
+                    two forms:
+
+
+                    Two ISO 8601-formatted timestamps separated by a forward slash (/).
+
+                    Two *nix timestamps in milliseconds separate by a forward slash (/)
+
+
+                    For both forms, the first timestamp is the start time of the range, and
+
+                    the second timestamp is the end time. The query only matches spans that
+
+                    have a timestamp between the start time and end time, inclusive.
+
+                    Considerations:
+
+
+                    The end time must be greater than the start time
+
+                    The time range must satisfy the relationship 5 minutes < (endTime - startTime) < span retention period.
+
+                    The minimum time range is 5 minutes, and the maximum time range is the span retention period.'
+                tagFilters:
+                  type: array
+                  items:
+                    anyOf:
+                    - title: Definition for tag filter using the `in` operator.
+                      type: object
+                      required:
+                      - name
+                      - operator
+                      - scope
+                      - values
+                      properties:
+                        name:
+                          type: string
+                          example: sf_service
+                          description: 'Name of span tag on which to filter.
+
+                            In your tag filter(s), you can specify indexed tags, which are either pre-configured indexed tags
+                            or custom indexed tags. Pre-configured indexed tags in APM include "sf_service", "sf_environment",
+                            "sf_httpMethod", "sf_kind".
+
+                            Search is case-insensitive.
+
+                            If you do not provide a filter on the tag "sf_environment", the API returns services in all environments.'
+                        scope:
+                          type: string
+                          enum:
+                          - GLOBAL
+                          - TIER
+                          - INCOMING
+                          - SPAN
+                          default: GLOBAL
+                          example: SPAN
+                          description: 'Scope of spans on which to filter, in the form of
+
+                            an enumerated string. The API accepts the following values:
+
+
+                            GLOBAL: Matches the first occurrence in all spans
+
+                            TIER: Matches the first occurrence in service-tier spans
+
+                            INCOMING: Matches the value on the incoming edge span of service tier spans
+
+                            SPAN: Matches the tag on each span within the trace
+
+
+                            This is a mandatory field.'
+                        operator:
+                          type: string
+                          enum:
+                          - in
+                          example: in
+                          description: Operator to apply in the filter. This is a mandatory field, and the two accepted values
+                            are equals and in. When you use the equals operator, you must use the value parameter and provide
+                            a single value as a string. When you use the in operator, you must use the values parameter and
+                            provide the values as strings in a JSON array.
+                        values:
+                          type: array
+                          items:
+                            type: string
+                            example:
+                            - - production
+                              - staging
+                          description: When you use the in operator, values is the list of values to compare to the span tag
+                            values, in the form of a JSON array of strings. Search is case-sensitive. The value(s) corresponding
+                            to tagName = "sf_environment" must be valid environment name(s).
+                      description: 'Map of properties for an individual tag filter, in the form of a JSON object.
+
+                        Note: The operator you include in tagFilter dictates whether to include the value or values field.
+                        When you provide the equals operator, you must include a single value as a string in the value field.
+                        When you provide the in operator, you must include a list of values as strings in the values field.'
+                    - title: Definition for tag filter using the `equals` operator.
+                      type: object
+                      required:
+                      - name
+                      - operator
+                      - scope
+                      - value
+                      properties:
+                        name:
+                          type: string
+                          example: sf_service
+                          description: 'Name of span tag on which to filter.
+
+                            In your tag filter(s), you can specify indexed tags, which are either pre-configured indexed tags
+                            or custom indexed tags. Pre-configured indexed tags in APM include "sf_service", "sf_environment",
+                            "sf_httpMethod", "sf_kind".
+
+                            Search is case-insensitive.
+
+                            If you do not provide a filter on the tag "sf_environment", the API returns services in all environments.'
+                        scope:
+                          type: string
+                          enum:
+                          - GLOBAL
+                          - TIER
+                          - INCOMING
+                          - SPAN
+                          default: GLOBAL
+                          example: SPAN
+                          description: 'Scope of spans on which to filter, in the form of
+
+                            an enumerated string. The API accepts the following values:
+
+
+                            GLOBAL: Matches the first occurrence in all spans
+
+                            TIER: Matches the first occurrence in service-tier spans
+
+                            INCOMING: Matches the value on the incoming edge span of service tier spans
+
+                            SPAN: Matches the tag on each span within the trace
+
+
+                            This is a mandatory field.'
+                        operator:
+                          type: string
+                          enum:
+                          - equals
+                          example: equals
+                          description: Operator to apply in the filter. This is a mandatory field, and the two accepted values
+                            are equals and in. When you use the equals operator, you must use the value parameter and provide
+                            a single value as a string. When you use the in operator, you must use the values parameter and
+                            provide the values as strings in a JSON array.
+                        value:
+                          type: string
+                          example: checkoutService
+                          description: 'When you use the equals operator, value is the value to compare to the provided span
+                            tag value. Search is case-sensitive.
+
+                            If the tagName you specified is sf_environment, value must be valid environment name.'
+                      description: 'Map of properties for an individual tag filter, in the form of a JSON object.
+
+                        Note: The operator you include in tagFilter dictates whether to include the value or values field.
+                        When you provide the equals operator, you must include a single value as a string in the value field.
+                        When you provide the in operator, you must include a list of values as strings in the values field.'
+                  example:
+                  - name: sf_environment
+                    operator: equals
+                    scope: GLOBAL
+                    value: production
+                  title: TagFilters
+                  description: List of tagFilters to include in the request.
+            examples:
+              example:
+                value:
+                  tagFilters:
+                  - name: sf_environment
+                    operator: equals
+                    scope: GLOBAL
+                    value: production
+                  timeRange: 2021-01-23T12:00:00Z/2021-01-24T00:00:00Z
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nodes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        serviceName:
+                          type: string
+                          example: service_five
+                          title: ServiceName
+                          description: Name of the service in the retrieved span data
+                        inferred:
+                          type: boolean
+                          example: false
+                          title: Inferred
+                          description: Flag that indicates if the service is an inferred service
+                        type:
+                          type: string
+                          enum:
+                          - service
+                          - database
+                          - pubsub
+                          example: database
+                          title: Type
+                          description: 'Type of the service. The API returns one of the following values:
+
+
+                            service
+
+                            database
+
+                            pubsub'
+                      title: Node
+                      description: Service (node) in the service topology
+                    title: NodeArray
+                    description: 'List of services that form the nodes of the service topology,
+
+                      in the form of a JSON array of objects'
+                  edges:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        fromNode:
+                          type: string
+                          example: service_start
+                          description: 'Name of the node from which the edge starts;
+
+                            equivalent to the name of the service that''s the
+
+                            origin of the operation'
+                        toNode:
+                          type: string
+                          example: service_end
+                          description: 'Name of the node at which the edge ends;
+
+                            equivalent to the name of the service that''s the
+
+                            destination of the operation'
+                      title: Edge
+                      description: 'Description of an interaction between two nodes in the topology,
+
+                        in the form of a JSON object'
+                    title: EdgeArray
+                    description: 'List of interactions that occur between services (nodes) in the
+
+                      topology, in the form of a JSON array of objects'
+              examples:
+                example:
+                  value:
+                    edges:
+                    - fromNode: service_start
+                      toNode: service_end
+                    nodes:
+                    - inferred: false
+                      serviceName: service_five
+                      type: database
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                    description: HTTP response code. Always 400.
+                  message:
+                    title: 'Error message associated with HTTP response code 400
+
+                      '
+                    type: string
+                    enum:
+                    - timeRange is required
+                    - Invalid delimiter used to split time range
+                    - Invalid time range
+                    - time range must not be negative
+                    - time range must be more than or equal to 5 minutes
+                    - time range must be less than or equal to the trace retention limit
+                    - invalid format for filter
+                    - name is a mandatory field
+                    - unsupported filter name
+                    - Invalid tag filter operator value
+                    - scope is a mandatory field
+                    - value is a mandatory field
+                    - values is a mandatory field
+                    example: invalid format for filter
+                    description: 'Descriptive message returned by the API.
+
+                      Expected values:
+
+
+                      timeRange is required: Ensure your request includes the required timeRange field.
+
+                      Invalid delimiter used to split time range: Ensure your timeRange field uses a forward slash (/) to
+                      delimit the start and end timestamps in the timeRange in your request.
+
+                      Invalid time range: Ensure the timeRange field in your request is formatted correctly.
+
+                      time range must not be negative: Ensure that the start timestamp occurs before the end timestamp.
+
+                      time range must be more than or equal to 5 minutes: Ensure the timeRange field in your request is greater
+                      than or equal to 5 minutes.
+
+                      time range must be less than or equal to the trace retention limit: Ensure the timeRange field in your
+                      request is less than or equal to the applicable trace retention limit.
+
+                      invalid format for filter: Ensure all tagFilters included in the request are formatted correctly.
+
+                      name is a mandatory field: Ensure all tagFilters in your request contain the mandatory name field.  The
+                      required name field is missing from the request; ensure it is added.
+
+                      unsupported filter name: Ensure all span tags listed in the name field of all tagFilters in your request
+                      are supported. This API currently supports the sf_service, sf_environment, sf_kind, and sf_httpMethod
+                      pre-configured tags, and any custom indexed tags.
+
+                      Invalid tag filter operator value: Ensure that all tagFilters in your request use either the in or equals
+                      operator. Filters using the in operator must include a values field, and filters using the equals operator
+                      must include value.
+
+                      scope is a mandatory field:  Ensure that all tagFilters in your request include the required scope field.
+
+                      value is a mandatory field: Ensure that all tagFilters using the equals operator include the required
+                      value field.
+
+                      values is a mandatory field: Ensure that all tagFilters using the in operator include the required values
+                      field.'
+              examples:
+                example:
+                  value:
+                    code: 400
+                    message: invalid format for filter
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 401
+                    description: HTTP response code. Always 401.
+                  message:
+                    type: string
+                    example: 'Unauthorized: Invalid token'
+                    description: 'Response message. Always "Unauthorized: Invalid token"'
+              examples:
+                example:
+                  value:
+                    code: 401
+                    message: 'Unauthorized: Invalid token'
+      security:
+      - SessionToken: []
+      tags:
+      - APM service topology
+  /apm/topology/{serviceName}:
+    post:
+      summary: Retrieve Dependencies by Service Name
+      description: 'Given a time window and a set of tags, retrieve the inbound and outbound dependencies for the service
+        identified in the {serviceName} path parameter. The results don''t include transitive dependencies.
+
+        This operation uses the POST method because it sends search criteria for retrieval in the request body.
+
+        Note: If the serviceName provided in the path parameter is not found, the API returns a 200 status code and an empty
+        response.'
+      parameters:
+      - name: serviceName
+        in: path
+        description: Name of the service for which you want to retrieve dependencies
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - timeRange
+              properties:
+                timeRange:
+                  type: string
+                  format: date-time
+                  example: 2021-01-23T12:00:00Z/2021-01-24T00:00:00Z
+                  title: TimeRange
+                  description: 'Time range boundary for matching service dependencies, in either of these
+
+                    two forms:
+
+
+                    Two ISO 8601-formatted timestamps separated by a forward slash (/).
+
+                    Two *nix timestamps in milliseconds separate by a forward slash (/)
+
+
+                    For both forms, the first timestamp is the start time of the range, and
+
+                    the second timestamp is the end time. The query only matches spans that
+
+                    have a timestamp between the start time and end time, inclusive.
+
+                    Considerations:
+
+
+                    The end time must be greater than the start time
+
+                    The time range must satisfy the relationship 5 minutes < (endTime - startTime) < span retention period.
+
+                    The minimum time range is 5 minutes, and the maximum time range is the span retention period.'
+                tagFilters:
+                  type: array
+                  items:
+                    anyOf:
+                    - title: Definition for tag filter using the `in` operator.
+                      type: object
+                      required:
+                      - name
+                      - operator
+                      - scope
+                      - values
+                      properties:
+                        name:
+                          type: string
+                          example: sf_service
+                          description: 'Name of span tag on which to filter.
+
+                            In your tag filter(s), you can specify indexed tags, which are either pre-configured indexed tags
+                            or custom indexed tags. Pre-configured indexed tags in APM include "sf_service", "sf_environment",
+                            "sf_httpMethod", "sf_kind".
+
+                            Search is case-insensitive.
+
+                            If you do not provide a filter on the tag "sf_environment", the API returns services in all environments.'
+                        scope:
+                          type: string
+                          enum:
+                          - GLOBAL
+                          - TIER
+                          - INCOMING
+                          - SPAN
+                          default: GLOBAL
+                          example: SPAN
+                          description: 'Scope of spans on which to filter, in the form of
+
+                            an enumerated string. The API accepts the following values:
+
+
+                            GLOBAL: Matches the first occurrence in all spans
+
+                            TIER: Matches the first occurrence in service-tier spans
+
+                            INCOMING: Matches the value on the incoming edge span of service tier spans
+
+                            SPAN: Matches the tag on each span within the trace
+
+
+                            This is a mandatory field.'
+                        operator:
+                          type: string
+                          enum:
+                          - in
+                          example: in
+                          description: Operator to apply in the filter. This is a mandatory field, and the two accepted values
+                            are equals and in. When you use the equals operator, you must use the value parameter and provide
+                            a single value as a string. When you use the in operator, you must use the values parameter and
+                            provide the values as strings in a JSON array.
+                        values:
+                          type: array
+                          items:
+                            type: string
+                            example:
+                            - - production
+                              - staging
+                          description: When you use the in operator, values is the list of values to compare to the span tag
+                            values, in the form of a JSON array of strings. Search is case-sensitive. The value(s) corresponding
+                            to tagName = "sf_environment" must be valid environment name(s).
+                      description: 'Map of properties for an individual tag filter, in the form of a JSON object.
+
+                        Note: The operator you include in tagFilter dictates whether to include the value or values field.
+                        When you provide the equals operator, you must include a single value as a string in the value field.
+                        When you provide the in operator, you must include a list of values as strings in the values field.'
+                    - title: Definition for tag filter using the `equals` operator.
+                      type: object
+                      required:
+                      - name
+                      - operator
+                      - scope
+                      - value
+                      properties:
+                        name:
+                          type: string
+                          example: sf_service
+                          description: 'Name of span tag on which to filter.
+
+                            In your tag filter(s), you can specify indexed tags, which are either pre-configured indexed tags
+                            or custom indexed tags. Pre-configured indexed tags in APM include "sf_service", "sf_environment",
+                            "sf_httpMethod", "sf_kind".
+
+                            Search is case-insensitive.
+
+                            If you do not provide a filter on the tag "sf_environment", the API returns services in all environments.'
+                        scope:
+                          type: string
+                          enum:
+                          - GLOBAL
+                          - TIER
+                          - INCOMING
+                          - SPAN
+                          default: GLOBAL
+                          example: SPAN
+                          description: 'Scope of spans on which to filter, in the form of
+
+                            an enumerated string. The API accepts the following values:
+
+
+                            GLOBAL: Matches the first occurrence in all spans
+
+                            TIER: Matches the first occurrence in service-tier spans
+
+                            INCOMING: Matches the value on the incoming edge span of service tier spans
+
+                            SPAN: Matches the tag on each span within the trace
+
+
+                            This is a mandatory field.'
+                        operator:
+                          type: string
+                          enum:
+                          - equals
+                          example: equals
+                          description: Operator to apply in the filter. This is a mandatory field, and the two accepted values
+                            are equals and in. When you use the equals operator, you must use the value parameter and provide
+                            a single value as a string. When you use the in operator, you must use the values parameter and
+                            provide the values as strings in a JSON array.
+                        value:
+                          type: string
+                          example: checkoutService
+                          description: 'When you use the equals operator, value is the value to compare to the provided span
+                            tag value. Search is case-sensitive.
+
+                            If the tagName you specified is sf_environment, value must be valid environment name.'
+                      description: 'Map of properties for an individual tag filter, in the form of a JSON object.
+
+                        Note: The operator you include in tagFilter dictates whether to include the value or values field.
+                        When you provide the equals operator, you must include a single value as a string in the value field.
+                        When you provide the in operator, you must include a list of values as strings in the values field.'
+                  example:
+                  - name: sf_environment
+                    operator: equals
+                    scope: GLOBAL
+                    value: production
+                  title: TagFilters
+                  description: List of tagFilters to include in the request.
+            examples:
+              example:
+                value:
+                  tagFilters:
+                  - name: sf_environment
+                    operator: equals
+                    scope: GLOBAL
+                    value: production
+                  timeRange: 2021-01-23T12:00:00Z/2021-01-24T00:00:00Z
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  inbound:
+                    type: array
+                    items:
+                      type: string
+                      example: inbound_service
+                      description: Element of the list of inbound services, in the form of a unique service name
+                    title: Inbound
+                    description: For a specific service, a list of the inbound services on which the service depends, in the
+                      form of a JSON array
+                  outbound:
+                    type: array
+                    items:
+                      type: string
+                      example: outbound_service
+                      description: Element of the list of outbound services, in the form of the unique service name
+                    title: Outbound
+                    description: 'For a specific service, a list of the outbound services that depend on the service,
+
+                      in the form of a JSON array of strings'
+                  services:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        inferred:
+                          type: boolean
+                          example: false
+                          title: Inferred
+                          description: Flag that indicates if the service is an inferred service
+                        serviceName:
+                          type: string
+                          example: service_five
+                          title: ServiceName
+                          description: Name of the service in the retrieved span data
+                        type:
+                          type: string
+                          enum:
+                          - service
+                          - database
+                          - pubsub
+                          example: database
+                          title: Type
+                          description: 'Type of the service. The API returns one of the following values:
+
+
+                            service
+
+                            database
+
+                            pubsub'
+                      title: Service
+                      description: 'Properties of an individual service in the
+
+                        topology or dependency list'
+                    title: Services
+                    description: 'List of outbound and inbound services, in the form of a
+
+                      JSON array of JSON objects'
+              examples:
+                example:
+                  value:
+                    inbound:
+                    - inbound_service
+                    outbound:
+                    - outbound_service
+                    services:
+                    - inferred: false
+                      serviceName: service_five
+                      type: database
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                    description: HTTP response code. Always 400.
+                  message:
+                    title: 'Error message associated with HTTP response code 400
+
+                      '
+                    type: string
+                    enum:
+                    - timeRange is required
+                    - Invalid delimiter used to split time range
+                    - Invalid time range
+                    - time range must not be negative
+                    - time range must be more than or equal to 5 minutes
+                    - time range must be less than or equal to the trace retention limit
+                    - invalid format for filter
+                    - name is a mandatory field
+                    - unsupported filter name
+                    - Invalid tag filter operator value
+                    - scope is a mandatory field
+                    - value is a mandatory field
+                    - values is a mandatory field
+                    example: invalid format for filter
+                    description: 'Descriptive message returned by the API.
+
+                      Expected values:
+
+
+                      timeRange is required: Ensure your request includes the required timeRange field.
+
+                      Invalid delimiter used to split time range: Ensure your timeRange field uses a forward slash (/) to
+                      delimit the start and end timestamps in the timeRange in your request.
+
+                      Invalid time range: Ensure the timeRange field in your request is formatted correctly.
+
+                      time range must not be negative: Ensure that the start timestamp occurs before the end timestamp.
+
+                      time range must be more than or equal to 5 minutes: Ensure the timeRange field in your request is greater
+                      than or equal to 5 minutes.
+
+                      time range must be less than or equal to the trace retention limit: Ensure the timeRange field in your
+                      request is less than or equal to the applicable trace retention limit.
+
+                      invalid format for filter: Ensure all tagFilters included in the request are formatted correctly.
+
+                      name is a mandatory field: Ensure all tagFilters in your request contain the mandatory name field.  The
+                      required name field is missing from the request; ensure it is added.
+
+                      unsupported filter name: Ensure all span tags listed in the name field of all tagFilters in your request
+                      are supported. This API currently supports the sf_service, sf_environment, sf_kind, and sf_httpMethod
+                      pre-configured tags, and any custom indexed tags.
+
+                      Invalid tag filter operator value: Ensure that all tagFilters in your request use either the in or equals
+                      operator. Filters using the in operator must include a values field, and filters using the equals operator
+                      must include value.
+
+                      scope is a mandatory field:  Ensure that all tagFilters in your request include the required scope field.
+
+                      value is a mandatory field: Ensure that all tagFilters using the equals operator include the required
+                      value field.
+
+                      values is a mandatory field: Ensure that all tagFilters using the in operator include the required values
+                      field.'
+              examples:
+                example:
+                  value:
+                    code: 400
+                    message: invalid format for filter
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 401
+                    description: HTTP response code. Always 401.
+                  message:
+                    type: string
+                    example: 'Unauthorized: Invalid token'
+                    description: 'Response message. Always "Unauthorized: Invalid token"'
+              examples:
+                example:
+                  value:
+                    code: 401
+                    message: 'Unauthorized: Invalid token'
+      security:
+      - SessionToken: []
+      tags:
+      - APM service topology

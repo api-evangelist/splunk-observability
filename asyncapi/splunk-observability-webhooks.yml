@@ -1,0 +1,66 @@
+generated: '2026-08-19'
+method: searched
+source: https://dev.splunk.com/observability/docs/integrations/webhook_integration_overview/
+surface: outbound-webhooks
+note: >-
+  Splunk Observability Cloud sends outbound webhooks as an ALERT NOTIFICATION channel, not as a
+  general event bus. A webhook integration is created through the Integrations API
+  (POST /v2/integration) and fires when a detector's notification rule targets it. There is no
+  event-subscription API, no event catalogue and no replay: the "event types" are whatever your
+  detectors detect.
+delivery:
+  transport: HTTPS POST
+  target: The url property of the webhook integration object.
+  custom_headers: Supported through the integration's headers property.
+  management_api: openapi/splunk-observability-integrations-openapi.yml
+signing:
+  header: X-SFX-Signature
+  algorithm: HMAC-SHA256
+  encoding: base64
+  key_field: sharedSecret
+  applied_when: The sharedSecret property is present and non-null on the integration.
+  verification: >-
+    Compute the HMAC-SHA256 of the raw incoming request payload using sharedSecret as the key,
+    base64-encode it, and compare to X-SFX-Signature. Splunk adds the header itself; it must not be
+    set in the integration's headers property.
+payload:
+  templating: Handlebars-style template; a custom payload can replace the default entirely.
+  default_fields:
+    - severity
+    - originatingMetric
+    - detectOnCondition
+    - detectOffCondition
+    - messageBody
+    - src
+    - inputs
+    - rule
+    - description
+    - messageTitle
+    - sf_schema
+    - eventType
+    - runbookUrl
+    - orgId
+    - detectorId
+    - imageUrl
+    - tip
+    - statusExtended
+    - incidentId
+    - detector
+    - detectorUrl
+    - status
+    - timestamp
+    - dimensions
+  schema_version_field: sf_schema
+  note: >-
+    sf_schema is an integer schema version on the default payload (2 in Splunk's published
+    example). Because the payload is user-templatable, a receiver cannot assume the default shape
+    unless it also controls the integration.
+asyncapi_published: false
+asyncapi_note: >-
+  Splunk publishes no AsyncAPI for the webhook surface. The streaming surface that IS specifiable
+  is SignalFlow — see asyncapi/splunk-observability-signalflow-asyncapi.yml.
+other_notification_channels:
+  note: >-
+    Webhook is the generic fallback. Splunk also ships first-class notification integrations
+    (PagerDuty, Slack, ServiceNow, Jira, Opsgenie, VictorOps, email, Amazon EventBridge, Microsoft
+    Teams and others), all created through the same Integrations API.

@@ -1,0 +1,693 @@
+openapi: 3.0.3
+info:
+  title: Splunk Observability Cloud — Synthetics locations
+  version: 1.0.1
+  description: 'API for managing locations used in Splunk Synthetic Monitoring tests.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You have to have the Splunk Observability Cloud admin role to use the POST /locations, DELETE /locations/{id}, GET /locations/{location_id}/runner_tokens,
+    POST /locations/{location_id}/runner_tokens, GET /locations/{location_id}/runner_tokens/{id} and DELETE /locations/{location_id}/runner_tokens/{id}
+    operations.
+
+    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the  GET /locations and GET /locations/{id}
+    operations.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference
+      pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's.
+      Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset
+      path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2/synthetics
+  description: Endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.
+paths:
+  /locations:
+    get:
+      summary: getLocations
+      description: 'Returns a list of locations that can be used in Splunk Synthetic Monitoring tests.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin, power role, or read_only role.'
+      parameters:
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  locations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: aws-us-east-1
+                          pattern: ^[a-z]([a-z\-]*[a-z])?$
+                          nullable: false
+                          description: ID of the location
+                        label:
+                          type: string
+                          example: AWS - N. Virginia
+                          maxLength: 256
+                          nullable: false
+                          description: Label for the location
+                        country:
+                          type: string
+                          example: US
+                          maxLength: 2
+                          nullable: true
+                          description: Country code for the location
+                        default:
+                          type: boolean
+                          example: true
+                          nullable: false
+                          description: True, if the location is added to a test by default.
+                        type:
+                          type: string
+                          enum:
+                          - public
+                          - private
+                          example: public
+                          description: Indicates whether the location is public or private.
+                      required:
+                      - id
+                      - label
+                      - default
+                      - type
+                      title: Location
+                  default_location_ids:
+                    type: array
+                    items:
+                      type: string
+                      example: aws-us-east-1
+                      title: LocationId
+                      description: The ID of a location.
+              examples:
+                example:
+                  value:
+                    default_location_ids:
+                    - aws-us-east-1
+                    locations:
+                    - country: US
+                      default: true
+                      id: aws-us-east-1
+                      label: AWS - N. Virginia
+                      type: public
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics locations
+    post:
+      summary: postLocations
+      description: 'Creates a Synthetics Private Location.
+
+        You must have an admin API session token to use this endpoint. To learn more about API tokens, see Retrieve and manage
+        user API access tokens using Splunk Observability Cloud.'
+      parameters:
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                location:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: /\Aprivate-[a-z\-]*[a-z]\z/
+                      example: private-data-center
+                      description: 'The ID for the Private Location
+
+                        Note: This will be used as a location_id when modifying a test and is used as a
+
+                        dimension value on metrics created using this location.
+
+                        Note: IDs must be unique.'
+                    label:
+                      type: string
+                      example: Data Center
+                      description: 'A descriptive label for the Private Location.
+
+                        Note: This is displayed in the UI and a property is created for metrics created using this location.
+
+                        Note: Labels must be unique'
+                  required:
+                  - id
+                  - label
+              required:
+              - location
+              title: LocationRequestBody
+            examples:
+              example:
+                value:
+                  location:
+                    id: private-data-center
+                    label: Data Center
+      responses:
+        '201':
+          description: HTTP 201 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  location:
+                    type: object
+                    properties:
+                      location:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: /\Aprivate-[a-z\-]*[a-z]\z/
+                            example: private-data-center
+                            description: 'The ID for the Private Location.
+
+                              Note: This will be used as a location_id when modifying a test and will be used as a
+
+                              dimension value on metrics created using this location
+
+                              Note: IDs must be unique'
+                          label:
+                            type: string
+                            example: Data Center
+                            description: 'A descriptive label for the Location
+
+                              Note: This will be displayed in the UI and a property will be created for metrics
+
+                              created using this location
+
+                              Note: Labels must be unique'
+                          country:
+                            type: string
+                            description: A 2-letter country code for the Location. Null for Private locations.
+                          default:
+                            type: boolean
+                            example: true
+                            description: True, if the location is added to new tests by default.
+                          type:
+                            type: string
+                            enum:
+                            - public
+                            - private
+                            example: public
+                            description: Indicates whether the location is public or private.
+                        required:
+                        - id
+                        - label
+                    title: LocationResponse
+                type: object
+              examples:
+                example:
+                  value:
+                    location:
+                      location:
+                        country: null
+                        default: true
+                        id: private-data-center
+                        label: Data Center
+                        type: public
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Can't create Location.
+                  details:
+                    type: object
+                    description: 'This is a dynamic schema that consists of:
+
+                      "fieldName": ["reason"]'
+                type: object
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    message: Can't create Location.
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics locations
+  /locations/{id}:
+    get:
+      summary: getSingleLocation
+      description: 'Returns a single location that can be used in Splunk Synthetic Monitoring tests.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin, power, or read_only role.'
+      parameters:
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  location:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: aws-us-east-1
+                        pattern: ^[a-z]([a-z\-]*[a-z])?$
+                        nullable: false
+                        description: ID of the location
+                      label:
+                        type: string
+                        example: AWS - N. Virginia
+                        maxLength: 256
+                        nullable: false
+                        description: Label for the location
+                      country:
+                        type: string
+                        example: US
+                        maxLength: 2
+                        nullable: true
+                        description: Country code for the location
+                      default:
+                        type: boolean
+                        example: true
+                        nullable: false
+                        description: True, if the location is added to a test by default.
+                      type:
+                        type: string
+                        enum:
+                        - public
+                        - private
+                        example: public
+                        description: Indicates whether the location is public or private.
+                    required:
+                    - id
+                    - label
+                    - default
+                    - type
+                    title: Location
+                  meta:
+                    type: object
+                    properties:
+                      active_test_ids:
+                        type: array
+                        items:
+                          type: integer
+                          example: 1234
+                          title: TestId
+                        description: A list of active test ids using this location.
+                      paused_test_ids:
+                        type: array
+                        items:
+                          type: integer
+                          example: 1234
+                          title: TestId
+                        description: A list of paused test ids using this location.
+              examples:
+                example:
+                  value:
+                    location:
+                      country: US
+                      default: true
+                      id: aws-us-east-1
+                      label: AWS - N. Virginia
+                      type: public
+                    meta:
+                      active_test_ids:
+                      - 1234
+                      paused_test_ids:
+                      - 1234
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Can't find location.
+                  details:
+                    type: object
+                    example: '{}'
+                title: NotFound
+                description: Not Found
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Can't find location.
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics locations
+    delete:
+      summary: deletePrivateLocation
+      description: 'Synthetics Locations.
+
+        Requirements
+
+        You must have an admin API session token to use this endpoint. To learn more about API tokens, see https://quickdraw.splunk.com/redirect/?product=Observability&location=api-access-tokens&version=current.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of a Private Location.
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: HTTP 204 response
+        '403':
+          description: HTTP 403 response
+        '404':
+          description: HTTP 404 response
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics locations
+  /locations/{location_id}/runner_tokens:
+    get:
+      summary: listPrivateLocationsRunnerTokens
+      description: 'Synthetics Locations
+
+        Requirements
+
+        You must have an admin API session token to use this endpoint. To learn more about API tokens, see https://quickdraw.splunk.com/redirect/?product=Observability&location=api-access-tokens&version=current.'
+      parameters:
+      - name: location_id
+        in: path
+        description: ID of the Private Location.
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runner_tokens:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: e84deb35-b886-4040-9224-e2687a086894
+                          format: uuid
+                          description: ID of the token
+                        expiration:
+                          type: string
+                          format: date-time
+                          description: Date and time the token expires
+                        token:
+                          type: string
+                          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+                            '
+                          description: Token to be provided to the Runner
+                      required:
+                      - id
+                      - expiration
+                      - token
+                      title: RunnerToken
+                      description: Runner Token
+              examples:
+                example:
+                  value:
+                    runner_tokens:
+                    - expiration: '2024-01-01T00:00:00Z'
+                      id: e84deb35-b886-4040-9224-e2687a086894
+                      token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+                        '
+        '404':
+          description: HTTP 404 response
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics locations
+    post:
+      summary: listPrivateLocationRunnerTokens
+      description: 'Synthetics Locations
+
+        Requirements
+
+        You must have an admin API session token to use this endpoint. To learn more about API tokens, see https://quickdraw.splunk.com/redirect/?product=Observability&location=api-access-tokens&version=current.'
+      parameters:
+      - name: location_id
+        in: path
+        description: ID of the Private Location.
+        required: true
+        schema:
+          type: string
+          example: private-data-center
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runner_token:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: e84deb35-b886-4040-9224-e2687a086894
+                        format: uuid
+                        description: ID of the token
+                      expiration:
+                        type: string
+                        format: date-time
+                        description: Date and time the token expires
+                      token:
+                        type: string
+                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+                          '
+                        description: Token to be provided to the Runner
+                    required:
+                    - id
+                    - expiration
+                    - token
+                    title: RunnerToken
+                    description: Runner Token
+              examples:
+                example:
+                  value:
+                    runner_token:
+                      expiration: '2024-01-01T00:00:00Z'
+                      id: e84deb35-b886-4040-9224-e2687a086894
+                      token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+                        '
+        '404':
+          description: HTTP 404 response
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics locations
+  /locations/{location_id}/runner_tokens/{id}:
+    get:
+      summary: showPrivateLocationRunnerToken
+      description: 'Synthetics Locations
+
+        Requirements
+
+        You must have an admin API session token to use this endpoint. To learn more about API tokens, see https://quickdraw.splunk.com/redirect/?product=Observability&location=api-access-tokens&version=current.'
+      parameters:
+      - name: location_id
+        in: path
+        description: ID of the Private Location.
+        required: true
+        schema:
+          type: string
+          example: aws-us-east-1
+          title: LocationId
+          description: The ID of a location.
+      - name: id
+        in: path
+        description: ID of the Runner Token.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runner_token:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: e84deb35-b886-4040-9224-e2687a086894
+                        format: uuid
+                        description: ID of the token
+                      expiration:
+                        type: string
+                        format: date-time
+                        description: Date and time the token expires
+                      token:
+                        type: string
+                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+                          '
+                        description: Token to be provided to the Runner
+                    required:
+                    - id
+                    - expiration
+                    - token
+                    title: RunnerToken
+                    description: Runner Token
+              examples:
+                example:
+                  value:
+                    runner_token:
+                      expiration: '2024-01-01T00:00:00Z'
+                      id: e84deb35-b886-4040-9224-e2687a086894
+                      token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+                        '
+        '404':
+          description: HTTP 404 response
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics locations
+    delete:
+      summary: deletePrivateLocationRunnerToken
+      description: 'Synthetics Locations
+
+        Requirements
+
+        You must have an admin API session token to use this endpoint. To learn more about API tokens, see https://quickdraw.splunk.com/redirect/?product=Observability&location=api-access-tokens&version=current.'
+      parameters:
+      - name: location_id
+        in: path
+        description: ID of the Private Location.
+        required: true
+        schema:
+          type: string
+          example: aws-us-east-1
+          title: LocationId
+          description: The ID of a location.
+      - name: id
+        in: path
+        description: ID of the Runner Token.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: HTTP 204 response
+        '404':
+          description: HTTP 404 response
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics locations

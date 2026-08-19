@@ -1,0 +1,76 @@
+generated: '2026-08-19'
+method: searched
+source: https://help.splunk.com/en/splunk-observability-cloud/release-notes
+scheme: rolling-saas-plus-versioned-components
+current_version: null
+version_note: >-
+  Splunk Observability Cloud has no product version number. Splunk states it "comprises both SaaS
+  products which release on a rolling basis and downloadable versioned components" — the SaaS
+  surface (and therefore the REST API in openapi/) is dated, not versioned, and each
+  OpenTelemetry distribution keeps its own semantic version in its own GitHub changelog.
+cadence: >-
+  Release notes are published monthly with multiple dated entries per month; the archive on
+  help.splunk.com runs from October 2024 through August 2026.
+format:
+  dated: true
+  machine_readable: false
+  note: >-
+    The changelog is HTML only. There is no RSS/Atom feed, no JSON feed and no per-endpoint API
+    changelog, so an agent cannot detect a breaking change without re-reading prose.
+api_changelog:
+  separate: false
+  note: >-
+    Splunk publishes no dedicated API changelog. The release notes are product-feature notes; the
+    48 OpenAPI documents each carry their own info.version (1.0.0 through 5.0.1) and those numbers
+    are the only per-API change signal published.
+entries:
+  - date: '2026-08-07'
+    area: Splunk Agent Observability
+    breaking: false
+    highlights:
+      - Observability and guardrail platform for GenAI and agentic applications, supporting all major LLM providers.
+  - date: '2026-08-06'
+    area: Splunk Observability for AI — AI Infrastructure Monitoring
+    breaking: false
+    highlights:
+      - Built-in dashboards for NetApp, Portworx and VAST DataStore AI infrastructure components.
+  - date: '2026-07-21'
+    area: OpenTelemetry Fleet Management
+    breaking: false
+    highlights:
+      - Track health, status, version and configuration of collectors and agents.
+  - date: '2026-07-15'
+    area: RUM / Incidents
+    breaking: false
+    highlights:
+      - Automatic navigation instrumentation for React Native and Flutter applications.
+      - Unified incident view with incident notification rules (us1 realm, Controlled Availability).
+  - date: '2026-07-13'
+    area: Organization administration
+    breaking: false
+    highlights:
+      - Self-service child organization management for eligible parent organizations.
+  - date: '2026-07-09'
+    area: Usage analytics
+    breaking: false
+    highlights:
+      - Natural-language data analysis for usage metrics via the AI Assistant.
+  - date: '2026-07-08'
+    area: APM, Database Monitoring, RUM, Application Security
+    breaking: false
+    highlights:
+      - AI troubleshooting agent for root-causing APM business transaction errors.
+      - Trace flowmap; service map panel and instance monitoring on the application overview.
+      - Database Monitoring support for MySQL and MariaDB; blocking-session relationships for SQL Server and Oracle.
+      - Zero-code instrumentation for Java, Python and Node.js in Secure Application.
+      - EPSS-based vulnerability risk scoring.
+window_note: >-
+  Recent window only, transcribed from the two most recent monthly pages. The full archive is the
+  source of truth.
+component_changelogs:
+  note: >-
+    Thirteen versioned OpenTelemetry components keep separate changelogs in the
+    github.com/signalfx organization (splunk-otel-collector, splunk-otel-java, splunk-otel-python,
+    splunk-otel-js, splunk-otel-go, splunk-otel-dotnet, splunk-otel-android, splunk-otel-ios and
+    others). Those are the only semantically versioned, machine-diffable release streams Splunk
+    publishes for this product.
