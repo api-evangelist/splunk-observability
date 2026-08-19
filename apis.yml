@@ -1,0 +1,51 @@
+aid: splunk-observability
+name: Splunk Observability Cloud
+description: 'Splunk Observability Cloud is the observability platform Splunk built on SignalFx, now part of Cisco:
+  infrastructure monitoring, APM, real user monitoring, synthetics, log observer and incident response over OpenTelemetry-native
+  ingest. It is the largest documented API surface Splunk operates — the developer site enumerates forty-eight distinct
+  OpenAPI specifications covering charts, dashboards, detectors, SignalFlow, SLOs, org tokens, teams and twenty
+  synthetics endpoints. None of them is fetchable: dev.splunk.com answers HTTP 200 with an identical 6,638-byte
+  single-page-application shell for every path, including invented control paths, so the entire contract surface
+  is readable by people and invisible to machines.'
+url: https://raw.githubusercontent.com/api-evangelist/splunk-observability/refs/heads/main/apis.yml
+type: Index
+access: 3rd-Party
+position: Consumer
+x-type: company
+x-source: cisco-family-buildout:2026-08-19
+x-parent: splunk
+x-relationship: product
+x-contract-status: soft404
+x-contract-note: 'The vendor''s developer host is a soft-404 farm: every path returns HTTP 200 with an identical
+  SPA shell, including invented control paths. No contract can be confirmed by a machine. API Evangelist has not
+  authored a substitute.'
+specificationVersion: '0.23'
+created: '2026-08-19'
+modified: '2026-08-19'
+tags:
+- Observability
+- APM
+- Monitoring
+- Telemetry
+- OpenTelemetry
+- Synthetics
+apis: []
+common:
+- type: Portal
+  url: https://dev.splunk.com/observability/reference/
+- type: Documentation
+  url: https://dev.splunk.com/observability/reference/
+- type: APIReference
+  url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+- type: ParentCompany
+  url: https://apis.io/providers/splunk/
+  name: Splunk
+- type: GitHubOrganization
+  url: https://github.com/splunk
+- type: GitHubOrganization
+  url: https://github.com/CiscoDevNet
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com
+- FN: APIs.json
+  email: info@apis.io
