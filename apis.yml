@@ -31,15 +31,17 @@ tags:
 - Synthetics
 apis: []
 common:
+- type: ParentCompany
+  url: https://apis.io/providers/splunk/
+  name: Splunk
+  x-relationship: product
+  x-generated-by: cisco-family:2026-08-19
 - type: Portal
   url: https://dev.splunk.com/observability/reference/
 - type: Documentation
   url: https://dev.splunk.com/observability/reference/
 - type: APIReference
   url: https://dev.splunk.com/observability/docs/apibasics/api_list/
-- type: ParentCompany
-  url: https://apis.io/providers/splunk/
-  name: Splunk
 - type: GitHubOrganization
   url: https://github.com/splunk
 - type: GitHubOrganization
