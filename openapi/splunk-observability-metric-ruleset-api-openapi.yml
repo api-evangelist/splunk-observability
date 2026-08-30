@@ -1,0 +1,3081 @@
+openapi: 3.2.0
+info:
+  title: Splunk Observability Cloud Metric ruleset API
+  version: 3.3.2
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's. Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2
+  description: Base API endpoint URL for metric ruleset
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+tags:
+- name: Metric ruleset
+paths:
+  /metricruleset:
+    get:
+      summary: Retrieve Metric Rulesets Query
+      description: 'Retrieves the properties of one or more metric rulesets. If you don''t specify any query parameters, the API returns up to the first 50 metric ruleset objects that you have access to.
+
+        Note: Splunk Observability Cloud returns a maximum of 10,000 metric rulesets, even if your organization contains more than 10,000 metric rulesets. To learn more, see the Considerations for retrieve operations section in the developer guide.'
+      parameters:
+      - name: limit
+        in: query
+        description: Number of metric rulesets to retrieve from the list of metric rulesets that match your search criteria.
+        schema:
+          type: integer
+          format: int32
+          default: 50
+          example: 100
+      - name: name
+        in: query
+        description: Name of a metric with a metric ruleset. The system retrieves metric rulesets for any metrics that matched this name.
+        schema:
+          type: string
+          example: cpu.utilization
+      - name: offsetId
+        in: query
+        description: 'ID of the metric ruleset you want to use as a starting point for the result set. The result doesn''t include
+
+          the metric ruleset with this ID and returns only metric rulesets found after the starting ID.
+
+          For example, you have 3 rulesets. If you pass the ID for ruleset 1, the system only returns rulesets 2 and 3.
+
+          If you pass the ID for ruleset 3, the last object in the list, then the results field comes back empty.'
+        schema:
+          type: string
+          example: FdDbV95AIAA
+      - name: Accept
+        in: header
+        description: Format of the response body. Always "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: 'Authentication token. You can use a session token (User API access token) or an access token (org token)
+
+          if the access token has the API authorization scope (authScope).'
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Valid Get Metric Rulesets Response
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    format: int32
+                    example: 1
+                    description: 'Number of metric rulesets that matched the provided search criteria.
+
+                      Note: This value is the total number of matches, not the number of metric rulesets returned. The number of metric rulesets that the system returns is affected by the limit and offsetId query parameters.
+
+                      In summary:
+
+
+                      sizeOf(results): Number of metric rulesets returned in the response body.
+
+                      count: Number of metric rulesets that match the search criteria.'
+                  continuationToken:
+                    type: string
+                    example: FdDbV95AIAA
+                    description: Token used to advance to the next set of paginated results. Use this token as the offsetId query parameter value.
+                  results:
+                    type: array
+                    items:
+                      title: Metric Ruleset Properties Object
+                      type: object
+                      properties:
+                        aggregationRules:
+                          title: Aggregation rules
+                          type: array
+                          items:
+                            title: Aggregation rule object properties
+                            type: object
+                            required:
+                            - matcher
+                            - enabled
+                            - aggregator
+                            properties:
+                              name:
+                                title: Aggregation rule name
+                                type: string
+                                example: Rule A
+                                description: Name of the aggregation rule
+                              matcher:
+                                title: Metric matcher
+                                oneOf:
+                                - title: Dimension Metric Matcher
+                                  type: object
+                                  properties:
+                                    filters:
+                                      title: Filters for the metric
+                                      type: array
+                                      items:
+                                        title: Dimension Matcher Filter
+                                        type: object
+                                        properties:
+                                          property:
+                                            title: Custom property or dimension to filter
+                                            type: string
+                                            example: data_center_location
+                                            description: Name of the dimension or to match to the data.
+                                          propertyValue:
+                                            title: Custom property or dimension values to filter
+                                            type: array
+                                            uniqueItems: true
+                                            minLength: 1
+                                            items:
+                                              type: string
+                                            example:
+                                            - Atlanta, US
+                                            - Boston, US
+                                            description: A list of values to compare to the value of the dimension specified in PropertyFilter.property. If the list contains more than one value, the filter becomes a set of queries between the value of property and each element of propertyValue. The system joins these queries with an implicit OR.
+                                          NOT:
+                                            title: Indicates if the property is included or excluded
+                                            type: boolean
+                                            example: false
+                                            description: Flag that indicates how the filter operates. If true, data that matches the criteria is excluded from the filter; otherwise, data that matches the criteria is included.
+                                        description: A single filter for this metric. The filter specifies a default or user-defined dimension. You can either include or exclude all the data that matches this dimension.
+                                      example:
+                                      - NOT: false
+                                        property: realm
+                                        propertyValue:
+                                        - lab
+                                      description: List of filters you want to apply to your metric in the form of a JSON array. Each element is a single filter for a default or user-defined dimension.
+                                    type:
+                                      title: Metric matcher type
+                                      type: string
+                                      enum:
+                                      - dimension
+                                      description: The type of this metric matcher. Always "dimension".
+                                  description: Matcher that finds metric by dimensions.
+                                description: 'Metric matcher for the rule. You can use the following types of metric matchers:
+
+
+                                  Dimension matcher: Matcher that finds metric by default or user-defined dimensions.'
+                              enabled:
+                                title: Status of this rule
+                                type: boolean
+                                default: false
+                                example: true
+                                description: Status of this aggregation rule. If you set this to true, the rule becomes active and the controls the metric volume. If you set this to false, the system creates the rule, but it doesn't change the metric volume.
+                              aggregator:
+                                title: Metric aggregator
+                                type: object
+                                oneOf:
+                                - title: Rollup Aggregator Properties
+                                  required:
+                                  - type
+                                  - outputName
+                                  properties:
+                                    dimensions:
+                                      title: Dimensions
+                                      type: array
+                                      minItems: 1
+                                      items:
+                                        type: string
+                                      example:
+                                      - realm
+                                      - service
+                                      description: Dimensions you want to include in the aggregation rule
+                                    dropDimensions:
+                                      title: Drop dimensions
+                                      type: boolean
+                                      example: false
+                                      description: Specify whether you want to keep or drop the dimensions in this aggregation rule.
+                                    outputName:
+                                      title: Name for the new aggregated metric
+                                      type: string
+                                      description: Name for the new aggregated metric.
+                                    type:
+                                      title: The type of aggregation rule
+                                      type: string
+                                      enum:
+                                      - rollup
+                                      description: Aggregation rule type
+                                  example:
+                                    aggregator:
+                                      dimensions:
+                                      - realm
+                                      outputName: cpu-utilization-by-realm
+                                      type: rollup
+                                      dropDimensions: 'false'
+                                    enabled: false
+                                    matcher:
+                                      filters:
+                                      - NOT: false
+                                        property: realm
+                                        propertyValue:
+                                        - lab
+                                      type: dimension
+                                  description: Summarizes your metric into a new metric with fewer dimensions and lower cardinality.
+                                description: 'Metric aggregator for the rule. You can use the following types of metric aggregators:
+
+
+                                  Rollup aggregator: Aggregator that summarizes your metric into a new metric with fewer dimensions and lower cardinality.'
+                              description:
+                                type: string
+                                example: Example aggregation rule.
+                                description: Information about an aggregation rule.
+                            description: A single aggregation rule in a metric ruleset.
+                          example:
+                          - aggregator:
+                              dimensions:
+                              - realm
+                              outputName: cpu-utilization-by-realm
+                              type: rollup
+                              dropDimensions: 'false'
+                            enabled: false
+                            name: Rule A
+                            matcher:
+                              filters:
+                              - NOT: false
+                                property: realm
+                                propertyValue:
+                                - lab
+                              type: dimension
+                            description: Example aggregation rule.
+                          - aggregator:
+                              dimensions:
+                              - service
+                              outputName: agg_cpu.utilization_by_service
+                              type: rollup
+                              dropDimensions: 'false'
+                            enabled: true
+                            name: Rule B
+                            matcher:
+                              filters: []
+                              type: dimension
+                            description: Example aggregation rule.
+                          description: List of aggregation rules in this ruleset in the form on a JSON array. Each element in the array is an aggregation rule. If you don't specify any aggregation rule, the array is empty.
+                        creator:
+                          title: Creator user ID
+                          type: string
+                          readOnly: true
+                          example: AAAAAAAAAAA
+                          description: User ID of the user who created this ruleset. The system sets this property, and you can't change it.
+                        creatorName:
+                          title: Creator name
+                          type: string
+                          readOnly: true
+                          example: Buttercup Pony
+                          description: Name of the user who created this ruleset. The system sets this property, and you can't change it.
+                        created:
+                          title: Ruleset creation time
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1663629108995
+                          description: Ruleset creation timestamp in *nix time in milliseconds. The system sets this property, and you can't change it.
+                        exceptionRules:
+                          title: Exception rules
+                          type: array
+                          items:
+                            title: Exception rule object properties
+                            required:
+                            - enabled
+                            - matcher
+                            - name
+                            properties:
+                              name:
+                                type: string
+                                example: my_exception_rule
+                                description: Name of the exception rule.
+                              enabled:
+                                type: boolean
+                                example: true
+                                description: Whether to reroute the metric with the specified dimension. If false, the rule remains defined but will not reroute metrics.
+                              matcher:
+                                title: Dimension Metric Matcher
+                                type: object
+                                properties:
+                                  filters:
+                                    title: Filters for the metric
+                                    type: array
+                                    items:
+                                      title: Dimension Matcher Filter
+                                      type: object
+                                      properties:
+                                        property:
+                                          title: Custom property or dimension to filter
+                                          type: string
+                                          example: data_center_location
+                                          description: Name of the dimension or to match to the data.
+                                        propertyValue:
+                                          title: Custom property or dimension values to filter
+                                          type: array
+                                          uniqueItems: true
+                                          minLength: 1
+                                          items:
+                                            type: string
+                                          example:
+                                          - Atlanta, US
+                                          - Boston, US
+                                          description: A list of values to compare to the value of the dimension specified in PropertyFilter.property. If the list contains more than one value, the filter becomes a set of queries between the value of property and each element of propertyValue. The system joins these queries with an implicit OR.
+                                        NOT:
+                                          title: Indicates if the property is included or excluded
+                                          type: boolean
+                                          example: false
+                                          description: Flag that indicates how the filter operates. If true, data that matches the criteria is excluded from the filter; otherwise, data that matches the criteria is included.
+                                      description: A single filter for this metric. The filter specifies a default or user-defined dimension. You can either include or exclude all the data that matches this dimension.
+                                    example:
+                                    - NOT: false
+                                      property: realm
+                                      propertyValue:
+                                      - lab
+                                    description: List of filters you want to apply to your metric in the form of a JSON array. Each element is a single filter for a default or user-defined dimension.
+                                  type:
+                                    title: Metric matcher type
+                                    type: string
+                                    enum:
+                                    - dimension
+                                    description: The type of this metric matcher. Always "dimension".
+                                required:
+                                - type
+                                - filters
+                                description: Matcher that finds metric by dimensions.
+                              restoration:
+                                title: Fields of the exceptionRules restoration element.
+                                properties:
+                                  restorationId:
+                                    type: string
+                                    example: abcd1234
+                                    description: ID of the restoration job.
+                                  startTime:
+                                    type: integer
+                                    format: int64
+                                    example: 1711055123727
+                                    description: Time from which the restoration job will restore archived data, in the form of *nix time in milliseconds.
+                                  stopTime:
+                                    type: integer
+                                    format: int64
+                                    example: 1711055123727
+                                    description: Time to which the restoration job will restore archived data, in the form of *nix time in milliseconds.
+                                description: 'Contains fields for the restoration job. The restoration job reroutes metrics from the archival route to the real-time route.
+
+                                  You can track the restoration job with an ID, and you can specify a time to begin the restoration job.'
+                              description:
+                                type: string
+                                example: Example exception rule.
+                                description: Information about an exception rule.
+                            description: 'Fields for exception rules. Each exception rule uses a matcher to find the metric(s) that you want to reroute.
+
+                              You can specify multiple matchers in a single exception rule to reroute metrics with different properties.'
+                          description: List of exception rules. Exception rules reroute a metric time series (MTS) from an archival route to a real-time route if the MTS contains values that match those of a specified filter.
+                        id:
+                          title: ID of the metric ruleset
+                          type: string
+                          readOnly: true
+                          example: FdDbV95AIAA
+                          description: ID of the ruleset. The system sets this property, and you can't change it.
+                        lastUpdatedBy:
+                          title: User who last updated this ruleset
+                          type: string
+                          readOnly: true
+                          example: AAAAAAAAAAA
+                          description: User ID of the user who last updated this ruleset. The system sets this property, and you can't change it.
+                        lastUpdatedByName:
+                          title: User who last updated this ruleset
+                          type: string
+                          readOnly: true
+                          example: Buttercup Pony
+                          description: Name of the user who last updated this ruleset. The system sets this property, and you can't change it.
+                        lastUpdated:
+                          title: Ruleset last updated time
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1664560815916
+                          description: Date and time the metric ruleset was last updated, in the form of a *nix timestamp in milliseconds. The system sets this property, and you can't change it.
+                        metricName:
+                          title: Metric name
+                          type: string
+                          example: cpu.utilization
+                          description: Name of the metric you are creating rules for
+                        routingRule:
+                          title: Routing rule
+                          type: object
+                          properties:
+                            destination:
+                              title: Destination
+                              type: string
+                              enum:
+                              - Drop
+                              - RealTime
+                              - Archived
+                              description: 'Routing destination for unaggregated raw data. You can select one of the following values:
+
+
+                                "Drop": Drop all your unaggregated raw data after the metric ruleset is created.
+
+                                "RealTime": Keep all your unaggregated raw data for 13 months after the metric ruleset is created.
+
+                                "Archived": Archives all your unaggregated raw data after the metric ruleset is created.
+
+
+                                To set or change destination to "Drop", the value of X-SF-TOKEN in your request header
+
+                                must be a session token associated with a user who has the admin role.'
+                            destinationForHistogramDpsEnabled:
+                              type: boolean
+                              example: false
+                              description: Sets whether the routing rule destination is respected for histograms.
+                          example:
+                            destination: RealTime
+                            destinationForHistogramDpsEnabled: false
+                          description: 'Routing rule for your unaggregated raw data. To set or change the value of destination
+
+                            in routingRule to "Drop", the value of X-SF-TOKEN in your request header must be
+
+                            a session token associated with a user who has the admin role.'
+                        version:
+                          title: Ruleset version
+                          type: integer
+                          format: int64
+                          example: 2
+                          description: The system uses Version to ensure updates to the metric ruleset are consistent. When you update the metric ruleset, always pass the current version of the ruleset.
+                        description:
+                          type: string
+                          example: Example metric ruleset.
+                          title: Description
+                          description: Information about the metric ruleset.
+                      description: Properties of a metric ruleset in the form of a JSON object.
+                    description: Results of a query to retrieve all metric rulesets in the form of a JSON array of objects. Each element is a metric ruleset object.
+                description: Properties in the response body of a successful retrieval of metric rulesets
+              examples:
+                example:
+                  value:
+                    continuationToken: FdDbV95AIAA
+                    count: 1
+                    results:
+                    - aggregationRules:
+                      - aggregator:
+                          dimensions:
+                          - realm
+                          dropDimensions: 'false'
+                          outputName: cpu-utilization-by-realm
+                          type: rollup
+                        description: Example aggregation rule.
+                        enabled: false
+                        matcher:
+                          filters:
+                          - NOT: false
+                            property: realm
+                            propertyValue:
+                            - lab
+                          type: dimension
+                        name: Rule A
+                      - aggregator:
+                          dimensions:
+                          - service
+                          dropDimensions: 'false'
+                          outputName: agg_cpu.utilization_by_service
+                          type: rollup
+                        description: Example aggregation rule.
+                        enabled: true
+                        matcher:
+                          filters: []
+                          type: dimension
+                        name: Rule B
+                      created: 1663629108995
+                      creator: AAAAAAAAAAA
+                      creatorName: Buttercup Pony
+                      description: Example metric ruleset.
+                      exceptionRules:
+                      - description: Example exception rule.
+                        enabled: true
+                        matcher:
+                          filters:
+                          - NOT: false
+                            property: realm
+                            propertyValue:
+                            - lab
+                          type: dimension
+                        name: my_exception_rule
+                        restoration:
+                          restorationId: abcd1234
+                          startTime: 1711055123727
+                          stopTime: 1711055123727
+                      id: FdDbV95AIAA
+                      lastUpdated: 1664560815916
+                      lastUpdatedBy: AAAAAAAAAAA
+                      lastUpdatedByName: Buttercup Pony
+                      metricName: cpu.utilization
+                      routingRule:
+                        destination: RealTime
+                        destinationForHistogramDpsEnabled: false
+                      version: 2
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  code: 401
+                  message: No session is active, or caller doesn't have access to requested organization
+              examples:
+                example:
+                  value:
+                    code: 401
+                    message: No session is active, or caller doesn't have access to requested organization
+      security:
+      - SessionToken: []
+      tags:
+      - Metric ruleset
+    post:
+      summary: Create New Metric Ruleset
+      description: Creates a metric ruleset.
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Request body format. Always "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: 'Authentication token. You can use a session token (User API access token) or an access token (org token)
+
+          if the access token has the API authorization scope (authScope).'
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: Create Metric Ruleset Request Body
+              type: object
+              required:
+              - metricName
+              - version
+              - routingRule
+              properties:
+                aggregationRules:
+                  title: Aggregation rules
+                  type: array
+                  items:
+                    title: Aggregation rule object properties
+                    type: object
+                    required:
+                    - matcher
+                    - enabled
+                    - aggregator
+                    properties:
+                      name:
+                        title: Aggregation rule name
+                        type: string
+                        example: Rule A
+                        description: Name of the aggregation rule
+                      matcher:
+                        title: Metric matcher
+                        oneOf:
+                        - title: Dimension Metric Matcher
+                          type: object
+                          properties:
+                            filters:
+                              title: Filters for the metric
+                              type: array
+                              items:
+                                title: Dimension Matcher Filter
+                                type: object
+                                properties:
+                                  property:
+                                    title: Custom property or dimension to filter
+                                    type: string
+                                    example: data_center_location
+                                    description: Name of the dimension or to match to the data.
+                                  propertyValue:
+                                    title: Custom property or dimension values to filter
+                                    type: array
+                                    uniqueItems: true
+                                    minLength: 1
+                                    items:
+                                      type: string
+                                    example:
+                                    - Atlanta, US
+                                    - Boston, US
+                                    description: A list of values to compare to the value of the dimension specified in PropertyFilter.property. If the list contains more than one value, the filter becomes a set of queries between the value of property and each element of propertyValue. The system joins these queries with an implicit OR.
+                                  NOT:
+                                    title: Indicates if the property is included or excluded
+                                    type: boolean
+                                    example: false
+                                    description: Flag that indicates how the filter operates. If true, data that matches the criteria is excluded from the filter; otherwise, data that matches the criteria is included.
+                                description: A single filter for this metric. The filter specifies a default or user-defined dimension. You can either include or exclude all the data that matches this dimension.
+                              example:
+                              - NOT: false
+                                property: realm
+                                propertyValue:
+                                - lab
+                              description: List of filters you want to apply to your metric in the form of a JSON array. Each element is a single filter for a default or user-defined dimension.
+                            type:
+                              title: Metric matcher type
+                              type: string
+                              enum:
+                              - dimension
+                              description: The type of this metric matcher. Always "dimension".
+                          description: Matcher that finds metric by dimensions.
+                        description: 'Metric matcher for the rule. You can use the following types of metric matchers:
+
+
+                          Dimension matcher: Matcher that finds metric by default or user-defined dimensions.'
+                      enabled:
+                        title: Status of this rule
+                        type: boolean
+                        default: false
+                        example: true
+                        description: Status of this aggregation rule. If you set this to true, the rule becomes active and the controls the metric volume. If you set this to false, the system creates the rule, but it doesn't change the metric volume.
+                      aggregator:
+                        title: Metric aggregator
+                        type: object
+                        oneOf:
+                        - title: Rollup Aggregator Properties
+                          required:
+                          - type
+                          - outputName
+                          properties:
+                            dimensions:
+                              title: Dimensions
+                              type: array
+                              minItems: 1
+                              items:
+                                type: string
+                              example:
+                              - realm
+                              - service
+                              description: Dimensions you want to include in the aggregation rule
+                            dropDimensions:
+                              title: Drop dimensions
+                              type: boolean
+                              example: false
+                              description: Specify whether you want to keep or drop the dimensions in this aggregation rule.
+                            outputName:
+                              title: Name for the new aggregated metric
+                              type: string
+                              description: Name for the new aggregated metric.
+                            type:
+                              title: The type of aggregation rule
+                              type: string
+                              enum:
+                              - rollup
+                              description: Aggregation rule type
+                          example:
+                            aggregator:
+                              dimensions:
+                              - realm
+                              outputName: cpu-utilization-by-realm
+                              type: rollup
+                              dropDimensions: 'false'
+                            enabled: false
+                            matcher:
+                              filters:
+                              - NOT: false
+                                property: realm
+                                propertyValue:
+                                - lab
+                              type: dimension
+                          description: Summarizes your metric into a new metric with fewer dimensions and lower cardinality.
+                        description: 'Metric aggregator for the rule. You can use the following types of metric aggregators:
+
+
+                          Rollup aggregator: Aggregator that summarizes your metric into a new metric with fewer dimensions and lower cardinality.'
+                      description:
+                        type: string
+                        example: Example aggregation rule.
+                        description: Information about an aggregation rule.
+                    description: A single aggregation rule in a metric ruleset.
+                  example:
+                  - aggregator:
+                      dimensions:
+                      - realm
+                      outputName: cpu-utilization-by-realm
+                      type: rollup
+                      dropDimensions: 'false'
+                    enabled: false
+                    name: Rule A
+                    matcher:
+                      filters:
+                      - NOT: false
+                        property: realm
+                        propertyValue:
+                        - lab
+                      type: dimension
+                    description: Example aggregation rule.
+                  - aggregator:
+                      dimensions:
+                      - service
+                      outputName: agg_cpu.utilization_by_service
+                      type: rollup
+                      dropDimensions: 'false'
+                    enabled: true
+                    name: Rule B
+                    matcher:
+                      filters: []
+                      type: dimension
+                    description: Example aggregation rule.
+                  description: List of aggregation rules in this ruleset in the form on a JSON array. Each element in the array is an aggregation rule. If you don't specify any aggregation rule, the array is empty.
+                exceptionRules:
+                  title: Exception rules
+                  type: array
+                  items:
+                    title: Exception rule object properties
+                    required:
+                    - enabled
+                    - matcher
+                    - name
+                    properties:
+                      name:
+                        type: string
+                        example: my_exception_rule
+                        description: Name of the exception rule.
+                      enabled:
+                        type: boolean
+                        example: true
+                        description: Whether to reroute the metric with the specified dimension. If false, the rule remains defined but will not reroute metrics.
+                      matcher:
+                        title: Dimension Metric Matcher
+                        type: object
+                        properties:
+                          filters:
+                            title: Filters for the metric
+                            type: array
+                            items:
+                              title: Dimension Matcher Filter
+                              type: object
+                              properties:
+                                property:
+                                  title: Custom property or dimension to filter
+                                  type: string
+                                  example: data_center_location
+                                  description: Name of the dimension or to match to the data.
+                                propertyValue:
+                                  title: Custom property or dimension values to filter
+                                  type: array
+                                  uniqueItems: true
+                                  minLength: 1
+                                  items:
+                                    type: string
+                                  example:
+                                  - Atlanta, US
+                                  - Boston, US
+                                  description: A list of values to compare to the value of the dimension specified in PropertyFilter.property. If the list contains more than one value, the filter becomes a set of queries between the value of property and each element of propertyValue. The system joins these queries with an implicit OR.
+                                NOT:
+                                  title: Indicates if the property is included or excluded
+                                  type: boolean
+                                  example: false
+                                  description: Flag that indicates how the filter operates. If true, data that matches the criteria is excluded from the filter; otherwise, data that matches the criteria is included.
+                              description: A single filter for this metric. The filter specifies a default or user-defined dimension. You can either include or exclude all the data that matches this dimension.
+                            example:
+                            - NOT: false
+                              property: realm
+                              propertyValue:
+                              - lab
+                            description: List of filters you want to apply to your metric in the form of a JSON array. Each element is a single filter for a default or user-defined dimension.
+                          type:
+                            title: Metric matcher type
+                            type: string
+                            enum:
+                            - dimension
+                            description: The type of this metric matcher. Always "dimension".
+                        required:
+                        - type
+                        - filters
+                        description: Matcher that finds metric by dimensions.
+                      restoration:
+                        title: Fields of the exceptionRules restoration element.
+                        properties:
+                          restorationId:
+                            type: string
+                            example: abcd1234
+                            description: ID of the restoration job.
+                          startTime:
+                            type: integer
+                            format: int64
+                            example: 1711055123727
+                            description: Time from which the restoration job will restore archived data, in the form of *nix time in milliseconds.
+                          stopTime:
+                            type: integer
+                            format: int64
+                            example: 1711055123727
+                            description: Time to which the restoration job will restore archived data, in the form of *nix time in milliseconds.
+                        description: 'Contains fields for the restoration job. The restoration job reroutes metrics from the archival route to the real-time route.
+
+                          You can track the restoration job with an ID, and you can specify a time to begin the restoration job.'
+                      description:
+                        type: string
+                        example: Example exception rule.
+                        description: Information about an exception rule.
+                    description: 'Fields for exception rules. Each exception rule uses a matcher to find the metric(s) that you want to reroute.
+
+                      You can specify multiple matchers in a single exception rule to reroute metrics with different properties.'
+                  description: List of exception rules. Exception rules reroute a metric time series (MTS) from an archival route to a real-time route if the MTS contains values that match those of a specified filter.
+                metricName:
+                  title: Metric name
+                  type: string
+                  example: cpu.utilization
+                  description: Name of the metric you are creating rules for
+                description:
+                  type: string
+                  example: Example metric ruleset.
+                  title: Description
+                  description: Information about the metric ruleset.
+                routingRule:
+                  title: Routing rule
+                  type: object
+                  properties:
+                    destination:
+                      title: Destination
+                      type: string
+                      enum:
+                      - Drop
+                      - RealTime
+                      - Archived
+                      description: 'Routing destination for unaggregated raw data. You can select one of the following values:
+
+
+                        "Drop": Drop all your unaggregated raw data after the metric ruleset is created.
+
+                        "RealTime": Keep all your unaggregated raw data for 13 months after the metric ruleset is created.
+
+                        "Archived": Archives all your unaggregated raw data after the metric ruleset is created.
+
+
+                        To set or change destination to "Drop", the value of X-SF-TOKEN in your request header
+
+                        must be a session token associated with a user who has the admin role.'
+                    destinationForHistogramDpsEnabled:
+                      type: boolean
+                      example: false
+                      description: Sets whether the routing rule destination is respected for histograms.
+                  example:
+                    destination: RealTime
+                    destinationForHistogramDpsEnabled: false
+                  description: 'Routing rule for your unaggregated raw data. To set or change the value of destination
+
+                    in routingRule to "Drop", the value of X-SF-TOKEN in your request header must be
+
+                    a session token associated with a user who has the admin role.'
+                version:
+                  title: Ruleset version
+                  type: integer
+                  format: int64
+                  example: 2
+                  description: The system uses Version to ensure updates to the metric ruleset are consistent. When you update the metric ruleset, always pass the current version of the ruleset.
+              description: Properties to use in creating a new metric ruleset using the API
+            examples:
+              example:
+                value:
+                  aggregationRules:
+                  - aggregator:
+                      dimensions:
+                      - realm
+                      dropDimensions: 'false'
+                      outputName: cpu-utilization-by-realm
+                      type: rollup
+                    description: Example aggregation rule.
+                    enabled: false
+                    matcher:
+                      filters:
+                      - NOT: false
+                        property: realm
+                        propertyValue:
+                        - lab
+                      type: dimension
+                    name: Rule A
+                  - aggregator:
+                      dimensions:
+                      - service
+                      dropDimensions: 'false'
+                      outputName: agg_cpu.utilization_by_service
+                      type: rollup
+                    description: Example aggregation rule.
+                    enabled: true
+                    matcher:
+                      filters: []
+                      type: dimension
+                    name: Rule B
+                  description: Example metric ruleset.
+                  exceptionRules:
+                  - description: Example exception rule.
+                    enabled: true
+                    matcher:
+                      filters:
+                      - NOT: false
+                        property: realm
+                        propertyValue:
+                        - lab
+                      type: dimension
+                    name: my_exception_rule
+                    restoration:
+                      restorationId: abcd1234
+                      startTime: 1711055123727
+                      stopTime: 1711055123727
+                  metricName: cpu.utilization
+                  routingRule:
+                    destination: RealTime
+                    destinationForHistogramDpsEnabled: false
+                  version: 2
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Create Metric Ruleset Response Body
+                type: object
+                properties:
+                  aggregationRules:
+                    title: Aggregation rules
+                    type: array
+                    items:
+                      title: Aggregation rule object properties
+                      type: object
+                      required:
+                      - matcher
+                      - enabled
+                      - aggregator
+                      properties:
+                        name:
+                          title: Aggregation rule name
+                          type: string
+                          example: Rule A
+                          description: Name of the aggregation rule
+                        matcher:
+                          title: Metric matcher
+                          oneOf:
+                          - title: Dimension Metric Matcher
+                            type: object
+                            properties:
+                              filters:
+                                title: Filters for the metric
+                                type: array
+                                items:
+                                  title: Dimension Matcher Filter
+                                  type: object
+                                  properties:
+                                    property:
+                                      title: Custom property or dimension to filter
+                                      type: string
+                                      example: data_center_location
+                                      description: Name of the dimension or to match to the data.
+                                    propertyValue:
+                                      title: Custom property or dimension values to filter
+                                      type: array
+                                      uniqueItems: true
+                                      minLength: 1
+                                      items:
+                                        type: string
+                                      example:
+                                      - Atlanta, US
+                                      - Boston, US
+                                      description: A list of values to compare to the value of the dimension specified in PropertyFilter.property. If the list contains more than one value, the filter becomes a set of queries between the value of property and each element of propertyValue. The system joins these queries with an implicit OR.
+                                    NOT:
+                                      title: Indicates if the property is included or excluded
+                                      type: boolean
+                                      example: false
+                                      description: Flag that indicates how the filter operates. If true, data that matches the criteria is excluded from the filter; otherwise, data that matches the criteria is included.
+                                  description: A single filter for this metric. The filter specifies a default or user-defined dimension. You can either include or exclude all the data that matches this dimension.
+                                example:
+                                - NOT: false
+                                  property: realm
+                                  propertyValue:
+                                  - lab
+                                description: List of filters you want to apply to your metric in the form of a JSON array. Each element is a single filter for a default or user-defined dimension.
+                              type:
+                                title: Metric matcher type
+                                type: string
+                                enum:
+                                - dimension
+                                description: The type of this metric matcher. Always "dimension".
+                            description: Matcher that finds metric by dimensions.
+                          description: 'Metric matcher for the rule. You can use the following types of metric matchers:
+
+
+                            Dimension matcher: Matcher that finds metric by default or user-defined dimensions.'
+                        enabled:
+                          title: Status of this rule
+                          type: boolean
+                          default: false
+                          example: true
+                          description: Status of this aggregation rule. If you set this to true, the rule becomes active and the controls the metric volume. If you set this to false, the system creates the rule, but it doesn't change the metric volume.
+                        aggregator:
+                          title: Metric aggregator
+                          type: object
+                          oneOf:
+                          - title: Rollup Aggregator Properties
+                            required:
+                            - type
+                            - outputName
+                            properties:
+                              dimensions:
+                                title: Dimensions
+                                type: array
+                                minItems: 1
+                                items:
+                                  type: string
+                                example:
+                                - realm
+                                - service
+                                description: Dimensions you want to include in the aggregation rule
+                              dropDimensions:
+                                title: Drop dimensions
+                                type: boolean
+                                example: false
+                                description: Specify whether you want to keep or drop the dimensions in this aggregation rule.
+                              outputName:
+                                title: Name for the new aggregated metric
+                                type: string
+                                description: Name for the new aggregated metric.
+                              type:
+                                title: The type of aggregation rule
+                                type: string
+                                enum:
+                                - rollup
+                                description: Aggregation rule type
+                            example:
+                              aggregator:
+                                dimensions:
+                                - realm
+                                outputName: cpu-utilization-by-realm
+                                type: rollup
+                                dropDimensions: 'false'
+                              enabled: false
+                              matcher:
+                                filters:
+                                - NOT: false
+                                  property: realm
+                                  propertyValue:
+                                  - lab
+                                type: dimension
+                            description: Summarizes your metric into a new metric with fewer dimensions and lower cardinality.
+                          description: 'Metric aggregator for the rule. You can use the following types of metric aggregators:
+
+
+                            Rollup aggregator: Aggregator that summarizes your metric into a new metric with fewer dimensions and lower cardinality.'
+                        description:
+                          type: string
+                          example: Example aggregation rule.
+                          description: Information about an aggregation rule.
+                      description: A single aggregation rule in a metric ruleset.
+                    example:
+                    - aggregator:
+                        dimensions:
+                        - realm
+                        outputName: cpu-utilization-by-realm
+                        type: rollup
+                        dropDimensions: 'false'
+                      enabled: false
+                      name: Rule A
+                      matcher:
+                        filters:
+                        - NOT: false
+                          property: realm
+                          propertyValue:
+                          - lab
+                        type: dimension
+                      description: Example aggregation rule.
+                    - aggregator:
+                        dimensions:
+                        - service
+                        outputName: agg_cpu.utilization_by_service
+                        type: rollup
+                        dropDimensions: 'false'
+                      enabled: true
+                      name: Rule B
+                      matcher:
+                        filters: []
+                        type: dimension
+                      description: Example aggregation rule.
+                    description: List of aggregation rules in this ruleset in the form on a JSON array. Each element in the array is an aggregation rule. If you don't specify any aggregation rule, the array is empty.
+                  creator:
+                    title: Creator user ID
+                    type: string
+                    readOnly: true
+                    example: AAAAAAAAAAA
+                    description: User ID of the user who created this ruleset. The system sets this property, and you can't change it.
+                  creatorName:
+                    title: Creator name
+                    type: string
+                    readOnly: true
+                    example: Buttercup Pony
+                    description: Name of the user who created this ruleset. The system sets this property, and you can't change it.
+                  created:
+                    title: Ruleset creation time
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1663629108995
+                    description: Ruleset creation timestamp in *nix time in milliseconds. The system sets this property, and you can't change it.
+                  exceptionRules:
+                    title: Exception rules
+                    type: array
+                    items:
+                      title: Exception rule object properties
+                      required:
+                      - enabled
+                      - matcher
+                      - name
+                      properties:
+                        name:
+                          type: string
+                          example: my_exception_rule
+                          description: Name of the exception rule.
+                        enabled:
+                          type: boolean
+                          example: true
+                          description: Whether to reroute the metric with the specified dimension. If false, the rule remains defined but will not reroute metrics.
+                        matcher:
+                          title: Dimension Metric Matcher
+                          type: object
+                          properties:
+                            filters:
+                              title: Filters for the metric
+                              type: array
+                              items:
+                                title: Dimension Matcher Filter
+                                type: object
+                                properties:
+                                  property:
+                                    title: Custom property or dimension to filter
+                                    type: string
+                                    example: data_center_location
+                                    description: Name of the dimension or to match to the data.
+                                  propertyValue:
+                                    title: Custom property or dimension values to filter
+                                    type: array
+                                    uniqueItems: true
+                                    minLength: 1
+                                    items:
+                                      type: string
+                                    example:
+                                    - Atlanta, US
+                                    - Boston, US
+                                    description: A list of values to compare to the value of the dimension specified in PropertyFilter.property. If the list contains more than one value, the filter becomes a set of queries between the value of property and each element of propertyValue. The system joins these queries with an implicit OR.
+                                  NOT:
+                                    title: Indicates if the property is included or excluded
+                                    type: boolean
+                                    example: false
+                                    description: Flag that indicates how the filter operates. If true, data that matches the criteria is excluded from the filter; otherwise, data that matches the criteria is included.
+                                description: A single filter for this metric. The filter specifies a default or user-defined dimension. You can either include or exclude all the data that matches this dimension.
+                              example:
+                              - NOT: false
+                                property: realm
+                                propertyValue:
+                                - lab
+                              description: List of filters you want to apply to your metric in the form of a JSON array. Each element is a single filter for a default or user-defined dimension.
+                            type:
+                              title: Metric matcher type
+                              type: string
+                              enum:
+                              - dimension
+                              description: The type of this metric matcher. Always "dimension".
+                          required:
+                          - type
+                          - filters
+                          description: Matcher that finds metric by dimensions.
+                        restoration:
+                          title: Fields of the exceptionRules restoration element.
+                          properties:
+                            restorationId:
+                              type: string
+                              example: abcd1234
+                              description: ID of the restoration job.
+                            startTime:
+                              type: integer
+                              format: int64
+                              example: 1711055123727
+                              description: Time from which the restoration job will restore archived data, in the form of *nix time in milliseconds.
+                            stopTime:
+                              type: integer
+                              format: int64
+                              example: 1711055123727
+                              description: Time to which the restoration job will restore archived data, in the form of *nix time in milliseconds.
+                          description: 'Contains fields for the restoration job. The restoration job reroutes metrics from the archival route to the real-time route.
+
+                            You can track the restoration job with an ID, and you can specify a time to begin the restoration job.'
+                        description:
+                          type: string
+                          example: Example exception rule.
+                          description: Information about an exception rule.
+                      description: 'Fields for exception rules. Each exception rule uses a matcher to find the metric(s) that you want to reroute.
+
+                        You can specify multiple matchers in a single exception rule to reroute metrics with different properties.'
+                    description: List of exception rules. Exception rules reroute a metric time series (MTS) from an archival route to a real-time route if the MTS contains values that match those of a specified filter.
+                  id:
+                    title: ID of the metric ruleset
+                    type: string
+                    readOnly: true
+                    example: FdDbV95AIAA
+                    description: ID of the ruleset. The system sets this property, and you can't change it.
+                  lastUpdatedBy:
+                    title: User who last updated this ruleset
+                    type: string
+                    readOnly: true
+                    example: AAAAAAAAAAA
+                    description: User ID of the user who last updated this ruleset. The system sets this property, and you can't change it.
+                  lastUpdatedByName:
+                    title: User who last updated this ruleset
+                    type: string
+                    readOnly: true
+                    example: Buttercup Pony
+                    description: Name of the user who last updated this ruleset. The system sets this property, and you can't change it.
+                  lastUpdated:
+                    title: Ruleset last updated time
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1664560815916
+                    description: Date and time the metric ruleset was last updated, in the form of a *nix timestamp in milliseconds. The system sets this property, and you can't change it.
+                  metricName:
+                    title: Metric name
+                    type: string
+                    example: cpu.utilization
+                    description: Name of the metric you are creating rules for
+                  description:
+                    type: string
+                    example: Example metric ruleset.
+                    title: Description
+                    description: Information about the metric ruleset.
+                  routingRule:
+                    title: Routing rule
+                    type: object
+                    properties:
+                      destination:
+                        title: Destination
+                        type: string
+                        enum:
+                        - Drop
+                        - RealTime
+                        - Archived
+                        description: 'Routing destination for unaggregated raw data. You can select one of the following values:
+
+
+                          "Drop": Drop all your unaggregated raw data after the metric ruleset is created.
+
+                          "RealTime": Keep all your unaggregated raw data for 13 months after the metric ruleset is created.
+
+                          "Archived": Archives all your unaggregated raw data after the metric ruleset is created.
+
+
+                          To set or change destination to "Drop", the value of X-SF-TOKEN in your request header
+
+                          must be a session token associated with a user who has the admin role.'
+                      destinationForHistogramDpsEnabled:
+                        type: boolean
+                        example: false
+                        description: Sets whether the routing rule destination is respected for histograms.
+                    example:
+                      destination: RealTime
+                      destinationForHistogramDpsEnabled: false
+                    description: 'Routing rule for your unaggregated raw data. To set or change the value of destination
+
+                      in routingRule to "Drop", the value of X-SF-TOKEN in your request header must be
+
+                      a session token associated with a user who has the admin role.'
+                  version:
+                    title: Ruleset version
+                    type: integer
+                    format: int64
+                    example: 2
+                    description: The system uses Version to ensure updates to the metric ruleset are consistent. When you update the metric ruleset, always pass the current version of the ruleset.
+                description: Response body returned when the Create Metric Ruleset operation (POST /metricruleset) successfully creates a ruleset.
+              examples:
+                example:
+                  value:
+                    aggregationRules:
+                    - aggregator:
+                        dimensions:
+                        - realm
+                        dropDimensions: 'false'
+                        outputName: cpu-utilization-by-realm
+                        type: rollup
+                      description: Example aggregation rule.
+                      enabled: false
+                      matcher:
+                        filters:
+                        - NOT: false
+                          property: realm
+                          propertyValue:
+                          - lab
+                        type: dimension
+                      name: Rule A
+                    - aggregator:
+                        dimensions:
+                        - service
+                        dropDimensions: 'false'
+                        outputName: agg_cpu.utilization_by_service
+                        type: rollup
+                      description: Example aggregation rule.
+                      enabled: true
+                      matcher:
+                        filters: []
+                        type: dimension
+                      name: Rule B
+                    created: 1663629108995
+                    creator: AAAAAAAAAAA
+                    creatorName: Buttercup Pony
+                    description: Example metric ruleset.
+                    exceptionRules:
+                    - description: Example exception rule.
+                      enabled: true
+                      matcher:
+                        filters:
+                        - NOT: false
+                          property: realm
+                          propertyValue:
+                          - lab
+                        type: dimension
+                      name: my_exception_rule
+                      restoration:
+                        restorationId: abcd1234
+                        startTime: 1711055123727
+                        stopTime: 1711055123727
+                    id: FdDbV95AIAA
+                    lastUpdated: 1664560815916
+                    lastUpdatedBy: AAAAAAAAAAA
+                    lastUpdatedByName: Buttercup Pony
+                    metricName: cpu.utilization
+                    routingRule:
+                      destination: RealTime
+                      destinationForHistogramDpsEnabled: false
+                    version: 2
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  code: 401
+                  message: No session is active, or caller doesn't have access to the requested organization
+              examples:
+                example:
+                  value:
+                    code: 401
+                    message: No session is active, or caller doesn't have access to the requested organization
+        '403':
+          description: HTTP 403 response
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  code: 403
+                  message: User is not authorized for this operation
+              examples:
+                example:
+                  value:
+                    code: 403
+                    message: User is not authorized for this operation
+        '409':
+          description: HTTP 409 response
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  code: 409
+                  message: A metric ruleset with this ID already exists
+              examples:
+                example:
+                  value:
+                    code: 409
+                    message: A metric ruleset with this ID already exists
+      security:
+      - SessionToken: []
+      tags:
+      - Metric ruleset
+  /metricruleset/{id}:
+    get:
+      summary: Retrieve Metric Ruleset ID
+      description: Retrieves the properties of the ruleset that has the ID specified in the {id} path parameter.
+      parameters:
+      - name: id
+        in: path
+        description: ID for the ruleset you want to retrieve
+        required: true
+        schema:
+          type: string
+          example: FdDbV95AIAA
+      - name: X-SF-TOKEN
+        in: header
+        description: 'Authentication token. You can use a session token (User API access token) or an access token (org token)
+
+          if the access token has the API authorization scope (authScope).'
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Get Metric Ruleset Response Body
+                type: object
+                properties:
+                  aggregationRules:
+                    title: Aggregation rules
+                    type: array
+                    items:
+                      title: Aggregation rule object properties
+                      type: object
+                      required:
+                      - matcher
+                      - enabled
+                      - aggregator
+                      properties:
+                        name:
+                          title: Aggregation rule name
+                          type: string
+                          example: Rule A
+                          description: Name of the aggregation rule
+                        matcher:
+                          title: Metric matcher
+                          oneOf:
+                          - title: Dimension Metric Matcher
+                            type: object
+                            properties:
+                              filters:
+                                title: Filters for the metric
+                                type: array
+                                items:
+                                  title: Dimension Matcher Filter
+                                  type: object
+                                  properties:
+                                    property:
+                                      title: Custom property or dimension to filter
+                                      type: string
+                                      example: data_center_location
+                                      description: Name of the dimension or to match to the data.
+                                    propertyValue:
+                                      title: Custom property or dimension values to filter
+                                      type: array
+                                      uniqueItems: true
+                                      minLength: 1
+                                      items:
+                                        type: string
+                                      example:
+                                      - Atlanta, US
+                                      - Boston, US
+                                      description: A list of values to compare to the value of the dimension specified in PropertyFilter.property. If the list contains more than one value, the filter becomes a set of queries between the value of property and each element of propertyValue. The system joins these queries with an implicit OR.
+                                    NOT:
+                                      title: Indicates if the property is included or excluded
+                                      type: boolean
+                                      example: false
+                                      description: Flag that indicates how the filter operates. If true, data that matches the criteria is excluded from the filter; otherwise, data that matches the criteria is included.
+                                  description: A single filter for this metric. The filter specifies a default or user-defined dimension. You can either include or exclude all the data that matches this dimension.
+                                example:
+                                - NOT: false
+                                  property: realm
+                                  propertyValue:
+                                  - lab
+                                description: List of filters you want to apply to your metric in the form of a JSON array. Each element is a single filter for a default or user-defined dimension.
+                              type:
+                                title: Metric matcher type
+                                type: string
+                                enum:
+                                - dimension
+                                description: The type of this metric matcher. Always "dimension".
+                            description: Matcher that finds metric by dimensions.
+                          description: 'Metric matcher for the rule. You can use the following types of metric matchers:
+
+
+                            Dimension matcher: Matcher that finds metric by default or user-defined dimensions.'
+                        enabled:
+                          title: Status of this rule
+                          type: boolean
+                          default: false
+                          example: true
+                          description: Status of this aggregation rule. If you set this to true, the rule becomes active and the controls the metric volume. If you set this to false, the system creates the rule, but it doesn't change the metric volume.
+                        aggregator:
+                          title: Metric aggregator
+                          type: object
+                          oneOf:
+                          - title: Rollup Aggregator Properties
+                            required:
+                            - type
+                            - outputName
+                            properties:
+                              dimensions:
+                                title: Dimensions
+                                type: array
+                                minItems: 1
+                                items:
+                                  type: string
+                                example:
+                                - realm
+                                - service
+                                description: Dimensions you want to include in the aggregation rule
+                              dropDimensions:
+                                title: Drop dimensions
+                                type: boolean
+                                example: false
+                                description: Specify whether you want to keep or drop the dimensions in this aggregation rule.
+                              outputName:
+                                title: Name for the new aggregated metric
+                                type: string
+                                description: Name for the new aggregated metric.
+                              type:
+                                title: The type of aggregation rule
+                                type: string
+                                enum:
+                                - rollup
+                                description: Aggregation rule type
+                            example:
+                              aggregator:
+                                dimensions:
+                                - realm
+                                outputName: cpu-utilization-by-realm
+                                type: rollup
+                                dropDimensions: 'false'
+                              enabled: false
+                              matcher:
+                                filters:
+                                - NOT: false
+                                  property: realm
+                                  propertyValue:
+                                  - lab
+                                type: dimension
+                            description: Summarizes your metric into a new metric with fewer dimensions and lower cardinality.
+                          description: 'Metric aggregator for the rule. You can use the following types of metric aggregators:
+
+
+                            Rollup aggregator: Aggregator that summarizes your metric into a new metric with fewer dimensions and lower cardinality.'
+                        description:
+                          type: string
+                          example: Example aggregation rule.
+                          description: Information about an aggregation rule.
+                      description: A single aggregation rule in a metric ruleset.
+                    example:
+                    - aggregator:
+                        dimensions:
+                        - realm
+                        outputName: cpu-utilization-by-realm
+                        type: rollup
+                        dropDimensions: 'false'
+                      enabled: false
+                      name: Rule A
+                      matcher:
+                        filters:
+                        - NOT: false
+                          property: realm
+                          propertyValue:
+                          - lab
+                        type: dimension
+                      description: Example aggregation rule.
+                    - aggregator:
+                        dimensions:
+                        - service
+                        outputName: agg_cpu.utilization_by_service
+                        type: rollup
+                        dropDimensions: 'false'
+                      enabled: true
+                      name: Rule B
+                      matcher:
+                        filters: []
+                        type: dimension
+                      description: Example aggregation rule.
+                    description: List of aggregation rules in this ruleset in the form on a JSON array. Each element in the array is an aggregation rule. If you don't specify any aggregation rule, the array is empty.
+                  creator:
+                    title: Creator user ID
+                    type: string
+                    readOnly: true
+                    example: AAAAAAAAAAA
+                    description: User ID of the user who created this ruleset. The system sets this property, and you can't change it.
+                  creatorName:
+                    title: Creator name
+                    type: string
+                    readOnly: true
+                    example: Buttercup Pony
+                    description: Name of the user who created this ruleset. The system sets this property, and you can't change it.
+                  created:
+                    title: Ruleset creation time
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1663629108995
+                    description: Ruleset creation timestamp in *nix time in milliseconds. The system sets this property, and you can't change it.
+                  exceptionRules:
+                    title: Exception rules
+                    type: array
+                    items:
+                      title: Exception rule object properties
+                      required:
+                      - enabled
+                      - matcher
+                      - name
+                      properties:
+                        name:
+                          type: string
+                          example: my_exception_rule
+                          description: Name of the exception rule.
+                        enabled:
+                          type: boolean
+                          example: true
+                          description: Whether to reroute the metric with the specified dimension. If false, the rule remains defined but will not reroute metrics.
+                        matcher:
+                          title: Dimension Metric Matcher
+                          type: object
+                          properties:
+                            filters:
+                              title: Filters for the metric
+                              type: array
+                              items:
+                                title: Dimension Matcher Filter
+                                type: object
+                                properties:
+                                  property:
+                                    title: Custom property or dimension to filter
+                                    type: string
+                                    example: data_center_location
+                                    description: Name of the dimension or to match to the data.
+                                  propertyValue:
+                                    title: Custom property or dimension values to filter
+                                    type: array
+                                    uniqueItems: true
+                                    minLength: 1
+                                    items:
+                                      type: string
+                                    example:
+                                    - Atlanta, US
+                                    - Boston, US
+                                    description: A list of values to compare to the value of the dimension specified in PropertyFilter.property. If the list contains more than one value, the filter becomes a set of queries between the value of property and each element of propertyValue. The system joins these queries with an implicit OR.
+                                  NOT:
+                                    title: Indicates if the property is included or excluded
+                                    type: boolean
+                                    example: false
+                                    description: Flag that indicates how the filter operates. If true, data that matches the criteria is excluded from the filter; otherwise, data that matches the criteria is included.
+                                description: A single filter for this metric. The filter specifies a default or user-defined dimension. You can either include or exclude all the data that matches this dimension.
+                              example:
+                              - NOT: false
+                                property: realm
+                                propertyValue:
+                                - lab
+                              description: List of filters you want to apply to your metric in the form of a JSON array. Each element is a single filter for a default or user-defined dimension.
+                            type:
+                              title: Metric matcher type
+                              type: string
+                              enum:
+                              - dimension
+                              description: The type of this metric matcher. Always "dimension".
+                          required:
+                          - type
+                          - filters
+                          description: Matcher that finds metric by dimensions.
+                        restoration:
+                          title: Fields of the exceptionRules restoration element.
+                          properties:
+                            restorationId:
+                              type: string
+                              example: abcd1234
+                              description: ID of the restoration job.
+                            startTime:
+                              type: integer
+                              format: int64
+                              example: 1711055123727
+                              description: Time from which the restoration job will restore archived data, in the form of *nix time in milliseconds.
+                            stopTime:
+                              type: integer
+                              format: int64
+                              example: 1711055123727
+                              description: Time to which the restoration job will restore archived data, in the form of *nix time in milliseconds.
+                          description: 'Contains fields for the restoration job. The restoration job reroutes metrics from the archival route to the real-time route.
+
+                            You can track the restoration job with an ID, and you can specify a time to begin the restoration job.'
+                        description:
+                          type: string
+                          example: Example exception rule.
+                          description: Information about an exception rule.
+                      description: 'Fields for exception rules. Each exception rule uses a matcher to find the metric(s) that you want to reroute.
+
+                        You can specify multiple matchers in a single exception rule to reroute metrics with different properties.'
+                    description: List of exception rules. Exception rules reroute a metric time series (MTS) from an archival route to a real-time route if the MTS contains values that match those of a specified filter.
+                  id:
+                    title: ID of the metric ruleset
+                    type: string
+                    readOnly: true
+                    example: FdDbV95AIAA
+                    description: ID of the ruleset. The system sets this property, and you can't change it.
+                  lastUpdatedBy:
+                    title: User who last updated this ruleset
+                    type: string
+                    readOnly: true
+                    example: AAAAAAAAAAA
+                    description: User ID of the user who last updated this ruleset. The system sets this property, and you can't change it.
+                  lastUpdatedByName:
+                    title: User who last updated this ruleset
+                    type: string
+                    readOnly: true
+                    example: Buttercup Pony
+                    description: Name of the user who last updated this ruleset. The system sets this property, and you can't change it.
+                  lastUpdated:
+                    title: Ruleset last updated time
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1664560815916
+                    description: Date and time the metric ruleset was last updated, in the form of a *nix timestamp in milliseconds. The system sets this property, and you can't change it.
+                  metricName:
+                    title: Metric name
+                    type: string
+                    example: cpu.utilization
+                    description: Name of the metric you are creating rules for
+                  description:
+                    type: string
+                    example: Example metric ruleset.
+                    title: Description
+                    description: Information about the metric ruleset.
+                  routingRule:
+                    title: Routing rule
+                    type: object
+                    properties:
+                      destination:
+                        title: Destination
+                        type: string
+                        enum:
+                        - Drop
+                        - RealTime
+                        - Archived
+                        description: 'Routing destination for unaggregated raw data. You can select one of the following values:
+
+
+                          "Drop": Drop all your unaggregated raw data after the metric ruleset is created.
+
+                          "RealTime": Keep all your unaggregated raw data for 13 months after the metric ruleset is created.
+
+                          "Archived": Archives all your unaggregated raw data after the metric ruleset is created.
+
+
+                          To set or change destination to "Drop", the value of X-SF-TOKEN in your request header
+
+                          must be a session token associated with a user who has the admin role.'
+                      destinationForHistogramDpsEnabled:
+                        type: boolean
+                        example: false
+                        description: Sets whether the routing rule destination is respected for histograms.
+                    example:
+                      destination: RealTime
+                      destinationForHistogramDpsEnabled: false
+                    description: 'Routing rule for your unaggregated raw data. To set or change the value of destination
+
+                      in routingRule to "Drop", the value of X-SF-TOKEN in your request header must be
+
+                      a session token associated with a user who has the admin role.'
+                  version:
+                    title: Ruleset version
+                    type: integer
+                    format: int64
+                    example: 2
+                    description: The system uses Version to ensure updates to the metric ruleset are consistent. When you update the metric ruleset, always pass the current version of the ruleset.
+                description: Properties of the metric ruleset retrieved by a successful GET /metricruleset/{id} in the form of a JSON object.
+              examples:
+                example:
+                  value:
+                    aggregationRules:
+                    - aggregator:
+                        dimensions:
+                        - realm
+                        dropDimensions: 'false'
+                        outputName: cpu-utilization-by-realm
+                        type: rollup
+                      description: Example aggregation rule.
+                      enabled: false
+                      matcher:
+                        filters:
+                        - NOT: false
+                          property: realm
+                          propertyValue:
+                          - lab
+                        type: dimension
+                      name: Rule A
+                    - aggregator:
+                        dimensions:
+                        - service
+                        dropDimensions: 'false'
+                        outputName: agg_cpu.utilization_by_service
+                        type: rollup
+                      description: Example aggregation rule.
+                      enabled: true
+                      matcher:
+                        filters: []
+                        type: dimension
+                      name: Rule B
+                    created: 1663629108995
+                    creator: AAAAAAAAAAA
+                    creatorName: Buttercup Pony
+                    description: Example metric ruleset.
+                    exceptionRules:
+                    - description: Example exception rule.
+                      enabled: true
+                      matcher:
+                        filters:
+                        - NOT: false
+                          property: realm
+                          propertyValue:
+                          - lab
+                        type: dimension
+                      name: my_exception_rule
+                      restoration:
+                        restorationId: abcd1234
+                        startTime: 1711055123727
+                        stopTime: 1711055123727
+                    id: FdDbV95AIAA
+                    lastUpdated: 1664560815916
+                    lastUpdatedBy: AAAAAAAAAAA
+                    lastUpdatedByName: Buttercup Pony
+                    metricName: cpu.utilization
+                    routingRule:
+                      destination: RealTime
+                      destinationForHistogramDpsEnabled: false
+                    version: 2
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  code: 401
+                  message: No session is active, or caller doesn't have access to requested organization
+              examples:
+                example:
+                  value:
+                    code: 401
+                    message: No session is active, or caller doesn't have access to requested organization
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  code: 404
+                  message: Metric Ruleset not found
+              examples:
+                example:
+                  value:
+                    code: 404
+                    message: Metric Ruleset not found
+      security:
+      - SessionToken: []
+      tags:
+      - Metric ruleset
+    put:
+      summary: Update Existing Metric Ruleset
+      description: 'Updates the metric ruleset for the ID specified in the {id} path parameter.
+
+        The PUT /metricruleset/{id} operation has overwrite semantics:
+
+
+        For read-write properties, if the value is already specified, a new value in the request body overwrites it.
+
+        For read-write properties, if the value is already specified, and you don''t modify it, the API updates the property with the default value. For example, if you don''t provide values for aggregators, the updated metric ruleset has an empty array for aggregators.
+
+
+        Because of these semantics, follow these steps to explicitly preserve existing values:
+
+
+        Send a GET /metricruleset/{id} request to retrieve the existing metric ruleset property values.
+
+        Update any read-write properties in the response body with the new values you want to use.
+
+        Use the response body as the request body in the PUT /metricruleset/{id} operation to update the metric ruleset.'
+      parameters:
+      - name: id
+        in: path
+        description: ID of the metric ruleset you want to update
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: Request body format. Always "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: 'Authentication token. You can use a session token (User API access token) or an access token (org token)
+
+          if the access token has the API authorization scope (authScope).'
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: Update Metric Ruleset Request Body
+              type: object
+              properties:
+                aggregationRules:
+                  title: Aggregation rules
+                  type: array
+                  items:
+                    title: Aggregation rule object properties
+                    type: object
+                    required:
+                    - matcher
+                    - enabled
+                    - aggregator
+                    properties:
+                      name:
+                        title: Aggregation rule name
+                        type: string
+                        example: Rule A
+                        description: Name of the aggregation rule
+                      matcher:
+                        title: Metric matcher
+                        oneOf:
+                        - title: Dimension Metric Matcher
+                          type: object
+                          properties:
+                            filters:
+                              title: Filters for the metric
+                              type: array
+                              items:
+                                title: Dimension Matcher Filter
+                                type: object
+                                properties:
+                                  property:
+                                    title: Custom property or dimension to filter
+                                    type: string
+                                    example: data_center_location
+                                    description: Name of the dimension or to match to the data.
+                                  propertyValue:
+                                    title: Custom property or dimension values to filter
+                                    type: array
+                                    uniqueItems: true
+                                    minLength: 1
+                                    items:
+                                      type: string
+                                    example:
+                                    - Atlanta, US
+                                    - Boston, US
+                                    description: A list of values to compare to the value of the dimension specified in PropertyFilter.property. If the list contains more than one value, the filter becomes a set of queries between the value of property and each element of propertyValue. The system joins these queries with an implicit OR.
+                                  NOT:
+                                    title: Indicates if the property is included or excluded
+                                    type: boolean
+                                    example: false
+                                    description: Flag that indicates how the filter operates. If true, data that matches the criteria is excluded from the filter; otherwise, data that matches the criteria is included.
+                                description: A single filter for this metric. The filter specifies a default or user-defined dimension. You can either include or exclude all the data that matches this dimension.
+                              example:
+                              - NOT: false
+                                property: realm
+                                propertyValue:
+                                - lab
+                              description: List of filters you want to apply to your metric in the form of a JSON array. Each element is a single filter for a default or user-defined dimension.
+                            type:
+                              title: Metric matcher type
+                              type: string
+                              enum:
+                              - dimension
+                              description: The type of this metric matcher. Always "dimension".
+                          description: Matcher that finds metric by dimensions.
+                        description: 'Metric matcher for the rule. You can use the following types of metric matchers:
+
+
+                          Dimension matcher: Matcher that finds metric by default or user-defined dimensions.'
+                      enabled:
+                        title: Status of this rule
+                        type: boolean
+                        default: false
+                        example: true
+                        description: Status of this aggregation rule. If you set this to true, the rule becomes active and the controls the metric volume. If you set this to false, the system creates the rule, but it doesn't change the metric volume.
+                      aggregator:
+                        title: Metric aggregator
+                        type: object
+                        oneOf:
+                        - title: Rollup Aggregator Properties
+                          required:
+                          - type
+                          - outputName
+                          properties:
+                            dimensions:
+                              title: Dimensions
+                              type: array
+                              minItems: 1
+                              items:
+                                type: string
+                              example:
+                              - realm
+                              - service
+                              description: Dimensions you want to include in the aggregation rule
+                            dropDimensions:
+                              title: Drop dimensions
+                              type: boolean
+                              example: false
+                              description: Specify whether you want to keep or drop the dimensions in this aggregation rule.
+                            outputName:
+                              title: Name for the new aggregated metric
+                              type: string
+                              description: Name for the new aggregated metric.
+                            type:
+                              title: The type of aggregation rule
+                              type: string
+                              enum:
+                              - rollup
+                              description: Aggregation rule type
+                          example:
+                            aggregator:
+                              dimensions:
+                              - realm
+                              outputName: cpu-utilization-by-realm
+                              type: rollup
+                              dropDimensions: 'false'
+                            enabled: false
+                            matcher:
+                              filters:
+                              - NOT: false
+                                property: realm
+                                propertyValue:
+                                - lab
+                              type: dimension
+                          description: Summarizes your metric into a new metric with fewer dimensions and lower cardinality.
+                        description: 'Metric aggregator for the rule. You can use the following types of metric aggregators:
+
+
+                          Rollup aggregator: Aggregator that summarizes your metric into a new metric with fewer dimensions and lower cardinality.'
+                      description:
+                        type: string
+                        example: Example aggregation rule.
+                        description: Information about an aggregation rule.
+                    description: A single aggregation rule in a metric ruleset.
+                  example:
+                  - aggregator:
+                      dimensions:
+                      - realm
+                      outputName: cpu-utilization-by-realm
+                      type: rollup
+                      dropDimensions: 'false'
+                    enabled: false
+                    name: Rule A
+                    matcher:
+                      filters:
+                      - NOT: false
+                        property: realm
+                        propertyValue:
+                        - lab
+                      type: dimension
+                    description: Example aggregation rule.
+                  - aggregator:
+                      dimensions:
+                      - service
+                      outputName: agg_cpu.utilization_by_service
+                      type: rollup
+                      dropDimensions: 'false'
+                    enabled: true
+                    name: Rule B
+                    matcher:
+                      filters: []
+                      type: dimension
+                    description: Example aggregation rule.
+                  description: List of aggregation rules in this ruleset in the form on a JSON array. Each element in the array is an aggregation rule. If you don't specify any aggregation rule, the array is empty.
+                exceptionRules:
+                  title: Exception rules
+                  type: array
+                  items:
+                    title: Exception rule object properties
+                    required:
+                    - enabled
+                    - matcher
+                    - name
+                    properties:
+                      name:
+                        type: string
+                        example: my_exception_rule
+                        description: Name of the exception rule.
+                      enabled:
+                        type: boolean
+                        example: true
+                        description: Whether to reroute the metric with the specified dimension. If false, the rule remains defined but will not reroute metrics.
+                      matcher:
+                        title: Dimension Metric Matcher
+                        type: object
+                        properties:
+                          filters:
+                            title: Filters for the metric
+                            type: array
+                            items:
+                              title: Dimension Matcher Filter
+                              type: object
+                              properties:
+                                property:
+                                  title: Custom property or dimension to filter
+                                  type: string
+                                  example: data_center_location
+                                  description: Name of the dimension or to match to the data.
+                                propertyValue:
+                                  title: Custom property or dimension values to filter
+                                  type: array
+                                  uniqueItems: true
+                                  minLength: 1
+                                  items:
+                                    type: string
+                                  example:
+                                  - Atlanta, US
+                                  - Boston, US
+                                  description: A list of values to compare to the value of the dimension specified in PropertyFilter.property. If the list contains more than one value, the filter becomes a set of queries between the value of property and each element of propertyValue. The system joins these queries with an implicit OR.
+                                NOT:
+                                  title: Indicates if the property is included or excluded
+                                  type: boolean
+                                  example: false
+                                  description: Flag that indicates how the filter operates. If true, data that matches the criteria is excluded from the filter; otherwise, data that matches the criteria is included.
+                              description: A single filter for this metric. The filter specifies a default or user-defined dimension. You can either include or exclude all the data that matches this dimension.
+                            example:
+                            - NOT: false
+                              property: realm
+                              propertyValue:
+                              - lab
+                            description: List of filters you want to apply to your metric in the form of a JSON array. Each element is a single filter for a default or user-defined dimension.
+                          type:
+                            title: Metric matcher type
+                            type: string
+                            enum:
+                            - dimension
+                            description: The type of this metric matcher. Always "dimension".
+                        required:
+                        - type
+                        - filters
+                        description: Matcher that finds metric by dimensions.
+                      restoration:
+                        title: Fields of the exceptionRules restoration element.
+                        properties:
+                          restorationId:
+                            type: string
+                            example: abcd1234
+                            description: ID of the restoration job.
+                          startTime:
+                            type: integer
+                            format: int64
+                            example: 1711055123727
+                            description: Time from which the restoration job will restore archived data, in the form of *nix time in milliseconds.
+                          stopTime:
+                            type: integer
+                            format: int64
+                            example: 1711055123727
+                            description: Time to which the restoration job will restore archived data, in the form of *nix time in milliseconds.
+                        description: 'Contains fields for the restoration job. The restoration job reroutes metrics from the archival route to the real-time route.
+
+                          You can track the restoration job with an ID, and you can specify a time to begin the restoration job.'
+                      description:
+                        type: string
+                        example: Example exception rule.
+                        description: Information about an exception rule.
+                    description: 'Fields for exception rules. Each exception rule uses a matcher to find the metric(s) that you want to reroute.
+
+                      You can specify multiple matchers in a single exception rule to reroute metrics with different properties.'
+                  description: List of exception rules. Exception rules reroute a metric time series (MTS) from an archival route to a real-time route if the MTS contains values that match those of a specified filter.
+                metricName:
+                  title: Metric name
+                  type: string
+                  example: cpu.utilization
+                  description: Name of the metric you are creating rules for
+                description:
+                  type: string
+                  example: Example metric ruleset.
+                  title: Description
+                  description: Information about the metric ruleset.
+                routingRule:
+                  title: Routing rule
+                  type: object
+                  properties:
+                    destination:
+                      title: Destination
+                      type: string
+                      enum:
+                      - Drop
+                      - RealTime
+                      - Archived
+                      description: 'Routing destination for unaggregated raw data. You can select one of the following values:
+
+
+                        "Drop": Drop all your unaggregated raw data after the metric ruleset is created.
+
+                        "RealTime": Keep all your unaggregated raw data for 13 months after the metric ruleset is created.
+
+                        "Archived": Archives all your unaggregated raw data after the metric ruleset is created.
+
+
+                        To set or change destination to "Drop", the value of X-SF-TOKEN in your request header
+
+                        must be a session token associated with a user who has the admin role.'
+                    destinationForHistogramDpsEnabled:
+                      type: boolean
+                      example: false
+                      description: Sets whether the routing rule destination is respected for histograms.
+                  example:
+                    destination: RealTime
+                    destinationForHistogramDpsEnabled: false
+                  description: 'Routing rule for your unaggregated raw data. To set or change the value of destination
+
+                    in routingRule to "Drop", the value of X-SF-TOKEN in your request header must be
+
+                    a session token associated with a user who has the admin role.'
+                version:
+                  title: Ruleset version
+                  type: integer
+                  format: int64
+                  example: 2
+                  description: The system uses Version to ensure updates to the metric ruleset are consistent. When you update the metric ruleset, always pass the current version of the ruleset.
+              description: Properties you can overwrite in an Update Metric Ruleset request
+            examples:
+              example:
+                value:
+                  aggregationRules:
+                  - aggregator:
+                      dimensions:
+                      - realm
+                      dropDimensions: 'false'
+                      outputName: cpu-utilization-by-realm
+                      type: rollup
+                    description: Example aggregation rule.
+                    enabled: false
+                    matcher:
+                      filters:
+                      - NOT: false
+                        property: realm
+                        propertyValue:
+                        - lab
+                      type: dimension
+                    name: Rule A
+                  - aggregator:
+                      dimensions:
+                      - service
+                      dropDimensions: 'false'
+                      outputName: agg_cpu.utilization_by_service
+                      type: rollup
+                    description: Example aggregation rule.
+                    enabled: true
+                    matcher:
+                      filters: []
+                      type: dimension
+                    name: Rule B
+                  description: Example metric ruleset.
+                  exceptionRules:
+                  - description: Example exception rule.
+                    enabled: true
+                    matcher:
+                      filters:
+                      - NOT: false
+                        property: realm
+                        propertyValue:
+                        - lab
+                      type: dimension
+                    name: my_exception_rule
+                    restoration:
+                      restorationId: abcd1234
+                      startTime: 1711055123727
+                      stopTime: 1711055123727
+                  metricName: cpu.utilization
+                  routingRule:
+                    destination: RealTime
+                    destinationForHistogramDpsEnabled: false
+                  version: 2
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Update Metric Ruleset Response Body
+                type: object
+                properties:
+                  aggregationRules:
+                    title: Aggregation rules
+                    type: array
+                    items:
+                      title: Aggregation rule object properties
+                      type: object
+                      required:
+                      - matcher
+                      - enabled
+                      - aggregator
+                      properties:
+                        name:
+                          title: Aggregation rule name
+                          type: string
+                          example: Rule A
+                          description: Name of the aggregation rule
+                        matcher:
+                          title: Metric matcher
+                          oneOf:
+                          - title: Dimension Metric Matcher
+                            type: object
+                            properties:
+                              filters:
+                                title: Filters for the metric
+                                type: array
+                                items:
+                                  title: Dimension Matcher Filter
+                                  type: object
+                                  properties:
+                                    property:
+                                      title: Custom property or dimension to filter
+                                      type: string
+                                      example: data_center_location
+                                      description: Name of the dimension or to match to the data.
+                                    propertyValue:
+                                      title: Custom property or dimension values to filter
+                                      type: array
+                                      uniqueItems: true
+                                      minLength: 1
+                                      items:
+                                        type: string
+                                      example:
+                                      - Atlanta, US
+                                      - Boston, US
+                                      description: A list of values to compare to the value of the dimension specified in PropertyFilter.property. If the list contains more than one value, the filter becomes a set of queries between the value of property and each element of propertyValue. The system joins these queries with an implicit OR.
+                                    NOT:
+                                      title: Indicates if the property is included or excluded
+                                      type: boolean
+                                      example: false
+                                      description: Flag that indicates how the filter operates. If true, data that matches the criteria is excluded from the filter; otherwise, data that matches the criteria is included.
+                                  description: A single filter for this metric. The filter specifies a default or user-defined dimension. You can either include or exclude all the data that matches this dimension.
+                                example:
+                                - NOT: false
+                                  property: realm
+                                  propertyValue:
+                                  - lab
+                                description: List of filters you want to apply to your metric in the form of a JSON array. Each element is a single filter for a default or user-defined dimension.
+                              type:
+                                title: Metric matcher type
+                                type: string
+                                enum:
+                                - dimension
+                                description: The type of this metric matcher. Always "dimension".
+                            description: Matcher that finds metric by dimensions.
+                          description: 'Metric matcher for the rule. You can use the following types of metric matchers:
+
+
+                            Dimension matcher: Matcher that finds metric by default or user-defined dimensions.'
+                        enabled:
+                          title: Status of this rule
+                          type: boolean
+                          default: false
+                          example: true
+                          description: Status of this aggregation rule. If you set this to true, the rule becomes active and the controls the metric volume. If you set this to false, the system creates the rule, but it doesn't change the metric volume.
+                        aggregator:
+                          title: Metric aggregator
+                          type: object
+                          oneOf:
+                          - title: Rollup Aggregator Properties
+                            required:
+                            - type
+                            - outputName
+                            properties:
+                              dimensions:
+                                title: Dimensions
+                                type: array
+                                minItems: 1
+                                items:
+                                  type: string
+                                example:
+                                - realm
+                                - service
+                                description: Dimensions you want to include in the aggregation rule
+                              dropDimensions:
+                                title: Drop dimensions
+                                type: boolean
+                                example: false
+                                description: Specify whether you want to keep or drop the dimensions in this aggregation rule.
+                              outputName:
+                                title: Name for the new aggregated metric
+                                type: string
+                                description: Name for the new aggregated metric.
+                              type:
+                                title: The type of aggregation rule
+                                type: string
+                                enum:
+                                - rollup
+                                description: Aggregation rule type
+                            example:
+                              aggregator:
+                                dimensions:
+                                - realm
+                                outputName: cpu-utilization-by-realm
+                                type: rollup
+                                dropDimensions: 'false'
+                              enabled: false
+                              matcher:
+                                filters:
+                                - NOT: false
+                                  property: realm
+                                  propertyValue:
+                                  - lab
+                                type: dimension
+                            description: Summarizes your metric into a new metric with fewer dimensions and lower cardinality.
+                          description: 'Metric aggregator for the rule. You can use the following types of metric aggregators:
+
+
+                            Rollup aggregator: Aggregator that summarizes your metric into a new metric with fewer dimensions and lower cardinality.'
+                        description:
+                          type: string
+                          example: Example aggregation rule.
+                          description: Information about an aggregation rule.
+                      description: A single aggregation rule in a metric ruleset.
+                    example:
+                    - aggregator:
+                        dimensions:
+                        - realm
+                        outputName: cpu-utilization-by-realm
+                        type: rollup
+                        dropDimensions: 'false'
+                      enabled: false
+                      name: Rule A
+                      matcher:
+                        filters:
+                        - NOT: false
+                          property: realm
+                          propertyValue:
+                          - lab
+                        type: dimension
+                      description: Example aggregation rule.
+                    - aggregator:
+                        dimensions:
+                        - service
+                        outputName: agg_cpu.utilization_by_service
+                        type: rollup
+                        dropDimensions: 'false'
+                      enabled: true
+                      name: Rule B
+                      matcher:
+                        filters: []
+                        type: dimension
+                      description: Example aggregation rule.
+                    description: List of aggregation rules in this ruleset in the form on a JSON array. Each element in the array is an aggregation rule. If you don't specify any aggregation rule, the array is empty.
+                  creator:
+                    title: Creator user ID
+                    type: string
+                    readOnly: true
+                    example: AAAAAAAAAAA
+                    description: User ID of the user who created this ruleset. The system sets this property, and you can't change it.
+                  creatorName:
+                    title: Creator name
+                    type: string
+                    readOnly: true
+                    example: Buttercup Pony
+                    description: Name of the user who created this ruleset. The system sets this property, and you can't change it.
+                  created:
+                    title: Ruleset creation time
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1663629108995
+                    description: Ruleset creation timestamp in *nix time in milliseconds. The system sets this property, and you can't change it.
+                  exceptionRules:
+                    title: Exception rules
+                    type: array
+                    items:
+                      title: Exception rule object properties
+                      required:
+                      - enabled
+                      - matcher
+                      - name
+                      properties:
+                        name:
+                          type: string
+                          example: my_exception_rule
+                          description: Name of the exception rule.
+                        enabled:
+                          type: boolean
+                          example: true
+                          description: Whether to reroute the metric with the specified dimension. If false, the rule remains defined but will not reroute metrics.
+                        matcher:
+                          title: Dimension Metric Matcher
+                          type: object
+                          properties:
+                            filters:
+                              title: Filters for the metric
+                              type: array
+                              items:
+                                title: Dimension Matcher Filter
+                                type: object
+                                properties:
+                                  property:
+                                    title: Custom property or dimension to filter
+                                    type: string
+                                    example: data_center_location
+                                    description: Name of the dimension or to match to the data.
+                                  propertyValue:
+                                    title: Custom property or dimension values to filter
+                                    type: array
+                                    uniqueItems: true
+                                    minLength: 1
+                                    items:
+                                      type: string
+                                    example:
+                                    - Atlanta, US
+                                    - Boston, US
+                                    description: A list of values to compare to the value of the dimension specified in PropertyFilter.property. If the list contains more than one value, the filter becomes a set of queries between the value of property and each element of propertyValue. The system joins these queries with an implicit OR.
+                                  NOT:
+                                    title: Indicates if the property is included or excluded
+                                    type: boolean
+                                    example: false
+                                    description: Flag that indicates how the filter operates. If true, data that matches the criteria is excluded from the filter; otherwise, data that matches the criteria is included.
+                                description: A single filter for this metric. The filter specifies a default or user-defined dimension. You can either include or exclude all the data that matches this dimension.
+                              example:
+                              - NOT: false
+                                property: realm
+                                propertyValue:
+                                - lab
+                              description: List of filters you want to apply to your metric in the form of a JSON array. Each element is a single filter for a default or user-defined dimension.
+                            type:
+                              title: Metric matcher type
+                              type: string
+                              enum:
+                              - dimension
+                              description: The type of this metric matcher. Always "dimension".
+                          required:
+                          - type
+                          - filters
+                          description: Matcher that finds metric by dimensions.
+                        restoration:
+                          title: Fields of the exceptionRules restoration element.
+                          properties:
+                            restorationId:
+                              type: string
+                              example: abcd1234
+                              description: ID of the restoration job.
+                            startTime:
+                              type: integer
+                              format: int64
+                              example: 1711055123727
+                              description: Time from which the restoration job will restore archived data, in the form of *nix time in milliseconds.
+                            stopTime:
+                              type: integer
+                              format: int64
+                              example: 1711055123727
+                              description: Time to which the restoration job will restore archived data, in the form of *nix time in milliseconds.
+                          description: 'Contains fields for the restoration job. The restoration job reroutes metrics from the archival route to the real-time route.
+
+                            You can track the restoration job with an ID, and you can specify a time to begin the restoration job.'
+                        description:
+                          type: string
+                          example: Example exception rule.
+                          description: Information about an exception rule.
+                      description: 'Fields for exception rules. Each exception rule uses a matcher to find the metric(s) that you want to reroute.
+
+                        You can specify multiple matchers in a single exception rule to reroute metrics with different properties.'
+                    description: List of exception rules. Exception rules reroute a metric time series (MTS) from an archival route to a real-time route if the MTS contains values that match those of a specified filter.
+                  id:
+                    title: ID of the metric ruleset
+                    type: string
+                    readOnly: true
+                    example: FdDbV95AIAA
+                    description: ID of the ruleset. The system sets this property, and you can't change it.
+                  lastUpdatedBy:
+                    title: User who last updated this ruleset
+                    type: string
+                    readOnly: true
+                    example: AAAAAAAAAAA
+                    description: User ID of the user who last updated this ruleset. The system sets this property, and you can't change it.
+                  lastUpdatedByName:
+                    title: User who last updated this ruleset
+                    type: string
+                    readOnly: true
+                    example: Buttercup Pony
+                    description: Name of the user who last updated this ruleset. The system sets this property, and you can't change it.
+                  lastUpdated:
+                    title: Ruleset last updated time
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1664560815916
+                    description: Date and time the metric ruleset was last updated, in the form of a *nix timestamp in milliseconds. The system sets this property, and you can't change it.
+                  metricName:
+                    title: Metric name
+                    type: string
+                    example: cpu.utilization
+                    description: Name of the metric you are creating rules for
+                  description:
+                    type: string
+                    example: Example metric ruleset.
+                    title: Description
+                    description: Information about the metric ruleset.
+                  routingRule:
+                    title: Routing rule
+                    type: object
+                    properties:
+                      destination:
+                        title: Destination
+                        type: string
+                        enum:
+                        - Drop
+                        - RealTime
+                        - Archived
+                        description: 'Routing destination for unaggregated raw data. You can select one of the following values:
+
+
+                          "Drop": Drop all your unaggregated raw data after the metric ruleset is created.
+
+                          "RealTime": Keep all your unaggregated raw data for 13 months after the metric ruleset is created.
+
+                          "Archived": Archives all your unaggregated raw data after the metric ruleset is created.
+
+
+                          To set or change destination to "Drop", the value of X-SF-TOKEN in your request header
+
+                          must be a session token associated with a user who has the admin role.'
+                      destinationForHistogramDpsEnabled:
+                        type: boolean
+                        example: false
+                        description: Sets whether the routing rule destination is respected for histograms.
+                    example:
+                      destination: RealTime
+                      destinationForHistogramDpsEnabled: false
+                    description: 'Routing rule for your unaggregated raw data. To set or change the value of destination
+
+                      in routingRule to "Drop", the value of X-SF-TOKEN in your request header must be
+
+                      a session token associated with a user who has the admin role.'
+                  version:
+                    title: Ruleset version
+                    type: integer
+                    format: int64
+                    example: 2
+                    description: The system uses Version to ensure updates to the metric ruleset are consistent. When you update the metric ruleset, always pass the current version of the ruleset.
+                description: Response body returned when the Update Metric Ruleset operation (PUT /metricruleset/{id}) successfully updates an metric ruleset.
+              examples:
+                example:
+                  value:
+                    aggregationRules:
+                    - aggregator:
+                        dimensions:
+                        - realm
+                        dropDimensions: 'false'
+                        outputName: cpu-utilization-by-realm
+                        type: rollup
+                      description: Example aggregation rule.
+                      enabled: false
+                      matcher:
+                        filters:
+                        - NOT: false
+                          property: realm
+                          propertyValue:
+                          - lab
+                        type: dimension
+                      name: Rule A
+                    - aggregator:
+                        dimensions:
+                        - service
+                        dropDimensions: 'false'
+                        outputName: agg_cpu.utilization_by_service
+                        type: rollup
+                      description: Example aggregation rule.
+                      enabled: true
+                      matcher:
+                        filters: []
+                        type: dimension
+                      name: Rule B
+                    created: 1663629108995
+                    creator: AAAAAAAAAAA
+                    creatorName: Buttercup Pony
+                    description: Example metric ruleset.
+                    exceptionRules:
+                    - description: Example exception rule.
+                      enabled: true
+                      matcher:
+                        filters:
+                        - NOT: false
+                          property: realm
+                          propertyValue:
+                          - lab
+                        type: dimension
+                      name: my_exception_rule
+                      restoration:
+                        restorationId: abcd1234
+                        startTime: 1711055123727
+                        stopTime: 1711055123727
+                    id: FdDbV95AIAA
+                    lastUpdated: 1664560815916
+                    lastUpdatedBy: AAAAAAAAAAA
+                    lastUpdatedByName: Buttercup Pony
+                    metricName: cpu.utilization
+                    routingRule:
+                      destination: RealTime
+                      destinationForHistogramDpsEnabled: false
+                    version: 2
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  code: 400
+                  message: Incorrect metric ruleset format, or version outdated
+              examples:
+                example:
+                  value:
+                    code: 400
+                    message: Incorrect metric ruleset format, or version outdated
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  code: 401
+                  message: No session is active, or caller doesn't have access to requested organization
+              examples:
+                example:
+                  value:
+                    code: 401
+                    message: No session is active, or caller doesn't have access to requested organization
+        '403':
+          description: HTTP 403 response
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  code: 403
+                  message: User is not authorized for this operation
+              examples:
+                example:
+                  value:
+                    code: 403
+                    message: User is not authorized for this operation
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  code: 404
+                  message: Metric Ruleset not found
+              examples:
+                example:
+                  value:
+                    code: 404
+                    message: Metric Ruleset not found
+      security:
+      - SessionToken: []
+      tags:
+      - Metric ruleset
+    delete:
+      summary: Delete Metric Ruleset ID
+      description: 'Deletes the ruleset that has the ID specified in the {id} path parameter.
+
+        Note: You must have an admin API session token to use this endpoint. To learn more about API tokens, see https://quickdraw.splunk.com/redirect/?product=Observability&location=api-access-tokens&version=current.'
+      parameters:
+      - name: id
+        in: path
+        description: ID of the ruleset you want to delete
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: 'Authentication token. You can use a session token (User API access token) or an access token (org token)
+
+          if the access token has the API authorization scope (authScope).'
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: HTTP 204 response
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  code: 204
+                  message: Successfully deleted metric ruleset
+              examples:
+                example:
+                  value:
+                    code: 204
+                    message: Successfully deleted metric ruleset
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  code: 401
+                  message: No session is active, or caller doesn't have access to requested organization
+              examples:
+                example:
+                  value:
+                    code: 401
+                    message: No session is active, or caller doesn't have access to requested organization
+      security:
+      - SessionToken: []
+      tags:
+      - Metric ruleset
+  /metricruleset/generateAggregationMetricName:
+    post:
+      summary: Generate Aggregated Metric Name
+      description: Use this endpoint to generate a new metric name based on the existing metric name and the dimensions you want to keep for aggregation.
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Request body format. Always "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: 'Authentication token. You can use a session token (User API access token) or an access token (org token)
+
+          if the access token has the API authorization scope (authScope).'
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: Generate Aggregated Metric Name Request Body
+              type: object
+              required:
+              - metricName
+              - dimensions
+              properties:
+                metricName:
+                  title: Metric name
+                  type: string
+                  example: cpu.utilization
+                  description: Name of the metric you want to generate a new name for
+                dimensions:
+                  title: Dimensions
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+                  example:
+                  - realm
+                  - service
+                  description: Dimensions you want to include in the aggregation rule
+                dropDimensions:
+                  title: Drop dimensions
+                  type: boolean
+                  example: false
+                  description: Specify whether you want to keep or drop the dimensions in this aggregation rule.
+              description: Properties to use to generate a new aggregated metric name using the API.
+            examples:
+              example:
+                value:
+                  dimensions:
+                  - realm
+                  - service
+                  dropDimensions: false
+                  metricName: cpu.utilization
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: string
+                example: cpu-utilization-by-realm-service
+              examples:
+                example:
+                  value: cpu-utilization-by-realm-service
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  code: 400
+                  message: Invalid generation request
+              examples:
+                example:
+                  value:
+                    code: 400
+                    message: Invalid generation request
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  code: 401
+                  message: No session is active, or caller doesn't have access to requested organization
+              examples:
+                example:
+                  value:
+                    code: 401
+                    message: No session is active, or caller doesn't have access to requested organization
+      security:
+      - SessionToken: []
+      tags:
+      - Metric ruleset
+  /metricruleset/restoration/{id}:
+    get:
+      summary: Retrieve Restoration Job Using ID
+      description: 'Use this endpoint to retrieve information about restoration jobs started through POST /v2/metricruleset or PUT /v2/metricruleset.
+
+        Restoration jobs restore archived metrics data to real-time for charting.'
+      parameters:
+      - name: id
+        in: path
+        description: ID of an existing restoration job
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: Request body format. Always "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: 'Authentication token. You can use a session token (User API access token) or an access token (org token)
+
+          if the access token has the API authorization scope (authScope).'
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Get restoration job response body
+                type: object
+                properties:
+                  created:
+                    title: Ruleset creation time
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1663629108995
+                    description: Ruleset creation timestamp in *nix time in milliseconds. The system sets this property, and you can't change it.
+                  creator:
+                    title: Creator user ID
+                    type: string
+                    readOnly: true
+                    example: AAAAAAAAAAA
+                    description: User ID of the user who created this ruleset. The system sets this property, and you can't change it.
+                  creatorName:
+                    title: Creator name
+                    type: string
+                    readOnly: true
+                    example: Buttercup Pony
+                    description: Name of the user who created this ruleset. The system sets this property, and you can't change it.
+                  id:
+                    title: ID of the metric ruleset
+                    type: string
+                    readOnly: true
+                    example: FdDbV95AIAA
+                    description: ID of the ruleset. The system sets this property, and you can't change it.
+                  lastUpdated:
+                    title: Ruleset last updated time
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1664560815916
+                    description: Date and time the metric ruleset was last updated, in the form of a *nix timestamp in milliseconds. The system sets this property, and you can't change it.
+                  lastUpdatedBy:
+                    title: User who last updated this ruleset
+                    type: string
+                    readOnly: true
+                    example: AAAAAAAAAAA
+                    description: User ID of the user who last updated this ruleset. The system sets this property, and you can't change it.
+                  lastUpdatedByName:
+                    title: User who last updated this ruleset
+                    type: string
+                    readOnly: true
+                    example: Buttercup Pony
+                    description: Name of the user who last updated this ruleset. The system sets this property, and you can't change it.
+                  status:
+                    type: string
+                    example: RUNNING
+                    description: 'Status of the restoration job. There are three possible status codes:
+
+
+                      RUNNING: The job is in progress.
+
+                      FINISHED: The job terminated and completed successfully.
+
+                      ERROR: The job terminated due to an error.'
+                description: Response body returned when GET /v2/metricruleset/restoration/{id} successfully retrieves a restoration job.
+              examples:
+                example:
+                  value:
+                    created: 1663629108995
+                    creator: AAAAAAAAAAA
+                    creatorName: Buttercup Pony
+                    id: FdDbV95AIAA
+                    lastUpdated: 1664560815916
+                    lastUpdatedBy: AAAAAAAAAAA
+                    lastUpdatedByName: Buttercup Pony
+                    status: RUNNING
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  code: 400
+                  message: Invalid generation request
+              examples:
+                example:
+                  value:
+                    code: 400
+                    message: Invalid generation request
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  code: 401
+                  message: No session is active, or caller doesn't have access to requested organization
+              examples:
+                example:
+                  value:
+                    code: 401
+                    message: No session is active, or caller doesn't have access to requested organization
+      security:
+      - SessionToken: []
+      tags:
+      - Metric ruleset
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.

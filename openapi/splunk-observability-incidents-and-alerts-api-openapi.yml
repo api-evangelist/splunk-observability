@@ -1,0 +1,3008 @@
+openapi: 3.2.0
+info:
+  title: Splunk Observability Cloud Incidents and alerts API
+  version: 3.7.1
+  description: 'API for retrieving or clearing incidents and muting "critical-notifications".
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the GET /incident, GET /incident/{id}, GET /alertmuting, and GET /alertmuting/{id} operations.
+
+    You have to have the Splunk Observability Cloud admin or power role to use the PUT /incident/clear, PUT /incident/{id}/clear, POST /alertmuting,  PUT /alertmuting/{id}, DELETE /alertmuting/{id}, and PUT /alertmuting/{id}/unmute operations.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's. Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2
+  description: Incident/Notification API endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+tags:
+- name: Incidents and alerts
+paths:
+  /alertmuting:
+    get:
+      summary: Retrieve Muting Rules Using Query
+      description: 'Retrieves muting rules based on the query
+
+        you specify in the query query parameter.
+
+        This endpoint retrieves muting rules regardless of the version
+
+        of the detector associated with the rule.
+
+        Note: Splunk Observability Cloud returns a maximum of 10,000 rules, even if your organization contains more than 10,000. To learn more, see the
+
+        Considerations for retrieve operations section in the developer guide.'
+      parameters:
+      - name: include
+        in: query
+        description: 'Specifies the type of muting rules you want to retrieve. The allowed values are:
+
+
+          Past: Retrieve expired muting rules
+
+          Future: Retrieve muting rules scheduled to start in the future
+
+          Ongoing: Retrieve currently active muting rules
+
+          Open: Retrieve muting rules with no scheduled end date
+
+          All: Retrieve muting rules of all types'
+        schema:
+          type: string
+          enum:
+          - Past
+          - Future
+          - Ongoing
+          - Open
+          - All
+          example: All
+      - name: limit
+        in: query
+        description: 'The number of results to return from the
+
+          result set.'
+        schema:
+          type: integer
+          format: int32
+          example: 50
+      - name: offset
+        in: query
+        description: 'The result object in the result set at which
+
+          the API should start returning results to you.
+
+          If omitted, the API starts at the first result
+
+          in the set.'
+        schema:
+          type: integer
+          format: int32
+          example: 0
+      - name: order_by
+        in: query
+        description: 'The metadata property on which the API should
+
+          sort the results. You don''t have to include
+
+          this property in the query, but the name must
+
+          be a property of muting rules.
+
+          Prepend a - character to the property name to sort in descending order. If you want to apply order_by to non-custom property fields like timestamp, prepend the field with sf_. For example: order_by=-sf_timestamp.'
+        schema:
+          type: string
+          example: sf_timestamp
+      - name: query
+        in: query
+        description: 'Specify which muting rules to retrieve based on description and filters.
+
+
+          You can retrieve muting rules with description containing specific keywords using this format: query=sf_description:<pattern>. For example, this is a query for muting rules with description related to CPU: query=sf_description:cpu_*.
+
+          You can retrieve muting rules with filters containing specific keywords using this format: query=sf_filters.lowercase:<pattern>. For example, this is a query for muting rules with filters for the AWS US East region: query=sf_filters.lowercase:us-east-2a.
+
+          To search for muting rules by specific values of a dimension or custom property, use query=<name>:<value>. If <value> contains non-alphanumeric characters, encode the non-alphanumeric characters and surround the value with double quotes. For example, the region custom property value US East must be passed in the parameter as region:"US%20East".
+
+
+          Note: The value for sf_description is case sensitive.'
+        schema:
+          type: string
+          example: sf_description:cpu_*
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    title: Count of matched muting rules
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    description: 'Number of muting rules that match the search criteria.
+
+                      This property is read-only.
+
+                      Note: Count is not the same as the number of objects returned
+
+                      in the response body:
+
+
+                      sizeOf(results): Size of the array returned in the response body.
+
+                      count: Number of rules that match the search criteria'
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        created:
+                          title: Creation time
+                          type: integer
+                          format: int64
+                          example: 1556825430000
+                          readOnly: true
+                          description: 'The time the muting rule was created, in *nix time in milliseconds.
+
+                            This property is read-only; it''s always set by the system.'
+                        creator:
+                          title: Creator user ID
+                          type: string
+                          example: AAXYAAAAAZ3
+                          readOnly: true
+                          description: 'User ID of the muting rule creator.
+
+                            This property is read-only; it''s always set by the system.'
+                        description:
+                          type: string
+                          readOnly: false
+                          writeOnly: false
+                          description: Description of the muting rule. It is best practice to provide a descriptive reason for the muting rule.
+                        filters:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              NOT:
+                                type: boolean
+                                default: false
+                                description: 'Flag that controls the filter semantics. If true, the filter
+
+                                  does a not equals comparison. Otherwise, the filter does an
+
+                                  equals comparison. The default is false.'
+                              property:
+                                type: string
+                                description: 'Name (key) of a dimension or custom property that one or more detectors
+
+                                  are monitoring for anomalies. The filter compares the value of property
+
+                                  to the value or values of propertyValue.'
+                              propertyValue:
+                                anyOf:
+                                - title: Boolean
+                                  type: boolean
+                                  description: Boolean value
+                                - title: Integer or Float
+                                  type: number
+                                  description: Integer or floating point number
+                                - title: String
+                                  type: string
+                                  description: String value
+                                - title: Array
+                                  type: array
+                                  items:
+                                    anyOf:
+                                    - type: number
+                                    - type: string
+                                    - type: boolean
+                                  description: 'List of numbers, strings, or booleans, as a JSON array. You can
+
+                                    specify multiple types in the same array.'
+                                description: Value that the API compares to the value of property.
+                            example: "[\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\": \"us-east-1a\"\n  },\n  {\n    \"NOT\": true,\n    \"property\": \"cpu.utilization\",\n    \"propertyValue\": 10.7\n  },\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\":\n      [\n        \"us-east-2a\",\n        \"us-west-1a\",\n        \"emea-west-2a\"\n      ]\n  }\n]\n"
+                            title: AlertMutingFilter
+                            description: 'Single muting filter for a rule, in the form of a JSON
+
+                              object. Specifies the dimension or custom property to filter on, the
+
+                              value or values to match, and a boolean value that controls the match semantics.
+
+                              The filter mutes an alert based on the following:
+
+
+                              NOT = false: Value of property EQ propertyValue
+
+                              NOT = true: Value of property NE propertyValue
+
+
+                              If propertyValue is an array, then the filter mutes an alert based on
+
+                              the following:
+
+
+                              NOT = false: Value of property matches any element of propertyValue
+
+                              NOT = true: Value of property matches none of the elements of propertyValue'
+                          description: 'List of muting filters for this rule, in the form of a JSON
+
+                            array. Each array element specifies a single filter.
+
+                            A muting filter JSON specifies the following:
+
+
+                            property: The dimension or custom property to compare to
+
+                            propertyValue
+
+                            propertyValue: A number, string, or array
+
+                            NOT: A flag that controls the comparison.
+
+
+                            A filter mutes an alert based on the following:
+
+
+                            NOT = false: value of property EQ propertyValue
+
+                            NOT = true: value of property NE propertyValue
+
+
+                            If propertyValue is an array, then the filter mutes an alert based on
+
+                            the following:
+
+
+                            NOT = false: value of property matches any element of
+
+                            propertyValue
+
+                            NOT = true: value of property matches none of the elements of
+
+                            propertyValue'
+                        id:
+                          title: Muting rule ID
+                          type: string
+                          readOnly: true
+                          description: 'ID of a muting rule.
+
+                            This property is read-only; it''s always set by the system.'
+                        lastUpdated:
+                          title: Muting rule last updated time
+                          type: integer
+                          format: int64
+                          example: 1557689430000
+                          readOnly: true
+                          description: 'The last time the muting rule was last updated, in *nix time in milliseconds.
+
+                            This property is read-only; it''s always set by the system.'
+                        lastUpdatedBy:
+                          title: ID of user who last updated the muting rule
+                          type: string
+                          readOnly: true
+                          description: 'The ID of the last user who updated the
+
+                            muting rule. If Splunk Observability Cloud made the last update, the value is
+
+                            "AAAAAAAAAA". This property is read-only; it''s always set by the system.'
+                        recurrence:
+                          type: object
+                          properties:
+                            unit:
+                              example: d
+                              type: string
+                              enum:
+                              - d
+                              - w
+                              description: Unit of the period. Can be days (d) or weeks (w).
+                            value:
+                              example: 2
+                              type: integer
+                              minimum: 1
+                              description: Amount of time, expressed as an integer applicable to the unit.
+                          title: recurrence
+                          description: 'Recurrence period of the muting rule. Recurrence can be daily, weekly,
+
+                            or custom, based on the number of days or weeks you provide. Note that
+
+                            the recurrence period must be larger than the muting duration.'
+                        linkedTeams:
+                          title: IDs of teams linked to the detector that created the incident.
+                          type: array
+                          items:
+                            type: string
+                          readOnly: true
+                          example:
+                          - AbcdEf1ABCD
+                          - FO1Vq3ABXYZ
+                          description: IDs of teams linked to the detector that created the incident. If the incident is created by a detector that is not linked to a team, the value is null. This is a JSON array of strings, where each string is a team ID. This property is read-only; it's always set by the system. For information about how to link detectors to teams, see Detectors linked to teams.
+                        sendAlertsOnceMutingPeriodHasEnded:
+                          type: boolean
+                          default: true
+                          example: true
+                          readOnly: false
+                          title: SendAlertsOnceMutingPeriodHasEnded
+                          description: 'Controls notifications after the muting period ends.
+
+                            To learn more, see Mute alert notifications
+
+                            in the user documentation.'
+                        startTime:
+                          type: integer
+                          format: int64
+                          minimum: 0
+                          readOnly: false
+                          writeOnly: false
+                          title: StartTime
+                          description: 'Starting time of a muting rule, in *nix time in milliseconds. If not specified,
+
+                            defaults to the current time. read/write.'
+                        stopTime:
+                          type: integer
+                          format: int64
+                          minimum: 0
+                          default: 0
+                          readOnly: false
+                          writeOnly: false
+                          title: StopTime
+                          description: 'Stop time of a muting rule, in *nix time in milliseconds. If set to 0, detectors
+
+                            that match this rule are muted indefinitely. The default value is 0.
+
+                            read/write'
+                      title: AlertMutingRule
+                      description: 'Properties of a muting rule, in the form of a JSON object.
+
+                        Note: You can''t create or update properties marked read-only. You
+
+                        receive read-only properties in response bodies for the following:
+
+
+                        GET /alertmuting
+
+                        POST /alertmuting
+
+                        GET /alertmuting/{id}
+
+                        PUT /alertmuting/{id}
+
+
+                        The response body for this request contains a string representation of
+
+                        any non-string values you specify for propertyValue.'
+                    description: 'Query results, in the form of a JSON array of
+
+                      objects. Each element is a muting rule.'
+                title: RetrieveAlertMutingRulesResponse
+                description: Response body for GET /alertmuting, in the form of a JSON object.
+              examples:
+                example:
+                  value:
+                    count: 0
+                    results:
+                    - created: 1556825430000
+                      creator: AAXYAAAAAZ3
+                      description: string
+                      filters:
+                      - "[\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\": \"us-east-1a\"\n  },\n  {\n    \"NOT\": true,\n    \"property\": \"cpu.utilization\",\n    \"propertyValue\": 10.7\n  },\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\":\n      [\n        \"us-east-2a\",\n        \"us-west-1a\",\n        \"emea-west-2a\"\n      ]\n  }\n]\n"
+                      id: string
+                      lastUpdated: 1557689430000
+                      lastUpdatedBy: string
+                      linkedTeams:
+                      - AbcdEf1ABCD
+                      - FO1Vq3ABXYZ
+                      recurrence:
+                        unit: d
+                        value: 2
+                      sendAlertsOnceMutingPeriodHasEnded: true
+                      startTime: 0
+                      stopTime: 0
+      security:
+      - SessionToken: []
+      tags:
+      - Incidents and alerts
+    post:
+      summary: Create Single Muting Rule
+      description: 'Creates a new muting rule, based on the
+
+        specifications in the request body. Unlike the detector APIs, you can
+
+        use the muting APIs with detectors you create in the UI as
+
+        well as detectors you create with the API.
+
+        Note: In some cases, Splunk Observability Cloud may send notifications during a muting period.
+
+        To learn more, see the section
+
+        Mute alert notifications
+
+        in the user documentation.
+
+        When you create a muting rule, you can resolve all of the alerts for the
+
+        muting rule you created by setting the optional resolveMatchingActiveAlerts
+
+        query parameter to true. The flag''s default value is false.'
+      parameters:
+      - name: resolveMatchingActiveAlerts
+        in: query
+        description: 'Optional resolve alerts flag. If you set the flag to true,
+
+          Splunk Observability Cloud resolves the alerts that match the muting rule you created.
+
+          If you leave out the parameter or set it to false, Splunk Observability Cloud takes no action.'
+        schema:
+          type: boolean
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                created:
+                  title: Creation time
+                  type: integer
+                  format: int64
+                  example: 1556825430000
+                  readOnly: true
+                  description: 'The time the muting rule was created, in *nix time in milliseconds.
+
+                    This property is read-only; it''s always set by the system.'
+                creator:
+                  title: Creator user ID
+                  type: string
+                  example: AAXYAAAAAZ3
+                  readOnly: true
+                  description: 'User ID of the muting rule creator.
+
+                    This property is read-only; it''s always set by the system.'
+                description:
+                  type: string
+                  readOnly: false
+                  writeOnly: false
+                  description: Description of the muting rule. It is best practice to provide a descriptive reason for the muting rule.
+                filters:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      NOT:
+                        type: boolean
+                        default: false
+                        description: 'Flag that controls the filter semantics. If true, the filter
+
+                          does a not equals comparison. Otherwise, the filter does an
+
+                          equals comparison. The default is false.'
+                      property:
+                        type: string
+                        description: 'Name (key) of a dimension or custom property that one or more detectors
+
+                          are monitoring for anomalies. The filter compares the value of property
+
+                          to the value or values of propertyValue.'
+                      propertyValue:
+                        anyOf:
+                        - title: Boolean
+                          type: boolean
+                          description: Boolean value
+                        - title: Integer or Float
+                          type: number
+                          description: Integer or floating point number
+                        - title: String
+                          type: string
+                          description: String value
+                        - title: Array
+                          type: array
+                          items:
+                            anyOf:
+                            - type: number
+                            - type: string
+                            - type: boolean
+                          description: 'List of numbers, strings, or booleans, as a JSON array. You can
+
+                            specify multiple types in the same array.'
+                        description: Value that the API compares to the value of property.
+                    example: "[\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\": \"us-east-1a\"\n  },\n  {\n    \"NOT\": true,\n    \"property\": \"cpu.utilization\",\n    \"propertyValue\": 10.7\n  },\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\":\n      [\n        \"us-east-2a\",\n        \"us-west-1a\",\n        \"emea-west-2a\"\n      ]\n  }\n]\n"
+                    title: AlertMutingFilter
+                    description: 'Single muting filter for a rule, in the form of a JSON
+
+                      object. Specifies the dimension or custom property to filter on, the
+
+                      value or values to match, and a boolean value that controls the match semantics.
+
+                      The filter mutes an alert based on the following:
+
+
+                      NOT = false: Value of property EQ propertyValue
+
+                      NOT = true: Value of property NE propertyValue
+
+
+                      If propertyValue is an array, then the filter mutes an alert based on
+
+                      the following:
+
+
+                      NOT = false: Value of property matches any element of propertyValue
+
+                      NOT = true: Value of property matches none of the elements of propertyValue'
+                  description: 'List of muting filters for this rule, in the form of a JSON
+
+                    array. Each array element specifies a single filter.
+
+                    A muting filter JSON specifies the following:
+
+
+                    property: The dimension or custom property to compare to
+
+                    propertyValue
+
+                    propertyValue: A number, string, or array
+
+                    NOT: A flag that controls the comparison.
+
+
+                    A filter mutes an alert based on the following:
+
+
+                    NOT = false: value of property EQ propertyValue
+
+                    NOT = true: value of property NE propertyValue
+
+
+                    If propertyValue is an array, then the filter mutes an alert based on
+
+                    the following:
+
+
+                    NOT = false: value of property matches any element of
+
+                    propertyValue
+
+                    NOT = true: value of property matches none of the elements of
+
+                    propertyValue'
+                id:
+                  title: Muting rule ID
+                  type: string
+                  readOnly: true
+                  description: 'ID of a muting rule.
+
+                    This property is read-only; it''s always set by the system.'
+                lastUpdated:
+                  title: Muting rule last updated time
+                  type: integer
+                  format: int64
+                  example: 1557689430000
+                  readOnly: true
+                  description: 'The last time the muting rule was last updated, in *nix time in milliseconds.
+
+                    This property is read-only; it''s always set by the system.'
+                lastUpdatedBy:
+                  title: ID of user who last updated the muting rule
+                  type: string
+                  readOnly: true
+                  description: 'The ID of the last user who updated the
+
+                    muting rule. If Splunk Observability Cloud made the last update, the value is
+
+                    "AAAAAAAAAA". This property is read-only; it''s always set by the system.'
+                recurrence:
+                  type: object
+                  properties:
+                    unit:
+                      example: d
+                      type: string
+                      enum:
+                      - d
+                      - w
+                      description: Unit of the period. Can be days (d) or weeks (w).
+                    value:
+                      example: 2
+                      type: integer
+                      minimum: 1
+                      description: Amount of time, expressed as an integer applicable to the unit.
+                  title: recurrence
+                  description: 'Recurrence period of the muting rule. Recurrence can be daily, weekly,
+
+                    or custom, based on the number of days or weeks you provide. Note that
+
+                    the recurrence period must be larger than the muting duration.'
+                linkedTeams:
+                  title: IDs of teams linked to the detector that created the incident.
+                  type: array
+                  items:
+                    type: string
+                  readOnly: true
+                  example:
+                  - AbcdEf1ABCD
+                  - FO1Vq3ABXYZ
+                  description: IDs of teams linked to the detector that created the incident. If the incident is created by a detector that is not linked to a team, the value is null. This is a JSON array of strings, where each string is a team ID. This property is read-only; it's always set by the system. For information about how to link detectors to teams, see Detectors linked to teams.
+                sendAlertsOnceMutingPeriodHasEnded:
+                  type: boolean
+                  default: true
+                  example: true
+                  readOnly: false
+                  title: SendAlertsOnceMutingPeriodHasEnded
+                  description: 'Controls notifications after the muting period ends.
+
+                    To learn more, see Mute alert notifications
+
+                    in the user documentation.'
+                startTime:
+                  type: integer
+                  format: int64
+                  minimum: 0
+                  readOnly: false
+                  writeOnly: false
+                  title: StartTime
+                  description: 'Starting time of a muting rule, in *nix time in milliseconds. If not specified,
+
+                    defaults to the current time. read/write.'
+                stopTime:
+                  type: integer
+                  format: int64
+                  minimum: 0
+                  default: 0
+                  readOnly: false
+                  writeOnly: false
+                  title: StopTime
+                  description: 'Stop time of a muting rule, in *nix time in milliseconds. If set to 0, detectors
+
+                    that match this rule are muted indefinitely. The default value is 0.
+
+                    read/write'
+              title: AlertMutingRule
+              description: 'Properties of a muting rule, in the form of a JSON object.
+
+                Note: You can''t create or update properties marked read-only. You
+
+                receive read-only properties in response bodies for the following:
+
+
+                GET /alertmuting
+
+                POST /alertmuting
+
+                GET /alertmuting/{id}
+
+                PUT /alertmuting/{id}
+
+
+                The response body for this request contains a string representation of
+
+                any non-string values you specify for propertyValue.'
+            examples:
+              example:
+                value:
+                  created: 1556825430000
+                  creator: AAXYAAAAAZ3
+                  description: string
+                  filters:
+                  - "[\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\": \"us-east-1a\"\n  },\n  {\n    \"NOT\": true,\n    \"property\": \"cpu.utilization\",\n    \"propertyValue\": 10.7\n  },\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\":\n      [\n        \"us-east-2a\",\n        \"us-west-1a\",\n        \"emea-west-2a\"\n      ]\n  }\n]\n"
+                  id: string
+                  lastUpdated: 1557689430000
+                  lastUpdatedBy: string
+                  linkedTeams:
+                  - AbcdEf1ABCD
+                  - FO1Vq3ABXYZ
+                  recurrence:
+                    unit: d
+                    value: 2
+                  sendAlertsOnceMutingPeriodHasEnded: true
+                  startTime: 0
+                  stopTime: 0
+      responses:
+        '201':
+          description: HTTP 201 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created:
+                    title: Creation time
+                    type: integer
+                    format: int64
+                    example: 1556825430000
+                    readOnly: true
+                    description: 'The time the muting rule was created, in *nix time in milliseconds.
+
+                      This property is read-only; it''s always set by the system.'
+                  creator:
+                    title: Creator user ID
+                    type: string
+                    example: AAXYAAAAAZ3
+                    readOnly: true
+                    description: 'User ID of the muting rule creator.
+
+                      This property is read-only; it''s always set by the system.'
+                  description:
+                    type: string
+                    readOnly: false
+                    writeOnly: false
+                    description: Description of the muting rule. It is best practice to provide a descriptive reason for the muting rule.
+                  filters:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        NOT:
+                          type: boolean
+                          default: false
+                          description: 'Flag that controls the filter semantics. If true, the filter
+
+                            does a not equals comparison. Otherwise, the filter does an
+
+                            equals comparison. The default is false.'
+                        property:
+                          type: string
+                          description: 'Name (key) of a dimension or custom property that one or more detectors
+
+                            are monitoring for anomalies. The filter compares the value of property
+
+                            to the value or values of propertyValue.'
+                        propertyValue:
+                          anyOf:
+                          - title: Boolean
+                            type: boolean
+                            description: Boolean value
+                          - title: Integer or Float
+                            type: number
+                            description: Integer or floating point number
+                          - title: String
+                            type: string
+                            description: String value
+                          - title: Array
+                            type: array
+                            items:
+                              anyOf:
+                              - type: number
+                              - type: string
+                              - type: boolean
+                            description: 'List of numbers, strings, or booleans, as a JSON array. You can
+
+                              specify multiple types in the same array.'
+                          description: Value that the API compares to the value of property.
+                      example: "[\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\": \"us-east-1a\"\n  },\n  {\n    \"NOT\": true,\n    \"property\": \"cpu.utilization\",\n    \"propertyValue\": 10.7\n  },\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\":\n      [\n        \"us-east-2a\",\n        \"us-west-1a\",\n        \"emea-west-2a\"\n      ]\n  }\n]\n"
+                      title: AlertMutingFilter
+                      description: 'Single muting filter for a rule, in the form of a JSON
+
+                        object. Specifies the dimension or custom property to filter on, the
+
+                        value or values to match, and a boolean value that controls the match semantics.
+
+                        The filter mutes an alert based on the following:
+
+
+                        NOT = false: Value of property EQ propertyValue
+
+                        NOT = true: Value of property NE propertyValue
+
+
+                        If propertyValue is an array, then the filter mutes an alert based on
+
+                        the following:
+
+
+                        NOT = false: Value of property matches any element of propertyValue
+
+                        NOT = true: Value of property matches none of the elements of propertyValue'
+                    description: 'List of muting filters for this rule, in the form of a JSON
+
+                      array. Each array element specifies a single filter.
+
+                      A muting filter JSON specifies the following:
+
+
+                      property: The dimension or custom property to compare to
+
+                      propertyValue
+
+                      propertyValue: A number, string, or array
+
+                      NOT: A flag that controls the comparison.
+
+
+                      A filter mutes an alert based on the following:
+
+
+                      NOT = false: value of property EQ propertyValue
+
+                      NOT = true: value of property NE propertyValue
+
+
+                      If propertyValue is an array, then the filter mutes an alert based on
+
+                      the following:
+
+
+                      NOT = false: value of property matches any element of
+
+                      propertyValue
+
+                      NOT = true: value of property matches none of the elements of
+
+                      propertyValue'
+                  id:
+                    title: Muting rule ID
+                    type: string
+                    readOnly: true
+                    description: 'ID of a muting rule.
+
+                      This property is read-only; it''s always set by the system.'
+                  lastUpdated:
+                    title: Muting rule last updated time
+                    type: integer
+                    format: int64
+                    example: 1557689430000
+                    readOnly: true
+                    description: 'The last time the muting rule was last updated, in *nix time in milliseconds.
+
+                      This property is read-only; it''s always set by the system.'
+                  lastUpdatedBy:
+                    title: ID of user who last updated the muting rule
+                    type: string
+                    readOnly: true
+                    description: 'The ID of the last user who updated the
+
+                      muting rule. If Splunk Observability Cloud made the last update, the value is
+
+                      "AAAAAAAAAA". This property is read-only; it''s always set by the system.'
+                  recurrence:
+                    type: object
+                    properties:
+                      unit:
+                        example: d
+                        type: string
+                        enum:
+                        - d
+                        - w
+                        description: Unit of the period. Can be days (d) or weeks (w).
+                      value:
+                        example: 2
+                        type: integer
+                        minimum: 1
+                        description: Amount of time, expressed as an integer applicable to the unit.
+                    title: recurrence
+                    description: 'Recurrence period of the muting rule. Recurrence can be daily, weekly,
+
+                      or custom, based on the number of days or weeks you provide. Note that
+
+                      the recurrence period must be larger than the muting duration.'
+                  linkedTeams:
+                    title: IDs of teams linked to the detector that created the incident.
+                    type: array
+                    items:
+                      type: string
+                    readOnly: true
+                    example:
+                    - AbcdEf1ABCD
+                    - FO1Vq3ABXYZ
+                    description: IDs of teams linked to the detector that created the incident. If the incident is created by a detector that is not linked to a team, the value is null. This is a JSON array of strings, where each string is a team ID. This property is read-only; it's always set by the system. For information about how to link detectors to teams, see Detectors linked to teams.
+                  sendAlertsOnceMutingPeriodHasEnded:
+                    type: boolean
+                    default: true
+                    example: true
+                    readOnly: false
+                    title: SendAlertsOnceMutingPeriodHasEnded
+                    description: 'Controls notifications after the muting period ends.
+
+                      To learn more, see Mute alert notifications
+
+                      in the user documentation.'
+                  startTime:
+                    type: integer
+                    format: int64
+                    minimum: 0
+                    readOnly: false
+                    writeOnly: false
+                    title: StartTime
+                    description: 'Starting time of a muting rule, in *nix time in milliseconds. If not specified,
+
+                      defaults to the current time. read/write.'
+                  stopTime:
+                    type: integer
+                    format: int64
+                    minimum: 0
+                    default: 0
+                    readOnly: false
+                    writeOnly: false
+                    title: StopTime
+                    description: 'Stop time of a muting rule, in *nix time in milliseconds. If set to 0, detectors
+
+                      that match this rule are muted indefinitely. The default value is 0.
+
+                      read/write'
+                title: AlertMutingRule
+                description: 'Properties of a muting rule, in the form of a JSON object.
+
+                  Note: You can''t create or update properties marked read-only. You
+
+                  receive read-only properties in response bodies for the following:
+
+
+                  GET /alertmuting
+
+                  POST /alertmuting
+
+                  GET /alertmuting/{id}
+
+                  PUT /alertmuting/{id}
+
+
+                  The response body for this request contains a string representation of
+
+                  any non-string values you specify for propertyValue.'
+              examples:
+                example:
+                  value:
+                    created: 1556825430000
+                    creator: AAXYAAAAAZ3
+                    description: string
+                    filters:
+                    - "[\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\": \"us-east-1a\"\n  },\n  {\n    \"NOT\": true,\n    \"property\": \"cpu.utilization\",\n    \"propertyValue\": 10.7\n  },\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\":\n      [\n        \"us-east-2a\",\n        \"us-west-1a\",\n        \"emea-west-2a\"\n      ]\n  }\n]\n"
+                    id: string
+                    lastUpdated: 1557689430000
+                    lastUpdatedBy: string
+                    linkedTeams:
+                    - AbcdEf1ABCD
+                    - FO1Vq3ABXYZ
+                    recurrence:
+                      unit: d
+                      value: 2
+                    sendAlertsOnceMutingPeriodHasEnded: true
+                    startTime: 0
+                    stopTime: 0
+      security:
+      - SessionToken: []
+      tags:
+      - Incidents and alerts
+  /alertmuting/{id}:
+    get:
+      summary: Retrieve Muting Rule ID
+      description: 'Retrieves a muting rule, based on the rule ID specified in the
+
+        {id} path parameter. Unlike the detector APIs, you can use the alert
+
+        muting APIs with detectors you create in the UI as well as detectors you
+
+        create with the API.'
+      parameters:
+      - name: id
+        in: path
+        description: ID of a muting rule
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created:
+                    title: Creation time
+                    type: integer
+                    format: int64
+                    example: 1556825430000
+                    readOnly: true
+                    description: 'The time the muting rule was created, in *nix time in milliseconds.
+
+                      This property is read-only; it''s always set by the system.'
+                  creator:
+                    title: Creator user ID
+                    type: string
+                    example: AAXYAAAAAZ3
+                    readOnly: true
+                    description: 'User ID of the muting rule creator.
+
+                      This property is read-only; it''s always set by the system.'
+                  description:
+                    type: string
+                    readOnly: false
+                    writeOnly: false
+                    description: Description of the muting rule. It is best practice to provide a descriptive reason for the muting rule.
+                  filters:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        NOT:
+                          type: boolean
+                          default: false
+                          description: 'Flag that controls the filter semantics. If true, the filter
+
+                            does a not equals comparison. Otherwise, the filter does an
+
+                            equals comparison. The default is false.'
+                        property:
+                          type: string
+                          description: 'Name (key) of a dimension or custom property that one or more detectors
+
+                            are monitoring for anomalies. The filter compares the value of property
+
+                            to the value or values of propertyValue.'
+                        propertyValue:
+                          anyOf:
+                          - title: Boolean
+                            type: boolean
+                            description: Boolean value
+                          - title: Integer or Float
+                            type: number
+                            description: Integer or floating point number
+                          - title: String
+                            type: string
+                            description: String value
+                          - title: Array
+                            type: array
+                            items:
+                              anyOf:
+                              - type: number
+                              - type: string
+                              - type: boolean
+                            description: 'List of numbers, strings, or booleans, as a JSON array. You can
+
+                              specify multiple types in the same array.'
+                          description: Value that the API compares to the value of property.
+                      example: "[\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\": \"us-east-1a\"\n  },\n  {\n    \"NOT\": true,\n    \"property\": \"cpu.utilization\",\n    \"propertyValue\": 10.7\n  },\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\":\n      [\n        \"us-east-2a\",\n        \"us-west-1a\",\n        \"emea-west-2a\"\n      ]\n  }\n]\n"
+                      title: AlertMutingFilter
+                      description: 'Single muting filter for a rule, in the form of a JSON
+
+                        object. Specifies the dimension or custom property to filter on, the
+
+                        value or values to match, and a boolean value that controls the match semantics.
+
+                        The filter mutes an alert based on the following:
+
+
+                        NOT = false: Value of property EQ propertyValue
+
+                        NOT = true: Value of property NE propertyValue
+
+
+                        If propertyValue is an array, then the filter mutes an alert based on
+
+                        the following:
+
+
+                        NOT = false: Value of property matches any element of propertyValue
+
+                        NOT = true: Value of property matches none of the elements of propertyValue'
+                    description: 'List of muting filters for this rule, in the form of a JSON
+
+                      array. Each array element specifies a single filter.
+
+                      A muting filter JSON specifies the following:
+
+
+                      property: The dimension or custom property to compare to
+
+                      propertyValue
+
+                      propertyValue: A number, string, or array
+
+                      NOT: A flag that controls the comparison.
+
+
+                      A filter mutes an alert based on the following:
+
+
+                      NOT = false: value of property EQ propertyValue
+
+                      NOT = true: value of property NE propertyValue
+
+
+                      If propertyValue is an array, then the filter mutes an alert based on
+
+                      the following:
+
+
+                      NOT = false: value of property matches any element of
+
+                      propertyValue
+
+                      NOT = true: value of property matches none of the elements of
+
+                      propertyValue'
+                  id:
+                    title: Muting rule ID
+                    type: string
+                    readOnly: true
+                    description: 'ID of a muting rule.
+
+                      This property is read-only; it''s always set by the system.'
+                  lastUpdated:
+                    title: Muting rule last updated time
+                    type: integer
+                    format: int64
+                    example: 1557689430000
+                    readOnly: true
+                    description: 'The last time the muting rule was last updated, in *nix time in milliseconds.
+
+                      This property is read-only; it''s always set by the system.'
+                  lastUpdatedBy:
+                    title: ID of user who last updated the muting rule
+                    type: string
+                    readOnly: true
+                    description: 'The ID of the last user who updated the
+
+                      muting rule. If Splunk Observability Cloud made the last update, the value is
+
+                      "AAAAAAAAAA". This property is read-only; it''s always set by the system.'
+                  recurrence:
+                    type: object
+                    properties:
+                      unit:
+                        example: d
+                        type: string
+                        enum:
+                        - d
+                        - w
+                        description: Unit of the period. Can be days (d) or weeks (w).
+                      value:
+                        example: 2
+                        type: integer
+                        minimum: 1
+                        description: Amount of time, expressed as an integer applicable to the unit.
+                    title: recurrence
+                    description: 'Recurrence period of the muting rule. Recurrence can be daily, weekly,
+
+                      or custom, based on the number of days or weeks you provide. Note that
+
+                      the recurrence period must be larger than the muting duration.'
+                  linkedTeams:
+                    title: IDs of teams linked to the detector that created the incident.
+                    type: array
+                    items:
+                      type: string
+                    readOnly: true
+                    example:
+                    - AbcdEf1ABCD
+                    - FO1Vq3ABXYZ
+                    description: IDs of teams linked to the detector that created the incident. If the incident is created by a detector that is not linked to a team, the value is null. This is a JSON array of strings, where each string is a team ID. This property is read-only; it's always set by the system. For information about how to link detectors to teams, see Detectors linked to teams.
+                  sendAlertsOnceMutingPeriodHasEnded:
+                    type: boolean
+                    default: true
+                    example: true
+                    readOnly: false
+                    title: SendAlertsOnceMutingPeriodHasEnded
+                    description: 'Controls notifications after the muting period ends.
+
+                      To learn more, see Mute alert notifications
+
+                      in the user documentation.'
+                  startTime:
+                    type: integer
+                    format: int64
+                    minimum: 0
+                    readOnly: false
+                    writeOnly: false
+                    title: StartTime
+                    description: 'Starting time of a muting rule, in *nix time in milliseconds. If not specified,
+
+                      defaults to the current time. read/write.'
+                  stopTime:
+                    type: integer
+                    format: int64
+                    minimum: 0
+                    default: 0
+                    readOnly: false
+                    writeOnly: false
+                    title: StopTime
+                    description: 'Stop time of a muting rule, in *nix time in milliseconds. If set to 0, detectors
+
+                      that match this rule are muted indefinitely. The default value is 0.
+
+                      read/write'
+                title: AlertMutingRule
+                description: 'Properties of a muting rule, in the form of a JSON object.
+
+                  Note: You can''t create or update properties marked read-only. You
+
+                  receive read-only properties in response bodies for the following:
+
+
+                  GET /alertmuting
+
+                  POST /alertmuting
+
+                  GET /alertmuting/{id}
+
+                  PUT /alertmuting/{id}
+
+
+                  The response body for this request contains a string representation of
+
+                  any non-string values you specify for propertyValue.'
+              examples:
+                example:
+                  value:
+                    created: 1556825430000
+                    creator: AAXYAAAAAZ3
+                    description: string
+                    filters:
+                    - "[\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\": \"us-east-1a\"\n  },\n  {\n    \"NOT\": true,\n    \"property\": \"cpu.utilization\",\n    \"propertyValue\": 10.7\n  },\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\":\n      [\n        \"us-east-2a\",\n        \"us-west-1a\",\n        \"emea-west-2a\"\n      ]\n  }\n]\n"
+                    id: string
+                    lastUpdated: 1557689430000
+                    lastUpdatedBy: string
+                    linkedTeams:
+                    - AbcdEf1ABCD
+                    - FO1Vq3ABXYZ
+                    recurrence:
+                      unit: d
+                      value: 2
+                    sendAlertsOnceMutingPeriodHasEnded: true
+                    startTime: 0
+                    stopTime: 0
+      security:
+      - SessionToken: []
+      tags:
+      - Incidents and alerts
+    put:
+      summary: Update Single Muting Rule
+      description: 'Updates the muting rule specified in the {id} path parameter,
+
+        using the values specified in the request body. Unlike the detector
+
+        APIs, you can use the muting APIs with detectors you create in the
+
+        UI as well as detectors you create with the API.
+
+        Note: In some cases, Splunk Observability Cloud may send notifications during a muting period.
+
+        To learn more, see the section
+
+        Mute alert notifications
+
+        in the user documentation.
+
+        When you update a muting rule, you can resolve all of the alerts that match
+
+        the rule by setting the optional resolveMatchingActiveAlerts query parameter
+
+        to true. The flag''s default value is false.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of a muting rule
+        required: true
+        schema:
+          type: string
+      - name: resolveMatchingActiveAlerts
+        in: query
+        description: 'Optional resolve alerts flag. If you set the flag to true,
+
+          Splunk Observability Cloud resolves the alerts for the muting rule you''re updating.
+
+          If you leave out the parameter or set it to false, Splunk Observability Cloud takes no action.'
+        schema:
+          type: boolean
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                created:
+                  title: Creation time
+                  type: integer
+                  format: int64
+                  example: 1556825430000
+                  readOnly: true
+                  description: 'The time the muting rule was created, in *nix time in milliseconds.
+
+                    This property is read-only; it''s always set by the system.'
+                creator:
+                  title: Creator user ID
+                  type: string
+                  example: AAXYAAAAAZ3
+                  readOnly: true
+                  description: 'User ID of the muting rule creator.
+
+                    This property is read-only; it''s always set by the system.'
+                description:
+                  type: string
+                  readOnly: false
+                  writeOnly: false
+                  description: Description of the muting rule. It is best practice to provide a descriptive reason for the muting rule.
+                filters:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      NOT:
+                        type: boolean
+                        default: false
+                        description: 'Flag that controls the filter semantics. If true, the filter
+
+                          does a not equals comparison. Otherwise, the filter does an
+
+                          equals comparison. The default is false.'
+                      property:
+                        type: string
+                        description: 'Name (key) of a dimension or custom property that one or more detectors
+
+                          are monitoring for anomalies. The filter compares the value of property
+
+                          to the value or values of propertyValue.'
+                      propertyValue:
+                        anyOf:
+                        - title: Boolean
+                          type: boolean
+                          description: Boolean value
+                        - title: Integer or Float
+                          type: number
+                          description: Integer or floating point number
+                        - title: String
+                          type: string
+                          description: String value
+                        - title: Array
+                          type: array
+                          items:
+                            anyOf:
+                            - type: number
+                            - type: string
+                            - type: boolean
+                          description: 'List of numbers, strings, or booleans, as a JSON array. You can
+
+                            specify multiple types in the same array.'
+                        description: Value that the API compares to the value of property.
+                    example: "[\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\": \"us-east-1a\"\n  },\n  {\n    \"NOT\": true,\n    \"property\": \"cpu.utilization\",\n    \"propertyValue\": 10.7\n  },\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\":\n      [\n        \"us-east-2a\",\n        \"us-west-1a\",\n        \"emea-west-2a\"\n      ]\n  }\n]\n"
+                    title: AlertMutingFilter
+                    description: 'Single muting filter for a rule, in the form of a JSON
+
+                      object. Specifies the dimension or custom property to filter on, the
+
+                      value or values to match, and a boolean value that controls the match semantics.
+
+                      The filter mutes an alert based on the following:
+
+
+                      NOT = false: Value of property EQ propertyValue
+
+                      NOT = true: Value of property NE propertyValue
+
+
+                      If propertyValue is an array, then the filter mutes an alert based on
+
+                      the following:
+
+
+                      NOT = false: Value of property matches any element of propertyValue
+
+                      NOT = true: Value of property matches none of the elements of propertyValue'
+                  description: 'List of muting filters for this rule, in the form of a JSON
+
+                    array. Each array element specifies a single filter.
+
+                    A muting filter JSON specifies the following:
+
+
+                    property: The dimension or custom property to compare to
+
+                    propertyValue
+
+                    propertyValue: A number, string, or array
+
+                    NOT: A flag that controls the comparison.
+
+
+                    A filter mutes an alert based on the following:
+
+
+                    NOT = false: value of property EQ propertyValue
+
+                    NOT = true: value of property NE propertyValue
+
+
+                    If propertyValue is an array, then the filter mutes an alert based on
+
+                    the following:
+
+
+                    NOT = false: value of property matches any element of
+
+                    propertyValue
+
+                    NOT = true: value of property matches none of the elements of
+
+                    propertyValue'
+                id:
+                  title: Muting rule ID
+                  type: string
+                  readOnly: true
+                  description: 'ID of a muting rule.
+
+                    This property is read-only; it''s always set by the system.'
+                lastUpdated:
+                  title: Muting rule last updated time
+                  type: integer
+                  format: int64
+                  example: 1557689430000
+                  readOnly: true
+                  description: 'The last time the muting rule was last updated, in *nix time in milliseconds.
+
+                    This property is read-only; it''s always set by the system.'
+                lastUpdatedBy:
+                  title: ID of user who last updated the muting rule
+                  type: string
+                  readOnly: true
+                  description: 'The ID of the last user who updated the
+
+                    muting rule. If Splunk Observability Cloud made the last update, the value is
+
+                    "AAAAAAAAAA". This property is read-only; it''s always set by the system.'
+                recurrence:
+                  type: object
+                  properties:
+                    unit:
+                      example: d
+                      type: string
+                      enum:
+                      - d
+                      - w
+                      description: Unit of the period. Can be days (d) or weeks (w).
+                    value:
+                      example: 2
+                      type: integer
+                      minimum: 1
+                      description: Amount of time, expressed as an integer applicable to the unit.
+                  title: recurrence
+                  description: 'Recurrence period of the muting rule. Recurrence can be daily, weekly,
+
+                    or custom, based on the number of days or weeks you provide. Note that
+
+                    the recurrence period must be larger than the muting duration.'
+                linkedTeams:
+                  title: IDs of teams linked to the detector that created the incident.
+                  type: array
+                  items:
+                    type: string
+                  readOnly: true
+                  example:
+                  - AbcdEf1ABCD
+                  - FO1Vq3ABXYZ
+                  description: IDs of teams linked to the detector that created the incident. If the incident is created by a detector that is not linked to a team, the value is null. This is a JSON array of strings, where each string is a team ID. This property is read-only; it's always set by the system. For information about how to link detectors to teams, see Detectors linked to teams.
+                sendAlertsOnceMutingPeriodHasEnded:
+                  type: boolean
+                  default: true
+                  example: true
+                  readOnly: false
+                  title: SendAlertsOnceMutingPeriodHasEnded
+                  description: 'Controls notifications after the muting period ends.
+
+                    To learn more, see Mute alert notifications
+
+                    in the user documentation.'
+                startTime:
+                  type: integer
+                  format: int64
+                  minimum: 0
+                  readOnly: false
+                  writeOnly: false
+                  title: StartTime
+                  description: 'Starting time of a muting rule, in *nix time in milliseconds. If not specified,
+
+                    defaults to the current time. read/write.'
+                stopTime:
+                  type: integer
+                  format: int64
+                  minimum: 0
+                  default: 0
+                  readOnly: false
+                  writeOnly: false
+                  title: StopTime
+                  description: 'Stop time of a muting rule, in *nix time in milliseconds. If set to 0, detectors
+
+                    that match this rule are muted indefinitely. The default value is 0.
+
+                    read/write'
+              title: AlertMutingRule
+              description: 'Properties of a muting rule, in the form of a JSON object.
+
+                Note: You can''t create or update properties marked read-only. You
+
+                receive read-only properties in response bodies for the following:
+
+
+                GET /alertmuting
+
+                POST /alertmuting
+
+                GET /alertmuting/{id}
+
+                PUT /alertmuting/{id}
+
+
+                The response body for this request contains a string representation of
+
+                any non-string values you specify for propertyValue.'
+            examples:
+              example:
+                value:
+                  created: 1556825430000
+                  creator: AAXYAAAAAZ3
+                  description: string
+                  filters:
+                  - "[\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\": \"us-east-1a\"\n  },\n  {\n    \"NOT\": true,\n    \"property\": \"cpu.utilization\",\n    \"propertyValue\": 10.7\n  },\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\":\n      [\n        \"us-east-2a\",\n        \"us-west-1a\",\n        \"emea-west-2a\"\n      ]\n  }\n]\n"
+                  id: string
+                  lastUpdated: 1557689430000
+                  lastUpdatedBy: string
+                  linkedTeams:
+                  - AbcdEf1ABCD
+                  - FO1Vq3ABXYZ
+                  recurrence:
+                    unit: d
+                    value: 2
+                  sendAlertsOnceMutingPeriodHasEnded: true
+                  startTime: 0
+                  stopTime: 0
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created:
+                    title: Creation time
+                    type: integer
+                    format: int64
+                    example: 1556825430000
+                    readOnly: true
+                    description: 'The time the muting rule was created, in *nix time in milliseconds.
+
+                      This property is read-only; it''s always set by the system.'
+                  creator:
+                    title: Creator user ID
+                    type: string
+                    example: AAXYAAAAAZ3
+                    readOnly: true
+                    description: 'User ID of the muting rule creator.
+
+                      This property is read-only; it''s always set by the system.'
+                  description:
+                    type: string
+                    readOnly: false
+                    writeOnly: false
+                    description: Description of the muting rule. It is best practice to provide a descriptive reason for the muting rule.
+                  filters:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        NOT:
+                          type: boolean
+                          default: false
+                          description: 'Flag that controls the filter semantics. If true, the filter
+
+                            does a not equals comparison. Otherwise, the filter does an
+
+                            equals comparison. The default is false.'
+                        property:
+                          type: string
+                          description: 'Name (key) of a dimension or custom property that one or more detectors
+
+                            are monitoring for anomalies. The filter compares the value of property
+
+                            to the value or values of propertyValue.'
+                        propertyValue:
+                          anyOf:
+                          - title: Boolean
+                            type: boolean
+                            description: Boolean value
+                          - title: Integer or Float
+                            type: number
+                            description: Integer or floating point number
+                          - title: String
+                            type: string
+                            description: String value
+                          - title: Array
+                            type: array
+                            items:
+                              anyOf:
+                              - type: number
+                              - type: string
+                              - type: boolean
+                            description: 'List of numbers, strings, or booleans, as a JSON array. You can
+
+                              specify multiple types in the same array.'
+                          description: Value that the API compares to the value of property.
+                      example: "[\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\": \"us-east-1a\"\n  },\n  {\n    \"NOT\": true,\n    \"property\": \"cpu.utilization\",\n    \"propertyValue\": 10.7\n  },\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\":\n      [\n        \"us-east-2a\",\n        \"us-west-1a\",\n        \"emea-west-2a\"\n      ]\n  }\n]\n"
+                      title: AlertMutingFilter
+                      description: 'Single muting filter for a rule, in the form of a JSON
+
+                        object. Specifies the dimension or custom property to filter on, the
+
+                        value or values to match, and a boolean value that controls the match semantics.
+
+                        The filter mutes an alert based on the following:
+
+
+                        NOT = false: Value of property EQ propertyValue
+
+                        NOT = true: Value of property NE propertyValue
+
+
+                        If propertyValue is an array, then the filter mutes an alert based on
+
+                        the following:
+
+
+                        NOT = false: Value of property matches any element of propertyValue
+
+                        NOT = true: Value of property matches none of the elements of propertyValue'
+                    description: 'List of muting filters for this rule, in the form of a JSON
+
+                      array. Each array element specifies a single filter.
+
+                      A muting filter JSON specifies the following:
+
+
+                      property: The dimension or custom property to compare to
+
+                      propertyValue
+
+                      propertyValue: A number, string, or array
+
+                      NOT: A flag that controls the comparison.
+
+
+                      A filter mutes an alert based on the following:
+
+
+                      NOT = false: value of property EQ propertyValue
+
+                      NOT = true: value of property NE propertyValue
+
+
+                      If propertyValue is an array, then the filter mutes an alert based on
+
+                      the following:
+
+
+                      NOT = false: value of property matches any element of
+
+                      propertyValue
+
+                      NOT = true: value of property matches none of the elements of
+
+                      propertyValue'
+                  id:
+                    title: Muting rule ID
+                    type: string
+                    readOnly: true
+                    description: 'ID of a muting rule.
+
+                      This property is read-only; it''s always set by the system.'
+                  lastUpdated:
+                    title: Muting rule last updated time
+                    type: integer
+                    format: int64
+                    example: 1557689430000
+                    readOnly: true
+                    description: 'The last time the muting rule was last updated, in *nix time in milliseconds.
+
+                      This property is read-only; it''s always set by the system.'
+                  lastUpdatedBy:
+                    title: ID of user who last updated the muting rule
+                    type: string
+                    readOnly: true
+                    description: 'The ID of the last user who updated the
+
+                      muting rule. If Splunk Observability Cloud made the last update, the value is
+
+                      "AAAAAAAAAA". This property is read-only; it''s always set by the system.'
+                  recurrence:
+                    type: object
+                    properties:
+                      unit:
+                        example: d
+                        type: string
+                        enum:
+                        - d
+                        - w
+                        description: Unit of the period. Can be days (d) or weeks (w).
+                      value:
+                        example: 2
+                        type: integer
+                        minimum: 1
+                        description: Amount of time, expressed as an integer applicable to the unit.
+                    title: recurrence
+                    description: 'Recurrence period of the muting rule. Recurrence can be daily, weekly,
+
+                      or custom, based on the number of days or weeks you provide. Note that
+
+                      the recurrence period must be larger than the muting duration.'
+                  linkedTeams:
+                    title: IDs of teams linked to the detector that created the incident.
+                    type: array
+                    items:
+                      type: string
+                    readOnly: true
+                    example:
+                    - AbcdEf1ABCD
+                    - FO1Vq3ABXYZ
+                    description: IDs of teams linked to the detector that created the incident. If the incident is created by a detector that is not linked to a team, the value is null. This is a JSON array of strings, where each string is a team ID. This property is read-only; it's always set by the system. For information about how to link detectors to teams, see Detectors linked to teams.
+                  sendAlertsOnceMutingPeriodHasEnded:
+                    type: boolean
+                    default: true
+                    example: true
+                    readOnly: false
+                    title: SendAlertsOnceMutingPeriodHasEnded
+                    description: 'Controls notifications after the muting period ends.
+
+                      To learn more, see Mute alert notifications
+
+                      in the user documentation.'
+                  startTime:
+                    type: integer
+                    format: int64
+                    minimum: 0
+                    readOnly: false
+                    writeOnly: false
+                    title: StartTime
+                    description: 'Starting time of a muting rule, in *nix time in milliseconds. If not specified,
+
+                      defaults to the current time. read/write.'
+                  stopTime:
+                    type: integer
+                    format: int64
+                    minimum: 0
+                    default: 0
+                    readOnly: false
+                    writeOnly: false
+                    title: StopTime
+                    description: 'Stop time of a muting rule, in *nix time in milliseconds. If set to 0, detectors
+
+                      that match this rule are muted indefinitely. The default value is 0.
+
+                      read/write'
+                title: AlertMutingRule
+                description: 'Properties of a muting rule, in the form of a JSON object.
+
+                  Note: You can''t create or update properties marked read-only. You
+
+                  receive read-only properties in response bodies for the following:
+
+
+                  GET /alertmuting
+
+                  POST /alertmuting
+
+                  GET /alertmuting/{id}
+
+                  PUT /alertmuting/{id}
+
+
+                  The response body for this request contains a string representation of
+
+                  any non-string values you specify for propertyValue.'
+              examples:
+                example:
+                  value:
+                    created: 1556825430000
+                    creator: AAXYAAAAAZ3
+                    description: string
+                    filters:
+                    - "[\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\": \"us-east-1a\"\n  },\n  {\n    \"NOT\": true,\n    \"property\": \"cpu.utilization\",\n    \"propertyValue\": 10.7\n  },\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\":\n      [\n        \"us-east-2a\",\n        \"us-west-1a\",\n        \"emea-west-2a\"\n      ]\n  }\n]\n"
+                    id: string
+                    lastUpdated: 1557689430000
+                    lastUpdatedBy: string
+                    linkedTeams:
+                    - AbcdEf1ABCD
+                    - FO1Vq3ABXYZ
+                    recurrence:
+                      unit: d
+                      value: 2
+                    sendAlertsOnceMutingPeriodHasEnded: true
+                    startTime: 0
+                    stopTime: 0
+      security:
+      - SessionToken: []
+      tags:
+      - Incidents and alerts
+    delete:
+      summary: Delete Single Muting Rule
+      description: 'Deletes a muting rule, specified by the rule ID in the {id}
+
+        path parameter. Unlike the detector APIs that create v2 detectors,
+
+        you can use the muting APIs with detectors you create using the web
+
+        UI as well as detectors you create using the API (v2 detectors).
+
+        This operation doesn''t return a response body.
+
+        Note: You can''t delete an active muting rule.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of a muting rule
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+        '400':
+          description: HTTP 400 response
+        '404':
+          description: HTTP 404 response
+      security:
+      - SessionToken: []
+      tags:
+      - Incidents and alerts
+  /alertmuting/{id}/unmute:
+    put:
+      summary: Unmute Single Muting Rule
+      description: 'Ends the muting period that''s currently active for a muting rule
+
+        and updates the stop time to the current server time.
+
+        This operation works with muting rules for detectors you create
+
+        using the UI as well as detectors you create using the API
+
+        (v2 detectors).
+
+        Note: In some cases, Splunk Observability Cloud may send notifications during a muting period.
+
+        To learn more, see the section
+
+        Mute alert notifications
+
+        in the user documentation.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of a muting rule
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created:
+                    title: Creation time
+                    type: integer
+                    format: int64
+                    example: 1556825430000
+                    readOnly: true
+                    description: 'The time the muting rule was created, in *nix time in milliseconds.
+
+                      This property is read-only; it''s always set by the system.'
+                  creator:
+                    title: Creator user ID
+                    type: string
+                    example: AAXYAAAAAZ3
+                    readOnly: true
+                    description: 'User ID of the muting rule creator.
+
+                      This property is read-only; it''s always set by the system.'
+                  description:
+                    type: string
+                    readOnly: false
+                    writeOnly: false
+                    description: Description of the muting rule. It is best practice to provide a descriptive reason for the muting rule.
+                  filters:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        NOT:
+                          type: boolean
+                          default: false
+                          description: 'Flag that controls the filter semantics. If true, the filter
+
+                            does a not equals comparison. Otherwise, the filter does an
+
+                            equals comparison. The default is false.'
+                        property:
+                          type: string
+                          description: 'Name (key) of a dimension or custom property that one or more detectors
+
+                            are monitoring for anomalies. The filter compares the value of property
+
+                            to the value or values of propertyValue.'
+                        propertyValue:
+                          anyOf:
+                          - title: Boolean
+                            type: boolean
+                            description: Boolean value
+                          - title: Integer or Float
+                            type: number
+                            description: Integer or floating point number
+                          - title: String
+                            type: string
+                            description: String value
+                          - title: Array
+                            type: array
+                            items:
+                              anyOf:
+                              - type: number
+                              - type: string
+                              - type: boolean
+                            description: 'List of numbers, strings, or booleans, as a JSON array. You can
+
+                              specify multiple types in the same array.'
+                          description: Value that the API compares to the value of property.
+                      example: "[\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\": \"us-east-1a\"\n  },\n  {\n    \"NOT\": true,\n    \"property\": \"cpu.utilization\",\n    \"propertyValue\": 10.7\n  },\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\":\n      [\n        \"us-east-2a\",\n        \"us-west-1a\",\n        \"emea-west-2a\"\n      ]\n  }\n]\n"
+                      title: AlertMutingFilter
+                      description: 'Single muting filter for a rule, in the form of a JSON
+
+                        object. Specifies the dimension or custom property to filter on, the
+
+                        value or values to match, and a boolean value that controls the match semantics.
+
+                        The filter mutes an alert based on the following:
+
+
+                        NOT = false: Value of property EQ propertyValue
+
+                        NOT = true: Value of property NE propertyValue
+
+
+                        If propertyValue is an array, then the filter mutes an alert based on
+
+                        the following:
+
+
+                        NOT = false: Value of property matches any element of propertyValue
+
+                        NOT = true: Value of property matches none of the elements of propertyValue'
+                    description: 'List of muting filters for this rule, in the form of a JSON
+
+                      array. Each array element specifies a single filter.
+
+                      A muting filter JSON specifies the following:
+
+
+                      property: The dimension or custom property to compare to
+
+                      propertyValue
+
+                      propertyValue: A number, string, or array
+
+                      NOT: A flag that controls the comparison.
+
+
+                      A filter mutes an alert based on the following:
+
+
+                      NOT = false: value of property EQ propertyValue
+
+                      NOT = true: value of property NE propertyValue
+
+
+                      If propertyValue is an array, then the filter mutes an alert based on
+
+                      the following:
+
+
+                      NOT = false: value of property matches any element of
+
+                      propertyValue
+
+                      NOT = true: value of property matches none of the elements of
+
+                      propertyValue'
+                  id:
+                    title: Muting rule ID
+                    type: string
+                    readOnly: true
+                    description: 'ID of a muting rule.
+
+                      This property is read-only; it''s always set by the system.'
+                  lastUpdated:
+                    title: Muting rule last updated time
+                    type: integer
+                    format: int64
+                    example: 1557689430000
+                    readOnly: true
+                    description: 'The last time the muting rule was last updated, in *nix time in milliseconds.
+
+                      This property is read-only; it''s always set by the system.'
+                  lastUpdatedBy:
+                    title: ID of user who last updated the muting rule
+                    type: string
+                    readOnly: true
+                    description: 'The ID of the last user who updated the
+
+                      muting rule. If Splunk Observability Cloud made the last update, the value is
+
+                      "AAAAAAAAAA". This property is read-only; it''s always set by the system.'
+                  recurrence:
+                    type: object
+                    properties:
+                      unit:
+                        example: d
+                        type: string
+                        enum:
+                        - d
+                        - w
+                        description: Unit of the period. Can be days (d) or weeks (w).
+                      value:
+                        example: 2
+                        type: integer
+                        minimum: 1
+                        description: Amount of time, expressed as an integer applicable to the unit.
+                    title: recurrence
+                    description: 'Recurrence period of the muting rule. Recurrence can be daily, weekly,
+
+                      or custom, based on the number of days or weeks you provide. Note that
+
+                      the recurrence period must be larger than the muting duration.'
+                  linkedTeams:
+                    title: IDs of teams linked to the detector that created the incident.
+                    type: array
+                    items:
+                      type: string
+                    readOnly: true
+                    example:
+                    - AbcdEf1ABCD
+                    - FO1Vq3ABXYZ
+                    description: IDs of teams linked to the detector that created the incident. If the incident is created by a detector that is not linked to a team, the value is null. This is a JSON array of strings, where each string is a team ID. This property is read-only; it's always set by the system. For information about how to link detectors to teams, see Detectors linked to teams.
+                  sendAlertsOnceMutingPeriodHasEnded:
+                    type: boolean
+                    default: true
+                    example: true
+                    readOnly: false
+                    title: SendAlertsOnceMutingPeriodHasEnded
+                    description: 'Controls notifications after the muting period ends.
+
+                      To learn more, see Mute alert notifications
+
+                      in the user documentation.'
+                  startTime:
+                    type: integer
+                    format: int64
+                    minimum: 0
+                    readOnly: false
+                    writeOnly: false
+                    title: StartTime
+                    description: 'Starting time of a muting rule, in *nix time in milliseconds. If not specified,
+
+                      defaults to the current time. read/write.'
+                  stopTime:
+                    type: integer
+                    format: int64
+                    minimum: 0
+                    default: 0
+                    readOnly: false
+                    writeOnly: false
+                    title: StopTime
+                    description: 'Stop time of a muting rule, in *nix time in milliseconds. If set to 0, detectors
+
+                      that match this rule are muted indefinitely. The default value is 0.
+
+                      read/write'
+                title: AlertMutingRule
+                description: 'Properties of a muting rule, in the form of a JSON object.
+
+                  Note: You can''t create or update properties marked read-only. You
+
+                  receive read-only properties in response bodies for the following:
+
+
+                  GET /alertmuting
+
+                  POST /alertmuting
+
+                  GET /alertmuting/{id}
+
+                  PUT /alertmuting/{id}
+
+
+                  The response body for this request contains a string representation of
+
+                  any non-string values you specify for propertyValue.'
+              examples:
+                example:
+                  value:
+                    created: 1556825430000
+                    creator: AAXYAAAAAZ3
+                    description: string
+                    filters:
+                    - "[\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\": \"us-east-1a\"\n  },\n  {\n    \"NOT\": true,\n    \"property\": \"cpu.utilization\",\n    \"propertyValue\": 10.7\n  },\n  {\n    \"NOT\": false,\n    \"property\": \"aws_availability_zone\",\n    \"propertyValue\":\n      [\n        \"us-east-2a\",\n        \"us-west-1a\",\n        \"emea-west-2a\"\n      ]\n  }\n]\n"
+                    id: string
+                    lastUpdated: 1557689430000
+                    lastUpdatedBy: string
+                    linkedTeams:
+                    - AbcdEf1ABCD
+                    - FO1Vq3ABXYZ
+                    recurrence:
+                      unit: d
+                      value: 2
+                    sendAlertsOnceMutingPeriodHasEnded: true
+                    startTime: 0
+                    stopTime: 0
+      security:
+      - SessionToken: []
+      tags:
+      - Incidents and alerts
+  /incident:
+    get:
+      summary: Retrieve Incidents
+      description: 'Retrieves information for the latest incidents in an organization, one incident from each ETS. This endpoint retrieves
+
+        incidents created by detectors you add in the UI and detectors you add using the API.
+
+        Note: Splunk Observability Cloud returns a maximum of 10,000 incidents, even if your organization contains more than 10,000. To learn more, see the
+
+        Considerations for retrieve operations section in the developer guide.'
+      parameters:
+      - name: includeResolved
+        in: query
+        description: 'Specifies which latest incidents to retrieve based on their status. If
+
+          the value is true, the API returns latest incident for which the status
+
+          is "resolved"; otherwise, the API only returns the latest active incidents.'
+        schema:
+          type: boolean
+          default: false
+      - name: limit
+        in: query
+        description: The number of results to return from the result set.
+        schema:
+          type: integer
+          format: int32
+      - name: offset
+        in: query
+        description: 'The result object in the result set at which the API should start
+
+          returning results to you. If omitted, the API starts at the first
+
+          result in the set.'
+        schema:
+          type: integer
+          format: int32
+      - name: query
+        in: query
+        description: 'Controls which latest incidents to retrieve, based on descriptions and other filters. For example, to retrieve the latest incidents created by detectors linked to a team with the ID FO1Vq3ABXYZ, specify teamId:FO1Vq3ABXYZ.
+
+          To search for latest incidents by specific values of a dimension or custom property, use query=<name>:<value>. If <value> contains non-alphanumeric characters, encode the non-alphanumeric characters and surround the value with double quotes. For example, the region custom property value US East must be passed in the parameter as region:"US%20East".
+
+          Here are examples of the query parameter used alone and with other available query parameters:
+
+
+          https://app.{realm}.observability.splunkcloud.com/v2/incident?query=teamId:FO1Vq3ABXYZ
+
+          https://app.{realm}.observability.splunkcloud.com/v2/incident?query=region:"US%20East"&limit=5&offset=5
+
+
+          For information about how to link detectors to teams, see Detectors linked to teams.'
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    active:
+                      type: boolean
+                      readOnly: true
+                      title: Active
+                      description: 'Flag that indicates if the incident is still ongoing ("active").
+
+                        This property is read-only.'
+                    anomalyState:
+                      type: string
+                      enum:
+                      - ANOMALOUS
+                      - MANUALLY_RESOLVED
+                      - OK
+                      - STOPPED
+                      readOnly: true
+                      title: AnomalyState
+                      description: 'Describes the current anomaly state of an event or incident, as a
+
+                        enumerated string that describes the current signal status compared
+
+                        to its expected state. This property is read only.
+
+                        The possible values are:
+
+
+                        "ANOMALOUS": For this signal, the detector detected an
+
+                        anomaly, triggered an alert, generated an alert event, and sent a notification.
+
+                        "MANUALLY_RESOLVED": User resolved the incident in the UI or by
+
+                        calling PUT /incident/{id}/clear.
+
+                        "OK": Splunk Observability Cloud detected that the anomaly had cleared and issued a
+
+                        clear event for the incident.
+
+                        "STOPPED": User updated the detector and restarted the detector job'
+                    detectLabel:
+                      type: string
+                      readOnly: true
+                      title: DetectLabel
+                      description: 'The label of the SignalFlow program for the detector that generated
+
+                        an event or the events in an incident.
+
+                        This property is read-only.'
+                    detectorId:
+                      type: string
+                      readOnly: true
+                      title: DetectorId
+                      description: 'The ID of the detector that generated an
+
+                        event or events in an incident
+
+                        This property is read-only.'
+                    duration:
+                      title: Duration of the incident
+                      type: integer
+                      format: int64
+                      readOnly: true
+                      description: 'Duration of the entire incident in milliseconds. If the incident isn''t
+
+                        cleared yet, the value is null.
+
+                        This property is read-only; it''s always set by the system.'
+                    events:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          anomalyState:
+                            type: string
+                            enum:
+                            - ANOMALOUS
+                            - MANUALLY_RESOLVED
+                            - OK
+                            - STOPPED
+                            readOnly: true
+                            title: AnomalyState
+                            description: 'Describes the current anomaly state of an event or incident, as a
+
+                              enumerated string that describes the current signal status compared
+
+                              to its expected state. This property is read only.
+
+                              The possible values are:
+
+
+                              "ANOMALOUS": For this signal, the detector detected an
+
+                              anomaly, triggered an alert, generated an alert event, and sent a notification.
+
+                              "MANUALLY_RESOLVED": User resolved the incident in the UI or by
+
+                              calling PUT /incident/{id}/clear.
+
+                              "OK": Splunk Observability Cloud detected that the anomaly had cleared and issued a
+
+                              clear event for the incident.
+
+                              "STOPPED": User updated the detector and restarted the detector job'
+                          detectLabel:
+                            type: string
+                            readOnly: true
+                            title: DetectLabel
+                            description: 'The label of the SignalFlow program for the detector that generated
+
+                              an event or the events in an incident.
+
+                              This property is read-only.'
+                          detectorId:
+                            type: string
+                            readOnly: true
+                            title: DetectorId
+                            description: 'The ID of the detector that generated an
+
+                              event or events in an incident
+
+                              This property is read-only.'
+                          detectorName:
+                            title: Detector name (displayed)
+                            type: string
+                            minLength: 1
+                            readOnly: false
+                            writeOnly: false
+                            description: 'Displayed name of the detector in the UI dashboard. When you retrieve
+
+                              events or incidents, this property contains the name of the associated detector.'
+                          event_annotations:
+                            type: object
+                            readOnly: true
+                            description: 'Reserved for internal use.
+
+                              This property is read-only; it''s always set by the system.'
+                          id:
+                            type: string
+                            readOnly: true
+                            title: EventId
+                            description: 'The event ID. This property is read-only; it''s
+
+                              always set by the system.'
+                          incidentId:
+                            type: string
+                            readOnly: true
+                            title: IncidentId
+                            description: 'The ID of an incident.
+
+                              This property is read-only.'
+                          inputs:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                dimensions:
+                                  type: object
+                                  readOnly: true
+                                  title: Dimensions
+                                  description: 'The dimension names and values that matched the detector rule that
+
+                                    triggered the event
+
+                                    This property is read-only.'
+                                fragment:
+                                  type: string
+                                  readOnly: true
+                                  title: Fragment
+                                  description: 'Code that computed a value property that triggered an event, in the
+
+                                    form of a JSON string containing a fragment of SignalFlow code.
+
+                                    This property is read-only.'
+                                value:
+                                  type: number
+                                  readOnly: true
+                                  title: Value
+                                  description: 'The value that matched the detector rule, thus triggering an
+
+                                    alert event or clear event. This property is read-only.'
+                              title: IncidentEventSource
+                              description: 'A value that matched a detector rule and triggered an alert event or
+
+                                clear event'
+                            description: 'The list of input sources that the detector used in the rule
+
+                              that triggered this event.'
+                          severity:
+                            type: string
+                            readOnly: true
+                            format: Capitalized
+                            enum:
+                            - Critical
+                            - Major
+                            - Minor
+                            - Warning
+                            - Info
+                            title: Severity
+                            description: The severity of an event or an incident. Set this value in a detector. For the /incident endpoint, this property is read-only.
+                          timestamp:
+                            type: integer
+                            format: int64
+                            readOnly: true
+                            example: 1557484230000
+                            title: TimeStamp
+                            description: 'Timestamp for the time that the event occurred, in *nix time in milliseconds.
+
+                              This property is read-only.'
+                        title: IncidentEvent
+                        description: Event data for an event associated with an incident
+                      description: Array that contains the event objects for this incident
+                    incidentId:
+                      type: string
+                      readOnly: true
+                      title: IncidentId
+                      description: 'The ID of an incident.
+
+                        This property is read-only.'
+                    linkedTeams:
+                      title: IDs of teams linked to the detector that created the incident.
+                      type: array
+                      items:
+                        type: string
+                      readOnly: true
+                      example:
+                      - AbcdEf1ABCD
+                      - FO1Vq3ABXYZ
+                      description: IDs of teams linked to the detector that created the incident. If the incident is created by a detector that is not linked to a team, the value is null. This is a JSON array of strings, where each string is a team ID. This property is read-only; it's always set by the system. For information about how to link detectors to teams, see Detectors linked to teams.
+                    severity:
+                      type: string
+                      readOnly: true
+                      format: Capitalized
+                      enum:
+                      - Critical
+                      - Major
+                      - Minor
+                      - Warning
+                      - Info
+                      title: Severity
+                      description: The severity of an event or an incident. Set this value in a detector. For the /incident endpoint, this property is read-only.
+                  title: RetrieveIncidentResponse
+                  description: The properties of a single incident
+                title: RetrieveIncidentResponses
+                description: 'List of incidents returned by a search, in the form of a JSON array.
+
+                  The results property contains a list of incident objects.'
+              examples:
+                example:
+                  value:
+                  - active: true
+                    anomalyState: ANOMALOUS
+                    detectLabel: string
+                    detectorId: string
+                    duration: 0
+                    events:
+                    - anomalyState: ANOMALOUS
+                      detectLabel: string
+                      detectorId: string
+                      detectorName: string
+                      id: string
+                      incidentId: string
+                      inputs:
+                      - fragment: string
+                        value: 0
+                      severity: Critical
+                      timestamp: 1557484230000
+                    incidentId: string
+                    linkedTeams:
+                    - AbcdEf1ABCD
+                    - FO1Vq3ABXYZ
+                    severity: Critical
+      security:
+      - SessionToken: []
+      tags:
+      - Incidents and alerts
+  /incident/{id}:
+    get:
+      summary: Retrieve Incident ID
+      description: 'Retrieves an incident, based on the incident ID
+
+        specified in the {id} path parameter. This endpoint retrieves an
+
+        incident created by a detector you add using the UI or a detector
+
+        you add using the API (a v2 detector).'
+      parameters:
+      - name: id
+        in: path
+        description: ID of an incident
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  active:
+                    type: boolean
+                    readOnly: true
+                    title: Active
+                    description: 'Flag that indicates if the incident is still ongoing ("active").
+
+                      This property is read-only.'
+                  anomalyState:
+                    type: string
+                    enum:
+                    - ANOMALOUS
+                    - MANUALLY_RESOLVED
+                    - OK
+                    - STOPPED
+                    readOnly: true
+                    title: AnomalyState
+                    description: 'Describes the current anomaly state of an event or incident, as a
+
+                      enumerated string that describes the current signal status compared
+
+                      to its expected state. This property is read only.
+
+                      The possible values are:
+
+
+                      "ANOMALOUS": For this signal, the detector detected an
+
+                      anomaly, triggered an alert, generated an alert event, and sent a notification.
+
+                      "MANUALLY_RESOLVED": User resolved the incident in the UI or by
+
+                      calling PUT /incident/{id}/clear.
+
+                      "OK": Splunk Observability Cloud detected that the anomaly had cleared and issued a
+
+                      clear event for the incident.
+
+                      "STOPPED": User updated the detector and restarted the detector job'
+                  detectLabel:
+                    type: string
+                    readOnly: true
+                    title: DetectLabel
+                    description: 'The label of the SignalFlow program for the detector that generated
+
+                      an event or the events in an incident.
+
+                      This property is read-only.'
+                  detectorId:
+                    type: string
+                    readOnly: true
+                    title: DetectorId
+                    description: 'The ID of the detector that generated an
+
+                      event or events in an incident
+
+                      This property is read-only.'
+                  duration:
+                    title: Duration of the incident
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    description: 'Duration of the entire incident in milliseconds. If the incident isn''t
+
+                      cleared yet, the value is null.
+
+                      This property is read-only; it''s always set by the system.'
+                  events:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        anomalyState:
+                          type: string
+                          enum:
+                          - ANOMALOUS
+                          - MANUALLY_RESOLVED
+                          - OK
+                          - STOPPED
+                          readOnly: true
+                          title: AnomalyState
+                          description: 'Describes the current anomaly state of an event or incident, as a
+
+                            enumerated string that describes the current signal status compared
+
+                            to its expected state. This property is read only.
+
+                            The possible values are:
+
+
+                            "ANOMALOUS": For this signal, the detector detected an
+
+                            anomaly, triggered an alert, generated an alert event, and sent a notification.
+
+                            "MANUALLY_RESOLVED": User resolved the incident in the UI or by
+
+                            calling PUT /incident/{id}/clear.
+
+                            "OK": Splunk Observability Cloud detected that the anomaly had cleared and issued a
+
+                            clear event for the incident.
+
+                            "STOPPED": User updated the detector and restarted the detector job'
+                        detectLabel:
+                          type: string
+                          readOnly: true
+                          title: DetectLabel
+                          description: 'The label of the SignalFlow program for the detector that generated
+
+                            an event or the events in an incident.
+
+                            This property is read-only.'
+                        detectorId:
+                          type: string
+                          readOnly: true
+                          title: DetectorId
+                          description: 'The ID of the detector that generated an
+
+                            event or events in an incident
+
+                            This property is read-only.'
+                        detectorName:
+                          title: Detector name (displayed)
+                          type: string
+                          minLength: 1
+                          readOnly: false
+                          writeOnly: false
+                          description: 'Displayed name of the detector in the UI dashboard. When you retrieve
+
+                            events or incidents, this property contains the name of the associated detector.'
+                        event_annotations:
+                          type: object
+                          readOnly: true
+                          description: 'Reserved for internal use.
+
+                            This property is read-only; it''s always set by the system.'
+                        id:
+                          type: string
+                          readOnly: true
+                          title: EventId
+                          description: 'The event ID. This property is read-only; it''s
+
+                            always set by the system.'
+                        incidentId:
+                          type: string
+                          readOnly: true
+                          title: IncidentId
+                          description: 'The ID of an incident.
+
+                            This property is read-only.'
+                        inputs:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              dimensions:
+                                type: object
+                                readOnly: true
+                                title: Dimensions
+                                description: 'The dimension names and values that matched the detector rule that
+
+                                  triggered the event
+
+                                  This property is read-only.'
+                              fragment:
+                                type: string
+                                readOnly: true
+                                title: Fragment
+                                description: 'Code that computed a value property that triggered an event, in the
+
+                                  form of a JSON string containing a fragment of SignalFlow code.
+
+                                  This property is read-only.'
+                              value:
+                                type: number
+                                readOnly: true
+                                title: Value
+                                description: 'The value that matched the detector rule, thus triggering an
+
+                                  alert event or clear event. This property is read-only.'
+                            title: IncidentEventSource
+                            description: 'A value that matched a detector rule and triggered an alert event or
+
+                              clear event'
+                          description: 'The list of input sources that the detector used in the rule
+
+                            that triggered this event.'
+                        severity:
+                          type: string
+                          readOnly: true
+                          format: Capitalized
+                          enum:
+                          - Critical
+                          - Major
+                          - Minor
+                          - Warning
+                          - Info
+                          title: Severity
+                          description: The severity of an event or an incident. Set this value in a detector. For the /incident endpoint, this property is read-only.
+                        timestamp:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1557484230000
+                          title: TimeStamp
+                          description: 'Timestamp for the time that the event occurred, in *nix time in milliseconds.
+
+                            This property is read-only.'
+                      title: IncidentEvent
+                      description: Event data for an event associated with an incident
+                    description: Array that contains the event objects for this incident
+                  incidentId:
+                    type: string
+                    readOnly: true
+                    title: IncidentId
+                    description: 'The ID of an incident.
+
+                      This property is read-only.'
+                  linkedTeams:
+                    title: IDs of teams linked to the detector that created the incident.
+                    type: array
+                    items:
+                      type: string
+                    readOnly: true
+                    example:
+                    - AbcdEf1ABCD
+                    - FO1Vq3ABXYZ
+                    description: IDs of teams linked to the detector that created the incident. If the incident is created by a detector that is not linked to a team, the value is null. This is a JSON array of strings, where each string is a team ID. This property is read-only; it's always set by the system. For information about how to link detectors to teams, see Detectors linked to teams.
+                  severity:
+                    type: string
+                    readOnly: true
+                    format: Capitalized
+                    enum:
+                    - Critical
+                    - Major
+                    - Minor
+                    - Warning
+                    - Info
+                    title: Severity
+                    description: The severity of an event or an incident. Set this value in a detector. For the /incident endpoint, this property is read-only.
+                title: RetrieveIncidentResponse
+                description: The properties of a single incident
+              examples:
+                example:
+                  value:
+                    active: true
+                    anomalyState: ANOMALOUS
+                    detectLabel: string
+                    detectorId: string
+                    duration: 0
+                    events:
+                    - anomalyState: ANOMALOUS
+                      detectLabel: string
+                      detectorId: string
+                      detectorName: string
+                      id: string
+                      incidentId: string
+                      inputs:
+                      - fragment: string
+                        value: 0
+                      severity: Critical
+                      timestamp: 1557484230000
+                    incidentId: string
+                    linkedTeams:
+                    - AbcdEf1ABCD
+                    - FO1Vq3ABXYZ
+                    severity: Critical
+      security:
+      - SessionToken: []
+      tags:
+      - Incidents and alerts
+  /incident/{id}/clear:
+    put:
+      summary: Clear Single Incident
+      description: 'Manually clears the incident identified by the
+
+        incident ID specified in the {id} path parameter.
+
+        This API can be used with incidents created by a detector you add
+
+        using the UI or a detector you add using the API (a v2
+
+        detector).
+
+        This operation doesn''t return a response body.'
+      parameters:
+      - name: id
+        in: path
+        description: The id of an existing incident that you want to clear
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+      security:
+      - SessionToken: []
+      tags:
+      - Incidents and alerts
+  /incident/clear:
+    put:
+      summary: Clear Incidents
+      description: Clears alerts identified by the rules in the request body.
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filters:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: object
+                    properties:
+                      NOT:
+                        type: boolean
+                        default: false
+                        description: 'Flag that controls the rule results. If true, the filter
+
+                          does a not equals comparison. Otherwise, the filter does an
+
+                          equals comparison. The default is false.'
+                      property:
+                        type: string
+                        minLength: 1
+                        description: 'Dimension or custom property name (key) of a signal
+
+                          or signals that triggered an incident, in the form of a JSON string'
+                      propertyValue:
+                        type: array
+                        minItems: 1
+                        items:
+                          oneOf:
+                          - type: number
+                          - type: string
+                            minLength: 1
+                          - type: boolean
+                        description: 'List of values that the API compares to the value of property, in
+
+                          the form of a JSON array. Each element can be a JSON number, string,
+
+                          or boolean.'
+                    example: "{\n  \"NOT\": false,\n  \"property\": \"aws_availability_zone\",\n  \"propertyValue\": [\n    \"us-east-1a\"\n  ]\n}\n"
+                    title: IncidentClearRule
+                    description: 'Single clear incident rule, in the form of a JSON object. A rule selects
+
+                      incidents by comparing a signal property to one or more values. If
+
+                      Splunk Observability Cloud finds a match, it it clears the incidents that the signal triggered.
+
+                      The NOT property tells the API to reverse the rule results:
+
+
+                      NOT is false: Rule matches if the property is equal to any of the specified values
+
+                      NOT is true: Rule matches if the property is equal to none
+
+                      of the specified values or if the property doesn''t exist'
+                  description: 'List of rules that identify one or more incidents, in the form
+
+                    of a JSON array. Each array element specifies a single rule.'
+              example: "filters: [\n{\n  \"NOT\": false,\n  \"property\": \"aws_availability_zone\",\n  \"propertyValue\": [\n    \"us-east-1a\"\n  ]\n},\n{\n  \"NOT\": true,\n  \"property\": \"demo_test_host\",\n  \"propertyValue\": [ true ]\n}\n]\n"
+              title: IncidentClearRules
+              description: Rules that identify one or more incidents you want to clear.
+            examples:
+              example:
+                value: "filters: [\n{\n  \"NOT\": false,\n  \"property\": \"aws_availability_zone\",\n  \"propertyValue\": [\n    \"us-east-1a\"\n  ]\n},\n{\n  \"NOT\": true,\n  \"property\": \"demo_test_host\",\n  \"propertyValue\": [ true ]\n}\n]\n"
+      responses:
+        '201':
+          description: HTTP 201 response
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: HTTP response code, always 400
+                  message:
+                    type: string
+                    description: Human-readable text string
+              examples:
+                default:
+                  value: "{\n  \"code\": 400,\n  \"message\": \"Failed to deserialize payload at: sf.rest.shared.model.incident.ClearMultipleIncidentsRequest[\\\"filters\\\"]->java.util.ArrayList[0]->sf.rest.shared.model.PropertyFilter[\\\"propertyValue\\\"]\"\n}\n"
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                type: string
+              examples:
+                default:
+                  value: '"Invalid token specified."
+
+                    '
+      security:
+      - SessionToken: []
+      tags:
+      - Incidents and alerts
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.

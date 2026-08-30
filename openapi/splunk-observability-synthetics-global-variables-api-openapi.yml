@@ -1,0 +1,601 @@
+openapi: 3.2.0
+info:
+  title: Splunk Observability Cloud Synthetics global variables API
+  version: 1.0.1
+  description: 'API for creating, updating, and deleting global variables.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You have to have the Splunk Observability Cloud admin or power role to use the POST /variables, PUT /variables/{id}, and DELETE /variables/{id} operations.
+
+    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the GET /variables and GET /variables/{id} operations.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's. Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2/synthetics
+  description: Endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+tags:
+- name: Synthetics global variables
+paths:
+  /variables:
+    get:
+      summary: getVariables
+      description: 'Returns a list of global variables.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin, power, or read_only role.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  variables:
+                    type: array
+                    items:
+                      type: object
+                      title: Variable
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          example: 1
+                          description: The unique ID of the variable.
+                        name:
+                          type: string
+                          example: foo
+                          title: VariableName
+                          description: The name of your variable.
+                        description:
+                          type: string
+                          example: My awesome variable
+                          title: VariableDescription
+                          description: The description of your variable.
+                        value:
+                          type: string
+                          example: bar
+                          title: VariableValue
+                          description: 'The value of your variable.
+
+                            If this is a concealed variable, the value is
+
+                            <REDACTED>.'
+                        secret:
+                          type: boolean
+                          example: false
+                          title: VariableSecret
+                          description: This indicates whether this is a concealed variable. Concealed variable values are scrubbed from test run results to keep the value secure.
+                        createdAt:
+                          type: string
+                          readOnly: true
+                          example: '2022-09-14T14:35:37.801Z'
+                          title: CreatedAt
+                          description: 'Timestamp of when the test was last updated, in UTC.
+
+                            This field is read_only, and the system always sets the value.'
+                        updatedAt:
+                          type: string
+                          readOnly: true
+                          example: '2022-09-14T14:35:38.099Z'
+                          title: UpdatedAt
+                          description: 'Timestamp of when the test was last updated, in UTC.
+
+                            This field is read_only, and the system always sets the value.'
+              examples:
+                example:
+                  value:
+                    variables:
+                    - createdAt: '2022-09-14T14:35:37.801Z'
+                      description: My awesome variable
+                      id: 1
+                      name: foo
+                      secret: false
+                      updatedAt: '2022-09-14T14:35:38.099Z'
+                      value: bar
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics global variables
+    post:
+      summary: createVariableTest
+      description: 'Creates a new global variable, based on the specifications in the request body.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                variable:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: foo
+                      title: VariableName
+                      description: The name of your variable.
+                    value:
+                      type: string
+                      example: bar
+                      title: VariableValue
+                      description: 'The value of your variable.
+
+                        If this is a concealed variable, the value is
+
+                        <REDACTED>.'
+                    description:
+                      type: string
+                      example: My awesome variable
+                      title: VariableDescription
+                      description: The description of your variable.
+                    secret:
+                      type: boolean
+                      example: false
+                      title: VariableSecret
+                      description: This indicates whether this is a concealed variable. Concealed variable values are scrubbed from test run results to keep the value secure.
+              title: VariableRequestBody
+              description: 'The request body sent by the following method/endpoint operations:
+
+
+                POST /variables'
+            examples:
+              example:
+                value:
+                  variable:
+                    description: My awesome variable
+                    name: foo
+                    secret: false
+                    value: bar
+      responses:
+        '201':
+          description: HTTP 201 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  variable:
+                    type: array
+                    items:
+                      type: object
+                      title: Variable
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          example: 1
+                          description: The unique ID of the variable.
+                        name:
+                          type: string
+                          example: foo
+                          title: VariableName
+                          description: The name of your variable.
+                        description:
+                          type: string
+                          example: My awesome variable
+                          title: VariableDescription
+                          description: The description of your variable.
+                        value:
+                          type: string
+                          example: bar
+                          title: VariableValue
+                          description: 'The value of your variable.
+
+                            If this is a concealed variable, the value is
+
+                            <REDACTED>.'
+                        secret:
+                          type: boolean
+                          example: false
+                          title: VariableSecret
+                          description: This indicates whether this is a concealed variable. Concealed variable values are scrubbed from test run results to keep the value secure.
+                        createdAt:
+                          type: string
+                          readOnly: true
+                          example: '2022-09-14T14:35:37.801Z'
+                          title: CreatedAt
+                          description: 'Timestamp of when the test was last updated, in UTC.
+
+                            This field is read_only, and the system always sets the value.'
+                        updatedAt:
+                          type: string
+                          readOnly: true
+                          example: '2022-09-14T14:35:38.099Z'
+                          title: UpdatedAt
+                          description: 'Timestamp of when the test was last updated, in UTC.
+
+                            This field is read_only, and the system always sets the value.'
+              examples:
+                example:
+                  value:
+                    variable:
+                    - createdAt: '2022-09-14T14:35:37.801Z'
+                      description: My awesome variable
+                      id: 1
+                      name: foo
+                      secret: false
+                      updatedAt: '2022-09-14T14:35:38.099Z'
+                      value: bar
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Could not create Plain Text Variable
+                  details:
+                    type: object
+                    properties:
+                      value:
+                        type: array
+                        items:
+                          type: string
+                          example: can't be blank
+                        description: 'This is a dynamic schema that consists of:
+
+                          "fieldName": ["reason"]'
+                type: object
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details:
+                      value:
+                      - can't be blank
+                    message: Could not create Plain Text Variable
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics global variables
+  /variables/{id}:
+    get:
+      summary: getSingleVariable
+      description: 'Retrieves a single global variable.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin, power, or read_only role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of a global variable you want to retrieve.
+        required: true
+        schema:
+          type: integer
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  variable:
+                    type: array
+                    items:
+                      type: object
+                      title: Variable
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          example: 1
+                          description: The unique ID of the variable.
+                        name:
+                          type: string
+                          example: foo
+                          title: VariableName
+                          description: The name of your variable.
+                        description:
+                          type: string
+                          example: My awesome variable
+                          title: VariableDescription
+                          description: The description of your variable.
+                        value:
+                          type: string
+                          example: bar
+                          title: VariableValue
+                          description: 'The value of your variable.
+
+                            If this is a concealed variable, the value is
+
+                            <REDACTED>.'
+                        secret:
+                          type: boolean
+                          example: false
+                          title: VariableSecret
+                          description: This indicates whether this is a concealed variable. Concealed variable values are scrubbed from test run results to keep the value secure.
+                        createdAt:
+                          type: string
+                          readOnly: true
+                          example: '2022-09-14T14:35:37.801Z'
+                          title: CreatedAt
+                          description: 'Timestamp of when the test was last updated, in UTC.
+
+                            This field is read_only, and the system always sets the value.'
+                        updatedAt:
+                          type: string
+                          readOnly: true
+                          example: '2022-09-14T14:35:38.099Z'
+                          title: UpdatedAt
+                          description: 'Timestamp of when the test was last updated, in UTC.
+
+                            This field is read_only, and the system always sets the value.'
+              examples:
+                example:
+                  value:
+                    variable:
+                    - createdAt: '2022-09-14T14:35:37.801Z'
+                      description: My awesome variable
+                      id: 1
+                      name: foo
+                      secret: false
+                      updatedAt: '2022-09-14T14:35:38.099Z'
+                      value: bar
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Could not find Variable
+                  details:
+                    type: object
+                    example: '{}'
+                type: object
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Could not find Variable
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics global variables
+    put:
+      summary: updateSingleVariable
+      description: 'Update an existing global variable
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the global variable you are updating
+        required: true
+        schema:
+          type: integer
+          example: 1
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                variable:
+                  type: object
+                  properties:
+                    value:
+                      type: string
+                      example: bar
+                      title: VariableValue
+                      description: 'The value of your variable.
+
+                        If this is a concealed variable, the value is
+
+                        <REDACTED>.'
+                    description:
+                      type: string
+                      example: My awesome variable
+                      title: VariableDescription
+                      description: The description of your variable.
+              title: VariableUpdateRequestBody
+              description: 'The request body sent by the following method/endpoint operations:
+
+
+                PUT /variables
+
+                PATCH /variables
+
+
+                Please note that name and secret cannot be updated with PATCH or PUT operations.'
+            examples:
+              example:
+                value:
+                  variable:
+                    description: My awesome variable
+                    value: bar
+      responses:
+        '200':
+          description: HTTP 200 response
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Could not find Variable
+                  details:
+                    type: object
+                    example: '{}'
+                type: object
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Could not find Variable
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Could not update Plain Text Variable
+                  details:
+                    type: object
+                    properties:
+                      value:
+                        type: array
+                        items:
+                          type: string
+                          example: can't be blank
+                        description: 'This is a dynamic schema that consists of:
+
+                          "fieldName": ["reason"]'
+                type: object
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details:
+                      value:
+                      - can't be blank
+                    message: Could not update Plain Text Variable
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics global variables
+    delete:
+      summary: deleteVariable
+      description: 'Deletes a global variable
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of a global variable
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: HTTP 204 response
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics global variables
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.

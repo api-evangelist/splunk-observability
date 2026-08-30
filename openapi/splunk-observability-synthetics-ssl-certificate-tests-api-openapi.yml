@@ -1,0 +1,1389 @@
+openapi: 3.2.0
+info:
+  title: Splunk Observability Cloud Synthetics SSL Certificate Tests API
+  version: 1.0.0
+  description: 'API for creating, updating, and deleting SSL Certificate Tests.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You need the Splunk Observability Cloud admin, power, or read_only role to use this API.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's. Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2/synthetics
+  description: Endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+tags:
+- name: Synthetics SSL Certificate Tests
+paths:
+  /tests/ssl:
+    post:
+      summary: createSslTest
+      description: 'Creates a new SSL Certificate Test, based on the specifications in the request body.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                test:
+                  type: object
+                  title: SslTestRequest
+                  required:
+                  - name
+                  - active
+                  - frequency
+                  - schedulingStrategy
+                  - locationIds
+                  - host
+                  properties:
+                    name:
+                      type: string
+                      example: My SSL Cert Test
+                      title: TestName
+                    active:
+                      type: boolean
+                      example: true
+                      title: Active
+                    frequency:
+                      type: integer
+                      format: int32
+                      example: 5
+                      maximum: 1440
+                      minimum: 1
+                      title: Frequency
+                      description: How often to run your test.
+                    schedulingStrategy:
+                      type: string
+                      example: round_robin
+                      enum:
+                      - round_robin
+                      - concurrent
+                      title: SchedulingStrategy
+                      description: 'Type of scheduling strategy. This can only be:
+
+
+                        round_robin
+
+                        concurrent'
+                    locationIds:
+                      type: array
+                      items:
+                        type: string
+                      example:
+                      - aws-us-east-1
+                      title: LocationIds
+                      description: An array of location IDs where the test runs.
+                    host:
+                      type: string
+                      example: example.com
+                      title: Host
+                      description: The host to test.
+                    port:
+                      type: integer
+                      format: int32
+                      example: 443
+                      default: 443
+                      minimum: 1
+                      maximum: 65535
+                      title: Port
+                      description: The port to test.
+                    serverName:
+                      type: string
+                      example: example.com
+                      title: ServerName
+                      description: The server name definition of SNI (Server Name Indication) support allows a single server to host multiple TLS/SSL certificates on the same IP address and port.
+                    allowUntrustedRoot:
+                      type: boolean
+                      example: true
+                      title: AllowUntrustedRoot
+                      description: Allow untrusted root certificate in chain. true will disable untrusted root certificate validation.
+                    allowSelfSigned:
+                      type: boolean
+                      example: true
+                      title: AllowSelfSigned
+                      description: Allow self-signed certificate in chain. true will disable self-signed certificate validation.
+                    caCertificateId:
+                      type:
+                      - integer
+                      - 'null'
+                      format: int64
+                      example: 1
+                      title: CaCertificateId
+                      description: The unique ID of the CA Certificate.
+                    validations:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: My validation step
+                            title: ValidationName
+                          type:
+                            type: string
+                            enum:
+                            - assert_numeric
+                            - assert_string
+                            example: assert_numeric
+                            description: 'Type of assertion. Possible values for this are:
+
+
+                              assert_string - When asserting text
+
+                              assert_numeric - When asserting Expiration in days, tls_version, is_self_signed, is_revoked'
+                          actual:
+                            type: string
+                            example: '{{response.days_until_expiration}}'
+                            description: 'The actual value. If referencing a response variable, the value of
+
+                              this field is:
+
+
+                              {{response.days_until_expiration}}
+
+                              {{response.tls_version}}
+
+                              {{response.subject}}
+
+                              {{response.issuer}}
+
+                              {{response.is_self_signed}} contains 0 or 1 as boolean
+
+                              {{response.is_revoked}} contains 0 or 1 as boolean
+
+                              {{response.algorithm}}
+
+                              {{response.issuer_days_until_expiration}}
+
+                              {{response.issuer_tls_version}}
+
+                              {{response.issuer_subject}}
+
+                              {{response.issuer_algorithm}}
+
+                              {{response.issuer_is_trusted}} contains 0 or 1 as boolean
+
+                              {{response.issuer_is_revoked}} contains 0 or 1 as boolean'
+                          expected:
+                            type: string
+                            example: 200
+                            description: What you expect the variable to be.
+                          comparator:
+                            type: string
+                            enum:
+                            - is_empty
+                            - is_not_empty
+                            - contains
+                            - does_not_contain
+                            - equals
+                            - does_not_equal
+                            - matches
+                            - does_not_match
+                            - is_less_than
+                            - is_less_than_or_equal_to
+                            - is_greater_than
+                            - is_greater_than_or_equal_to
+                            example: equals
+                            description: 'Comparator between the actual value and the expected value. Must be
+
+                              one of the following for type = assert_string:
+
+
+                              is_empty
+
+                              is_not_empty
+
+                              contains
+
+                              does_not_contain
+
+                              equals
+
+                              does_not_equal
+
+                              matches to regular expression
+
+                              does_not_match to regular expression
+
+
+                              and one of the following for type = assert_numeric:
+
+
+                              equals
+
+                              does_not_equal
+
+                              is_less_than
+
+                              is_less_than_or_equal_to
+
+                              is_greater_than
+
+                              is_greater_than_or_equal_to'
+                        title: ValidationAssert
+                        description: Validation assert SSL Certificate data from response.
+                      title: Validations
+                    customProperties:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - key
+                        - value
+                        properties:
+                          key:
+                            type: string
+                            example: Env
+                          value:
+                            type: string
+                            example: production
+                      title: CustomProperties
+                      description: An array of custom properties.  The section Custom Properties Criteria lists the requirements for custom property names and values.
+            examples:
+              example:
+                value:
+                  test:
+                    active: true
+                    allowSelfSigned: true
+                    allowUntrustedRoot: true
+                    caCertificateId: 1
+                    customProperties:
+                    - key: Env
+                      value: production
+                    frequency: 5
+                    host: example.com
+                    locationIds:
+                    - aws-us-east-1
+                    name: My SSL Cert Test
+                    port: 443
+                    schedulingStrategy: round_robin
+                    serverName: example.com
+                    validations:
+                    - actual: '{{response.days_until_expiration}}'
+                      comparator: equals
+                      expected: 200
+                      name: My validation step
+                      type: assert_numeric
+      responses:
+        '201':
+          description: HTTP 201 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  test:
+                    type: object
+                    required:
+                    - id
+                    - name
+                    - active
+                    - frequency
+                    - schedulingStrategy
+                    - locationIds
+                    - host
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                        example: 1
+                        title: TestId
+                        description: The unique ID of the SSL Certificate Test.
+                      name:
+                        type: string
+                        example: My SSL Cert Test
+                        title: TestName
+                      active:
+                        type: boolean
+                        example: true
+                        title: Active
+                      frequency:
+                        type: integer
+                        format: int32
+                        example: 5
+                        maximum: 1440
+                        minimum: 1
+                        title: Frequency
+                        description: How often to run your test.
+                      schedulingStrategy:
+                        type: string
+                        example: round_robin
+                        enum:
+                        - round_robin
+                        - concurrent
+                        title: SchedulingStrategy
+                        description: 'Type of scheduling strategy. This can only be:
+
+
+                          round_robin
+
+                          concurrent'
+                      locationIds:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                        - aws-us-east-1
+                        title: LocationIds
+                        description: An array of location IDs where the test runs.
+                      host:
+                        type: string
+                        example: example.com
+                        title: Host
+                        description: The host to test.
+                      port:
+                        type: integer
+                        format: int32
+                        example: 443
+                        default: 443
+                        minimum: 1
+                        maximum: 65535
+                        title: Port
+                        description: The port to test.
+                      serverName:
+                        type: string
+                        example: example.com
+                        title: ServerName
+                        description: The server name definition of SNI (Server Name Indication) support allows a single server to host multiple TLS/SSL certificates on the same IP address and port.
+                      allowUntrustedRoot:
+                        type: boolean
+                        example: true
+                        title: AllowUntrustedRoot
+                        description: Allow untrusted root certificate in chain. true will disable untrusted root certificate validation.
+                      allowSelfSigned:
+                        type: boolean
+                        example: true
+                        title: AllowSelfSigned
+                        description: Allow self-signed certificate in chain. true will disable self-signed certificate validation.
+                      caCertificateId:
+                        type:
+                        - integer
+                        - 'null'
+                        format: int64
+                        example: 1
+                        title: CaCertificateId
+                        description: The unique ID of the CA Certificate.
+                      validations:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              example: My validation step
+                              title: ValidationName
+                            type:
+                              type: string
+                              enum:
+                              - assert_numeric
+                              - assert_string
+                              example: assert_numeric
+                              description: 'Type of assertion. Possible values for this are:
+
+
+                                assert_string - When asserting text
+
+                                assert_numeric - When asserting Expiration in days, tls_version, is_self_signed, is_revoked'
+                            actual:
+                              type: string
+                              example: '{{response.days_until_expiration}}'
+                              description: 'The actual value. If referencing a response variable, the value of
+
+                                this field is:
+
+
+                                {{response.days_until_expiration}}
+
+                                {{response.tls_version}}
+
+                                {{response.subject}}
+
+                                {{response.issuer}}
+
+                                {{response.is_self_signed}} contains 0 or 1 as boolean
+
+                                {{response.is_revoked}} contains 0 or 1 as boolean
+
+                                {{response.algorithm}}
+
+                                {{response.issuer_days_until_expiration}}
+
+                                {{response.issuer_tls_version}}
+
+                                {{response.issuer_subject}}
+
+                                {{response.issuer_algorithm}}
+
+                                {{response.issuer_is_trusted}} contains 0 or 1 as boolean
+
+                                {{response.issuer_is_revoked}} contains 0 or 1 as boolean'
+                            expected:
+                              type: string
+                              example: 200
+                              description: What you expect the variable to be.
+                            comparator:
+                              type: string
+                              enum:
+                              - is_empty
+                              - is_not_empty
+                              - contains
+                              - does_not_contain
+                              - equals
+                              - does_not_equal
+                              - matches
+                              - does_not_match
+                              - is_less_than
+                              - is_less_than_or_equal_to
+                              - is_greater_than
+                              - is_greater_than_or_equal_to
+                              example: equals
+                              description: 'Comparator between the actual value and the expected value. Must be
+
+                                one of the following for type = assert_string:
+
+
+                                is_empty
+
+                                is_not_empty
+
+                                contains
+
+                                does_not_contain
+
+                                equals
+
+                                does_not_equal
+
+                                matches to regular expression
+
+                                does_not_match to regular expression
+
+
+                                and one of the following for type = assert_numeric:
+
+
+                                equals
+
+                                does_not_equal
+
+                                is_less_than
+
+                                is_less_than_or_equal_to
+
+                                is_greater_than
+
+                                is_greater_than_or_equal_to'
+                          title: ValidationAssert
+                          description: Validation assert SSL Certificate data from response.
+                        title: Validations
+                      customProperties:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                          - key
+                          - value
+                          properties:
+                            key:
+                              type: string
+                              example: Env
+                            value:
+                              type: string
+                              example: production
+                        title: CustomProperties
+                        description: An array of custom properties.  The section Custom Properties Criteria lists the requirements for custom property names and values.
+                      createdAt:
+                        type: string
+                        readOnly: true
+                        writeOnly: false
+                        example: '2022-09-14T14:35:37.801Z'
+                        title: CreatedAt
+                        description: 'Timestamp of when the item was created, in UTC.
+
+                          This field is read_only, and the system always sets the value.'
+                      updatedAt:
+                        type: string
+                        readOnly: true
+                        writeOnly: false
+                        example: '2022-09-14T14:35:38.099Z'
+                        title: UpdatedAt
+                        description: 'Timestamp of when the item was last updated, in UTC.
+
+                          This field is read_only, and the system always sets the value.'
+                      createdBy:
+                        type: string
+                        readOnly: true
+                        writeOnly: false
+                        example: abcdefgh1234
+                        title: CreatedBy
+                        description: 'Member ID of who created the item.
+
+                          This field is read-only, and the system always sets the value.'
+                      updatedBy:
+                        type: string
+                        readOnly: true
+                        writeOnly: false
+                        example: abcdefgh1234
+                        title: UpdatedBy
+                        description: 'Member ID of who last updated the item.
+
+                          This field is read-only, and the system always sets the value.'
+                    title: SslTestResponse
+              examples:
+                example:
+                  value:
+                    test:
+                      active: true
+                      allowSelfSigned: true
+                      allowUntrustedRoot: true
+                      caCertificateId: 1
+                      createdAt: '2022-09-14T14:35:37.801Z'
+                      createdBy: abcdefgh1234
+                      customProperties:
+                      - key: Env
+                        value: production
+                      frequency: 5
+                      host: example.com
+                      id: 1
+                      locationIds:
+                      - aws-us-east-1
+                      name: My SSL Cert Test
+                      port: 443
+                      schedulingStrategy: round_robin
+                      serverName: example.com
+                      updatedAt: '2022-09-14T14:35:38.099Z'
+                      updatedBy: abcdefgh1234
+                      validations:
+                      - actual: '{{response.days_until_expiration}}'
+                        comparator: equals
+                        expected: 200
+                        name: My validation step
+                        type: assert_numeric
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Could not process SSL Certificate Test
+                  details:
+                    type: object
+                    properties:
+                      name:
+                        type: array
+                        items:
+                          type: string
+                          example: is already taken
+                        description: 'This is a dynamic schema that consists of:
+
+                          "fieldName": ["reason"]'
+                title: UnprocessableEntity
+                description: UnprocessableEntity
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details:
+                      name:
+                      - is already taken
+                    message: Could not process SSL Certificate Test
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics SSL Certificate Tests
+  /tests/ssl/{id}:
+    get:
+      summary: getSingleSslTest
+      description: 'Retrieves a single SSL Certificate Test.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin, power, or read_only role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the SSL Certificate Test you want to retrieve
+        required: true
+        schema:
+          type: integer
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  test:
+                    type: object
+                    required:
+                    - id
+                    - name
+                    - active
+                    - frequency
+                    - schedulingStrategy
+                    - locationIds
+                    - host
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                        example: 1
+                        title: TestId
+                        description: The unique ID of the SSL Certificate Test.
+                      name:
+                        type: string
+                        example: My SSL Cert Test
+                        title: TestName
+                      active:
+                        type: boolean
+                        example: true
+                        title: Active
+                      frequency:
+                        type: integer
+                        format: int32
+                        example: 5
+                        maximum: 1440
+                        minimum: 1
+                        title: Frequency
+                        description: How often to run your test.
+                      schedulingStrategy:
+                        type: string
+                        example: round_robin
+                        enum:
+                        - round_robin
+                        - concurrent
+                        title: SchedulingStrategy
+                        description: 'Type of scheduling strategy. This can only be:
+
+
+                          round_robin
+
+                          concurrent'
+                      locationIds:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                        - aws-us-east-1
+                        title: LocationIds
+                        description: An array of location IDs where the test runs.
+                      host:
+                        type: string
+                        example: example.com
+                        title: Host
+                        description: The host to test.
+                      port:
+                        type: integer
+                        format: int32
+                        example: 443
+                        default: 443
+                        minimum: 1
+                        maximum: 65535
+                        title: Port
+                        description: The port to test.
+                      serverName:
+                        type: string
+                        example: example.com
+                        title: ServerName
+                        description: The server name definition of SNI (Server Name Indication) support allows a single server to host multiple TLS/SSL certificates on the same IP address and port.
+                      allowUntrustedRoot:
+                        type: boolean
+                        example: true
+                        title: AllowUntrustedRoot
+                        description: Allow untrusted root certificate in chain. true will disable untrusted root certificate validation.
+                      allowSelfSigned:
+                        type: boolean
+                        example: true
+                        title: AllowSelfSigned
+                        description: Allow self-signed certificate in chain. true will disable self-signed certificate validation.
+                      caCertificateId:
+                        type:
+                        - integer
+                        - 'null'
+                        format: int64
+                        example: 1
+                        title: CaCertificateId
+                        description: The unique ID of the CA Certificate.
+                      validations:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              example: My validation step
+                              title: ValidationName
+                            type:
+                              type: string
+                              enum:
+                              - assert_numeric
+                              - assert_string
+                              example: assert_numeric
+                              description: 'Type of assertion. Possible values for this are:
+
+
+                                assert_string - When asserting text
+
+                                assert_numeric - When asserting Expiration in days, tls_version, is_self_signed, is_revoked'
+                            actual:
+                              type: string
+                              example: '{{response.days_until_expiration}}'
+                              description: 'The actual value. If referencing a response variable, the value of
+
+                                this field is:
+
+
+                                {{response.days_until_expiration}}
+
+                                {{response.tls_version}}
+
+                                {{response.subject}}
+
+                                {{response.issuer}}
+
+                                {{response.is_self_signed}} contains 0 or 1 as boolean
+
+                                {{response.is_revoked}} contains 0 or 1 as boolean
+
+                                {{response.algorithm}}
+
+                                {{response.issuer_days_until_expiration}}
+
+                                {{response.issuer_tls_version}}
+
+                                {{response.issuer_subject}}
+
+                                {{response.issuer_algorithm}}
+
+                                {{response.issuer_is_trusted}} contains 0 or 1 as boolean
+
+                                {{response.issuer_is_revoked}} contains 0 or 1 as boolean'
+                            expected:
+                              type: string
+                              example: 200
+                              description: What you expect the variable to be.
+                            comparator:
+                              type: string
+                              enum:
+                              - is_empty
+                              - is_not_empty
+                              - contains
+                              - does_not_contain
+                              - equals
+                              - does_not_equal
+                              - matches
+                              - does_not_match
+                              - is_less_than
+                              - is_less_than_or_equal_to
+                              - is_greater_than
+                              - is_greater_than_or_equal_to
+                              example: equals
+                              description: 'Comparator between the actual value and the expected value. Must be
+
+                                one of the following for type = assert_string:
+
+
+                                is_empty
+
+                                is_not_empty
+
+                                contains
+
+                                does_not_contain
+
+                                equals
+
+                                does_not_equal
+
+                                matches to regular expression
+
+                                does_not_match to regular expression
+
+
+                                and one of the following for type = assert_numeric:
+
+
+                                equals
+
+                                does_not_equal
+
+                                is_less_than
+
+                                is_less_than_or_equal_to
+
+                                is_greater_than
+
+                                is_greater_than_or_equal_to'
+                          title: ValidationAssert
+                          description: Validation assert SSL Certificate data from response.
+                        title: Validations
+                      customProperties:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                          - key
+                          - value
+                          properties:
+                            key:
+                              type: string
+                              example: Env
+                            value:
+                              type: string
+                              example: production
+                        title: CustomProperties
+                        description: An array of custom properties.  The section Custom Properties Criteria lists the requirements for custom property names and values.
+                      createdAt:
+                        type: string
+                        readOnly: true
+                        writeOnly: false
+                        example: '2022-09-14T14:35:37.801Z'
+                        title: CreatedAt
+                        description: 'Timestamp of when the item was created, in UTC.
+
+                          This field is read_only, and the system always sets the value.'
+                      updatedAt:
+                        type: string
+                        readOnly: true
+                        writeOnly: false
+                        example: '2022-09-14T14:35:38.099Z'
+                        title: UpdatedAt
+                        description: 'Timestamp of when the item was last updated, in UTC.
+
+                          This field is read_only, and the system always sets the value.'
+                      createdBy:
+                        type: string
+                        readOnly: true
+                        writeOnly: false
+                        example: abcdefgh1234
+                        title: CreatedBy
+                        description: 'Member ID of who created the item.
+
+                          This field is read-only, and the system always sets the value.'
+                      updatedBy:
+                        type: string
+                        readOnly: true
+                        writeOnly: false
+                        example: abcdefgh1234
+                        title: UpdatedBy
+                        description: 'Member ID of who last updated the item.
+
+                          This field is read-only, and the system always sets the value.'
+                    title: SslTestResponse
+              examples:
+                example:
+                  value:
+                    test:
+                      active: true
+                      allowSelfSigned: true
+                      allowUntrustedRoot: true
+                      caCertificateId: 1
+                      createdAt: '2022-09-14T14:35:37.801Z'
+                      createdBy: abcdefgh1234
+                      customProperties:
+                      - key: Env
+                        value: production
+                      frequency: 5
+                      host: example.com
+                      id: 1
+                      locationIds:
+                      - aws-us-east-1
+                      name: My SSL Cert Test
+                      port: 443
+                      schedulingStrategy: round_robin
+                      serverName: example.com
+                      updatedAt: '2022-09-14T14:35:38.099Z'
+                      updatedBy: abcdefgh1234
+                      validations:
+                      - actual: '{{response.days_until_expiration}}'
+                        comparator: equals
+                        expected: 200
+                        name: My validation step
+                        type: assert_numeric
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Record not found
+                  details:
+                    type: object
+                    example: '{}'
+                title: NotFound
+                description: Not Found
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Record not found
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics SSL Certificate Tests
+    put:
+      summary: updateSingleSslTest
+      description: 'Update an existing SSL Certificate Test
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the SSL Certificate Test you are updating
+        required: true
+        schema:
+          type: integer
+          example: 1
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                test:
+                  type: object
+                  title: SslTestRequest
+                  required:
+                  - name
+                  - active
+                  - frequency
+                  - schedulingStrategy
+                  - locationIds
+                  - host
+                  properties:
+                    name:
+                      type: string
+                      example: My SSL Cert Test
+                      title: TestName
+                    active:
+                      type: boolean
+                      example: true
+                      title: Active
+                    frequency:
+                      type: integer
+                      format: int32
+                      example: 5
+                      maximum: 1440
+                      minimum: 1
+                      title: Frequency
+                      description: How often to run your test.
+                    schedulingStrategy:
+                      type: string
+                      example: round_robin
+                      enum:
+                      - round_robin
+                      - concurrent
+                      title: SchedulingStrategy
+                      description: 'Type of scheduling strategy. This can only be:
+
+
+                        round_robin
+
+                        concurrent'
+                    locationIds:
+                      type: array
+                      items:
+                        type: string
+                      example:
+                      - aws-us-east-1
+                      title: LocationIds
+                      description: An array of location IDs where the test runs.
+                    host:
+                      type: string
+                      example: example.com
+                      title: Host
+                      description: The host to test.
+                    port:
+                      type: integer
+                      format: int32
+                      example: 443
+                      default: 443
+                      minimum: 1
+                      maximum: 65535
+                      title: Port
+                      description: The port to test.
+                    serverName:
+                      type: string
+                      example: example.com
+                      title: ServerName
+                      description: The server name definition of SNI (Server Name Indication) support allows a single server to host multiple TLS/SSL certificates on the same IP address and port.
+                    allowUntrustedRoot:
+                      type: boolean
+                      example: true
+                      title: AllowUntrustedRoot
+                      description: Allow untrusted root certificate in chain. true will disable untrusted root certificate validation.
+                    allowSelfSigned:
+                      type: boolean
+                      example: true
+                      title: AllowSelfSigned
+                      description: Allow self-signed certificate in chain. true will disable self-signed certificate validation.
+                    caCertificateId:
+                      type:
+                      - integer
+                      - 'null'
+                      format: int64
+                      example: 1
+                      title: CaCertificateId
+                      description: The unique ID of the CA Certificate.
+                    validations:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: My validation step
+                            title: ValidationName
+                          type:
+                            type: string
+                            enum:
+                            - assert_numeric
+                            - assert_string
+                            example: assert_numeric
+                            description: 'Type of assertion. Possible values for this are:
+
+
+                              assert_string - When asserting text
+
+                              assert_numeric - When asserting Expiration in days, tls_version, is_self_signed, is_revoked'
+                          actual:
+                            type: string
+                            example: '{{response.days_until_expiration}}'
+                            description: 'The actual value. If referencing a response variable, the value of
+
+                              this field is:
+
+
+                              {{response.days_until_expiration}}
+
+                              {{response.tls_version}}
+
+                              {{response.subject}}
+
+                              {{response.issuer}}
+
+                              {{response.is_self_signed}} contains 0 or 1 as boolean
+
+                              {{response.is_revoked}} contains 0 or 1 as boolean
+
+                              {{response.algorithm}}
+
+                              {{response.issuer_days_until_expiration}}
+
+                              {{response.issuer_tls_version}}
+
+                              {{response.issuer_subject}}
+
+                              {{response.issuer_algorithm}}
+
+                              {{response.issuer_is_trusted}} contains 0 or 1 as boolean
+
+                              {{response.issuer_is_revoked}} contains 0 or 1 as boolean'
+                          expected:
+                            type: string
+                            example: 200
+                            description: What you expect the variable to be.
+                          comparator:
+                            type: string
+                            enum:
+                            - is_empty
+                            - is_not_empty
+                            - contains
+                            - does_not_contain
+                            - equals
+                            - does_not_equal
+                            - matches
+                            - does_not_match
+                            - is_less_than
+                            - is_less_than_or_equal_to
+                            - is_greater_than
+                            - is_greater_than_or_equal_to
+                            example: equals
+                            description: 'Comparator between the actual value and the expected value. Must be
+
+                              one of the following for type = assert_string:
+
+
+                              is_empty
+
+                              is_not_empty
+
+                              contains
+
+                              does_not_contain
+
+                              equals
+
+                              does_not_equal
+
+                              matches to regular expression
+
+                              does_not_match to regular expression
+
+
+                              and one of the following for type = assert_numeric:
+
+
+                              equals
+
+                              does_not_equal
+
+                              is_less_than
+
+                              is_less_than_or_equal_to
+
+                              is_greater_than
+
+                              is_greater_than_or_equal_to'
+                        title: ValidationAssert
+                        description: Validation assert SSL Certificate data from response.
+                      title: Validations
+                    customProperties:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - key
+                        - value
+                        properties:
+                          key:
+                            type: string
+                            example: Env
+                          value:
+                            type: string
+                            example: production
+                      title: CustomProperties
+                      description: An array of custom properties.  The section Custom Properties Criteria lists the requirements for custom property names and values.
+            examples:
+              example:
+                value:
+                  test:
+                    active: true
+                    allowSelfSigned: true
+                    allowUntrustedRoot: true
+                    caCertificateId: 1
+                    customProperties:
+                    - key: Env
+                      value: production
+                    frequency: 5
+                    host: example.com
+                    locationIds:
+                    - aws-us-east-1
+                    name: My SSL Cert Test
+                    port: 443
+                    schedulingStrategy: round_robin
+                    serverName: example.com
+                    validations:
+                    - actual: '{{response.days_until_expiration}}'
+                      comparator: equals
+                      expected: 200
+                      name: My validation step
+                      type: assert_numeric
+      responses:
+        '200':
+          description: HTTP 200 response
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Record not found
+                  details:
+                    type: object
+                    example: '{}'
+                title: NotFound
+                description: Not Found
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Record not found
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Could not process SSL Certificate Test
+                  details:
+                    type: object
+                    properties:
+                      name:
+                        type: array
+                        items:
+                          type: string
+                          example: is already taken
+                        description: 'This is a dynamic schema that consists of:
+
+                          "fieldName": ["reason"]'
+                title: UnprocessableEntity
+                description: UnprocessableEntity
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details:
+                      name:
+                      - is already taken
+                    message: Could not process SSL Certificate Test
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics SSL Certificate Tests
+    delete:
+      summary: deleteSslTest
+      description: 'Deletes a SSL Certificate Test
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of a Test
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: HTTP 204 response
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Record not found
+                  details:
+                    type: object
+                    example: '{}'
+                title: NotFound
+                description: Not Found
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Record not found
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics SSL Certificate Tests
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.

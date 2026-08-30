@@ -1,0 +1,329 @@
+openapi: 3.2.0
+info:
+  title: Splunk Observability Cloud — Retrieve metric time series (MTS) Retrieve metric time series (MTS) API
+  version: 4.0.0
+  description: 'API for retrieving data points from a metric times series (MTS) for a given time window
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's. Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v1
+  description: MTS retrieval for time window API endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+tags:
+- name: Retrieve metric time series (MTS)
+paths:
+  /timeserieswindow:
+    get:
+      summary: Retrieve MTS
+      description: 'Retrieves data points for a MTS specified by text search or a time
+
+        window or both. The request uses the following query parameters:
+
+
+        query: A query that searches metrics, dimensions, custom
+
+        properties, and tags. The query language lets you use wildcards for
+
+        names and values.
+
+        startMS: The starting point of a time window for the data points
+
+        in the MTS.
+
+        endMS: The end point of a time window for the data points in the
+
+        MTS.
+
+
+        Another query parameter, resolution, specifies the resolution
+
+        that you want the system to use when returning data points. Because Splunk Observability Cloud
+
+        stores MTS for a specified length of time according to resolution, it
+
+        can return data points at a resolution of 1 second, 1 minute, 5 minutes,
+
+        and 1 hour, regardless of the incoming data resolution.
+
+        This endpoint only returns default rollup values, which depend on the type of metric in the requested MTS. You can''t override these values. The following list shows metric types and their corresponding rollup values:
+
+
+        Gauge: Average
+
+        Counter: Sum
+
+        Cumulative counter: Maximum
+
+
+        Note: Splunk Observability Cloud returns a maximum of 10,000 MTS, even if your organization contains more than 10,000. To learn more, see the
+
+        Considerations for retrieve operations section in the developer guide.'
+      parameters:
+      - name: query
+        in: query
+        description: 'Search criteria that specifies the MTS that you want the API to
+
+          return. You can search for the following:
+
+
+          Metric names
+
+          Dimension names
+
+          Specific values of a dimension
+
+          Custom properties
+
+          Specific values of a custom property
+
+          Tags
+
+
+          Search criteria have the following rules:
+
+
+          To search for a metric, use the field sf_metric. For example, sf_metric:<metric_name>.
+
+          You may use wildcards in the metric name. This returns data points for all MTS that match the metric name.
+
+          To search for data points that have a dimension or property,
+
+          regardless of the value, specify <name>:*
+
+          To search for specific values of a dimension or property, specify
+
+          the name and value as <name>:<value>. If <value> contains
+
+          non-alphanumeric characters, encode the non-alphanumeric characters and surround the value with
+
+          double quotes. For example, the region custom property value US East must be passed in the parameter as region:"US%20East".
+
+          To search for names or values using wildcards, use * as the
+
+          wildcard character. For example, to search for all values of the
+
+          region dimension, use region:*.
+
+          You can do range searches on metrics, dimensions or properties
+
+          using the syntax <name>:[<lower> to <upper>] (The value of
+
+          <lower> must be less than or equal to <upper>). This works for
+
+          numeric and alphabetic values.
+
+          To search MTS for the existence of dimensions or properties, use
+
+          _exists_ and _missing_. For example, to search for MTS that
+
+          have the host_machine dimension, specify _exists_:host_machine.
+
+          A single property name and value (or wildcards) make up a
+
+          predicate that implicitly returns a Boolean.
+
+          Join predicates with the NOT, AND, and OR Boolean operators.
+
+          Use parentheses ''('' and '')'' to change the evaluation order.'
+        schema:
+          type: string
+      - name: startMs
+        in: query
+        description: 'Starting time of the time window within which you want the system to search
+
+          for matching MTS. Specify the value in *nix time in milliseconds.'
+        schema:
+          type: integer
+          format: int64
+      - name: endMS
+        in: query
+        description: 'End point of the time window within which you want the system to search for
+
+          matching MTS. Specify the value in *nix time in milliseconds.'
+        schema:
+          type: integer
+          format: int64
+      - name: resolution
+        in: query
+        description: 'Resolution that the API should use for data points it returns.
+
+          Allowed values are 1000 (1 second), 60000 (1 minute), 300000 (5 minutes), and 3600000 (1 hour).'
+        schema:
+          type: integer
+          format: int32
+      - name: X-SF-Token
+        in: header
+        description: 'Authentication token. You can use a session token (User API access token) or an access token (org token)
+
+          if the access token has the API authorization scope (authScope)'
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      additionalProperties:
+                        type: array
+                        items:
+                          type: integer
+                          format: int64
+                    description: 'The data points for the MTS that match the search criteria
+
+                      and have timestamps within the specified time window. The
+
+                      number of data points is controlled by the resolution you
+
+                      request.
+
+                      The data points are sorted in ascending order of timestamp (older data points appear first).
+
+                      Each data point is an array containing two values: the timestamp and the value itself.'
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                    description: Errors associated with the request. This array is always empty. If an error occurs, the API returns an error (non-200) status code.
+                example:
+                  code: 200
+                  data:
+                    AAAAAAAAAAA:
+                    - - 1705449600000
+                      - 227.07710813246499
+                    AAAAAAAAAAE:
+                    - - 1705449600000
+                      - 122.4751087329639
+                  errors: []
+              examples:
+                example:
+                  value:
+                    code: 200
+                    data:
+                      AAAAAAAAAAA:
+                      - - 1705449600000
+                        - 227.07710813246499
+                      AAAAAAAAAAE:
+                      - - 1705449600000
+                        - 122.4751087329639
+                    errors: []
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    description: HTTP response code. Always 400
+                  message:
+                    type: string
+                    description: Error explanation
+                  type:
+                    type: string
+                    description: Type of the status. Always "error".
+                example:
+                  code: 400
+                  message: 'API error: 400'
+                  type: error
+              examples:
+                example:
+                  value:
+                    code: 400
+                    message: 'API error: 400'
+                    type: error
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    description: HTTP response code. Always 401
+                  message:
+                    type: string
+                    description: Error explanation
+                  type:
+                    type: string
+                    description: Type of the status. Always "error".
+                example:
+                  code: 401
+                  message: Authentication Required
+                  type: error
+              examples:
+                example:
+                  value:
+                    code: 401
+                    message: Authentication Required
+                    type: error
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    description: HTTP response code. Always 404
+                  message:
+                    type: string
+                    description: Error explanation
+                  type:
+                    type: string
+                    description: Type of the status. Always "error".
+                example:
+                  code: 404
+                  message: 'API Error: 404'
+                  type: error
+              examples:
+                example:
+                  value:
+                    code: 404
+                    message: 'API Error: 404'
+                    type: error
+      security:
+      - SessionToken: []
+      tags:
+      - Retrieve metric time series (MTS)
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.

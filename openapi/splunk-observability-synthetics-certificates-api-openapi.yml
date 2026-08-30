@@ -1,0 +1,1305 @@
+openapi: 3.2.0
+info:
+  title: Splunk Observability Cloud Synthetics certificates API
+  version: 1.0.0
+  description: 'API for creating, updating, and deleting client certificates.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You need the Splunk Observability Cloud admin, power, or read_only role to use this API.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's. Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2/synthetics
+  description: Endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+tags:
+- name: Synthetics certificates
+paths:
+  /certificates:
+    get:
+      summary: getClientCertificates
+      description: 'Returns a list of client certificates.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin, power, or read_only role.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  certificates:
+                    type: array
+                    items:
+                      title: CertificateResponse
+                      properties:
+                        name:
+                          type: string
+                          example: foo
+                          title: CertificateName
+                          description: The name of your client certificate.
+                        domain:
+                          type: string
+                          example: app.us1.observability.splunkcloud.com
+                          title: CertificateDomain
+                          description: The domain of your client certificate.
+                        description:
+                          type: string
+                          example: My awesome client certificate
+                          title: CertificateDescription
+                          description: The description of your client certificate.
+                        createdAt:
+                          type: string
+                          readOnly: true
+                          example: '2022-09-14T14:35:37.801Z'
+                          title: CreatedAt
+                          description: 'Timestamp of when the item was created, in UTC.
+
+                            This field is read_only, and the system always sets the value.'
+                        updatedAt:
+                          type: string
+                          readOnly: true
+                          example: '2022-09-14T14:35:38.099Z'
+                          title: UpdatedAt
+                          description: 'Timestamp of when the item was last updated, in UTC.
+
+                            This field is read_only, and the system always sets the value.'
+                        createdBy:
+                          type: string
+                          readOnly: true
+                          example: abcdefgh1234
+                          title: CreatedBy
+                          description: 'Member ID of who created the item.
+
+                            This field is read-only, and the system always sets the value.'
+                        updatedBy:
+                          type: string
+                          readOnly: true
+                          example: abcdefgh1234
+                          title: UpdatedBy
+                          description: 'Member ID of who last updated the item.
+
+                            This field is read-only, and the system always sets the value.'
+                        publicKey:
+                          title: CertificatePublicKeyResponse
+                          properties:
+                            content:
+                              type: string
+                              example: <REDACTED>
+                              description: The public key of the client certificate.
+                            fileExtension:
+                              type: string
+                              example: pem
+                              description: The file extension of the key.
+                            filename:
+                              type: string
+                              example: my_cert.pem
+                              description: The filename of the key.
+                            id:
+                              type: integer
+                              format: int64
+                              example: 1
+                              description: The unique ID of the key.
+                            createdAt:
+                              type: string
+                              readOnly: true
+                              example: '2022-09-14T14:35:37.801Z'
+                              title: CreatedAt
+                              description: 'Timestamp of when the item was created, in UTC.
+
+                                This field is read_only, and the system always sets the value.'
+                            updatedAt:
+                              type: string
+                              readOnly: true
+                              example: '2022-09-14T14:35:38.099Z'
+                              title: UpdatedAt
+                              description: 'Timestamp of when the item was last updated, in UTC.
+
+                                This field is read_only, and the system always sets the value.'
+                            createdBy:
+                              type: string
+                              readOnly: true
+                              example: abcdefgh1234
+                              title: CreatedBy
+                              description: 'Member ID of who created the item.
+
+                                This field is read-only, and the system always sets the value.'
+                            updatedBy:
+                              type: string
+                              readOnly: true
+                              example: abcdefgh1234
+                              title: UpdatedBy
+                              description: 'Member ID of who last updated the item.
+
+                                This field is read-only, and the system always sets the value.'
+                          required:
+                          - content
+                          - fileExtension
+                          - filename
+                          - id
+                          - createdAt
+                          - updatedAt
+                          - createdBy
+                          - updatedBy
+                          type: object
+                        privateKey:
+                          title: CertificatePrivateKeyResponse
+                          properties:
+                            content:
+                              type: string
+                              example: <REDACTED>
+                              description: The private key of the client certificate.
+                            fileExtension:
+                              type: string
+                              example: pem
+                              description: The file extension of the key.
+                            filename:
+                              type: string
+                              example: my_cert.pem
+                              description: The filename of the key.
+                            password:
+                              type: string
+                              example: <REDACTED>
+                              description: The password of the private key.
+                            id:
+                              type: integer
+                              format: int64
+                              example: 1
+                              description: The unique ID of the key.
+                            createdAt:
+                              type: string
+                              readOnly: true
+                              example: '2022-09-14T14:35:37.801Z'
+                              title: CreatedAt
+                              description: 'Timestamp of when the item was created, in UTC.
+
+                                This field is read_only, and the system always sets the value.'
+                            updatedAt:
+                              type: string
+                              readOnly: true
+                              example: '2022-09-14T14:35:38.099Z'
+                              title: UpdatedAt
+                              description: 'Timestamp of when the item was last updated, in UTC.
+
+                                This field is read_only, and the system always sets the value.'
+                            createdBy:
+                              type: string
+                              readOnly: true
+                              example: abcdefgh1234
+                              title: CreatedBy
+                              description: 'Member ID of who created the item.
+
+                                This field is read-only, and the system always sets the value.'
+                            updatedBy:
+                              type: string
+                              readOnly: true
+                              example: abcdefgh1234
+                              title: UpdatedBy
+                              description: 'Member ID of who last updated the item.
+
+                                This field is read-only, and the system always sets the value.'
+                          required:
+                          - content
+                          - fileExtension
+                          - filename
+                          - id
+                          - createdAt
+                          - updatedAt
+                          - createdBy
+                          - updatedBy
+                          type: object
+                        id:
+                          type: integer
+                          format: int64
+                          example: 1
+                          title: CertificateId
+                          description: The unique ID of the certificate.
+                        expiresAt:
+                          type:
+                          - string
+                          - 'null'
+                          example: '2026-09-14T14:35:37.801Z'
+                          title: CertificateExpiresAt
+                          description: Timestamp of when the certificate will expire, in UTC.
+                      required:
+                      - name
+                      - domain
+                      - createdAt
+                      - updatedAt
+                      - createdBy
+                      - updatedBy
+                      - publicKey
+                      - privateKey
+                      - id
+                      type: object
+              examples:
+                example:
+                  value:
+                    certificates:
+                    - createdAt: '2022-09-14T14:35:37.801Z'
+                      createdBy: abcdefgh1234
+                      description: My awesome client certificate
+                      domain: app.us1.observability.splunkcloud.com
+                      expiresAt: '2026-09-14T14:35:37.801Z'
+                      id: 1
+                      name: foo
+                      privateKey:
+                        content: <REDACTED>
+                        createdAt: '2022-09-14T14:35:37.801Z'
+                        createdBy: abcdefgh1234
+                        fileExtension: pem
+                        filename: my_cert.pem
+                        id: 1
+                        password: <REDACTED>
+                        updatedAt: '2022-09-14T14:35:38.099Z'
+                        updatedBy: abcdefgh1234
+                      publicKey:
+                        content: <REDACTED>
+                        createdAt: '2022-09-14T14:35:37.801Z'
+                        createdBy: abcdefgh1234
+                        fileExtension: pem
+                        filename: my_cert.pem
+                        id: 1
+                        updatedAt: '2022-09-14T14:35:38.099Z'
+                        updatedBy: abcdefgh1234
+                      updatedAt: '2022-09-14T14:35:38.099Z'
+                      updatedBy: abcdefgh1234
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics certificates
+    post:
+      summary: createClientCertificate
+      description: 'Creates a new client certificate, based on the specifications in the request body.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: CertificateRequestBody
+              properties:
+                certificate:
+                  type: object
+                  title: Certificate
+                  required:
+                  - name
+                  - domain
+                  - createdAt
+                  - updatedAt
+                  - createdBy
+                  - updatedBy
+                  - publicKey
+                  - privateKey
+                  properties:
+                    name:
+                      type: string
+                      example: foo
+                      title: CertificateName
+                      description: The name of your client certificate.
+                    domain:
+                      type: string
+                      example: app.us1.observability.splunkcloud.com
+                      title: CertificateDomain
+                      description: The domain of your client certificate.
+                    description:
+                      type: string
+                      example: My awesome client certificate
+                      title: CertificateDescription
+                      description: The description of your client certificate.
+                    createdAt:
+                      type: string
+                      readOnly: true
+                      example: '2022-09-14T14:35:37.801Z'
+                      title: CreatedAt
+                      description: 'Timestamp of when the item was created, in UTC.
+
+                        This field is read_only, and the system always sets the value.'
+                    updatedAt:
+                      type: string
+                      readOnly: true
+                      example: '2022-09-14T14:35:38.099Z'
+                      title: UpdatedAt
+                      description: 'Timestamp of when the item was last updated, in UTC.
+
+                        This field is read_only, and the system always sets the value.'
+                    createdBy:
+                      type: string
+                      readOnly: true
+                      example: abcdefgh1234
+                      title: CreatedBy
+                      description: 'Member ID of who created the item.
+
+                        This field is read-only, and the system always sets the value.'
+                    updatedBy:
+                      type: string
+                      readOnly: true
+                      example: abcdefgh1234
+                      title: UpdatedBy
+                      description: 'Member ID of who last updated the item.
+
+                        This field is read-only, and the system always sets the value.'
+                    publicKey:
+                      type: object
+                      required:
+                      - content
+                      - fileExtension
+                      - filename
+                      properties:
+                        content:
+                          type: string
+                          example: '"QmFnIEF0dHJpYnV0ZXMKICAgIGxvY2FsS2V5SUQ6IEY0IEVGIEVFIDU3IDE4IEU4IDE3IDczIEZBIDQ0IDI2IDZEIERCBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQo="
+
+                            '
+                          description: The public key content encoded in Base64.
+                        fileExtension:
+                          type: string
+                          example: pem
+                          description: The file extension of the key.
+                        filename:
+                          type: string
+                          example: my_cert.pem
+                          description: The filename of the key.
+                      title: CertificatePublicKey
+                    privateKey:
+                      title: CertificatePrivateKey
+                      properties:
+                        content:
+                          type: string
+                          example: '"QmFnIEF0dHJpYnV0ZXMKICAgIGxvY2FsS2V5SUQ6IEY0IEVGIEVFIDU3IDE4IEU4IDE3IDczIEZBIDQ0IDI2IDZEIERFIDVEIEExIDIwjdjPQotLS0tLUVORCBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQo="
+
+                            '
+                          description: The private key content encoded in Base64.
+                        fileExtension:
+                          type: string
+                          example: pem
+                          description: The file extension of the key.
+                        filename:
+                          type: string
+                          example: my_cert.pem
+                          description: The filename of the key.
+                        password:
+                          type: string
+                          example: my_password
+                          description: The password of the private key.
+                      required:
+                      - content
+                      - fileExtension
+                      - filename
+                      type: object
+            examples:
+              example:
+                value:
+                  certificate:
+                    createdAt: '2022-09-14T14:35:37.801Z'
+                    createdBy: abcdefgh1234
+                    description: My awesome client certificate
+                    domain: app.us1.observability.splunkcloud.com
+                    name: foo
+                    privateKey:
+                      content: '"QmFnIEF0dHJpYnV0ZXMKICAgIGxvY2FsS2V5SUQ6IEY0IEVGIEVFIDU3IDE4IEU4IDE3IDczIEZBIDQ0IDI2IDZEIERFIDVEIEExIDIwjdjPQotLS0tLUVORCBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQo="
+
+                        '
+                      fileExtension: pem
+                      filename: my_cert.pem
+                      password: my_password
+                    publicKey:
+                      content: '"QmFnIEF0dHJpYnV0ZXMKICAgIGxvY2FsS2V5SUQ6IEY0IEVGIEVFIDU3IDE4IEU4IDE3IDczIEZBIDQ0IDI2IDZEIERCBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQo="
+
+                        '
+                      fileExtension: pem
+                      filename: my_cert.pem
+                    updatedAt: '2022-09-14T14:35:38.099Z'
+                    updatedBy: abcdefgh1234
+      responses:
+        '201':
+          description: HTTP 201 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  certificate:
+                    title: CertificateResponse
+                    properties:
+                      name:
+                        type: string
+                        example: foo
+                        title: CertificateName
+                        description: The name of your client certificate.
+                      domain:
+                        type: string
+                        example: app.us1.observability.splunkcloud.com
+                        title: CertificateDomain
+                        description: The domain of your client certificate.
+                      description:
+                        type: string
+                        example: My awesome client certificate
+                        title: CertificateDescription
+                        description: The description of your client certificate.
+                      createdAt:
+                        type: string
+                        readOnly: true
+                        example: '2022-09-14T14:35:37.801Z'
+                        title: CreatedAt
+                        description: 'Timestamp of when the item was created, in UTC.
+
+                          This field is read_only, and the system always sets the value.'
+                      updatedAt:
+                        type: string
+                        readOnly: true
+                        example: '2022-09-14T14:35:38.099Z'
+                        title: UpdatedAt
+                        description: 'Timestamp of when the item was last updated, in UTC.
+
+                          This field is read_only, and the system always sets the value.'
+                      createdBy:
+                        type: string
+                        readOnly: true
+                        example: abcdefgh1234
+                        title: CreatedBy
+                        description: 'Member ID of who created the item.
+
+                          This field is read-only, and the system always sets the value.'
+                      updatedBy:
+                        type: string
+                        readOnly: true
+                        example: abcdefgh1234
+                        title: UpdatedBy
+                        description: 'Member ID of who last updated the item.
+
+                          This field is read-only, and the system always sets the value.'
+                      publicKey:
+                        title: CertificatePublicKeyResponse
+                        properties:
+                          content:
+                            type: string
+                            example: <REDACTED>
+                            description: The public key of the client certificate.
+                          fileExtension:
+                            type: string
+                            example: pem
+                            description: The file extension of the key.
+                          filename:
+                            type: string
+                            example: my_cert.pem
+                            description: The filename of the key.
+                          id:
+                            type: integer
+                            format: int64
+                            example: 1
+                            description: The unique ID of the key.
+                          createdAt:
+                            type: string
+                            readOnly: true
+                            example: '2022-09-14T14:35:37.801Z'
+                            title: CreatedAt
+                            description: 'Timestamp of when the item was created, in UTC.
+
+                              This field is read_only, and the system always sets the value.'
+                          updatedAt:
+                            type: string
+                            readOnly: true
+                            example: '2022-09-14T14:35:38.099Z'
+                            title: UpdatedAt
+                            description: 'Timestamp of when the item was last updated, in UTC.
+
+                              This field is read_only, and the system always sets the value.'
+                          createdBy:
+                            type: string
+                            readOnly: true
+                            example: abcdefgh1234
+                            title: CreatedBy
+                            description: 'Member ID of who created the item.
+
+                              This field is read-only, and the system always sets the value.'
+                          updatedBy:
+                            type: string
+                            readOnly: true
+                            example: abcdefgh1234
+                            title: UpdatedBy
+                            description: 'Member ID of who last updated the item.
+
+                              This field is read-only, and the system always sets the value.'
+                        required:
+                        - content
+                        - fileExtension
+                        - filename
+                        - id
+                        - createdAt
+                        - updatedAt
+                        - createdBy
+                        - updatedBy
+                        type: object
+                      privateKey:
+                        title: CertificatePrivateKeyResponse
+                        properties:
+                          content:
+                            type: string
+                            example: <REDACTED>
+                            description: The private key of the client certificate.
+                          fileExtension:
+                            type: string
+                            example: pem
+                            description: The file extension of the key.
+                          filename:
+                            type: string
+                            example: my_cert.pem
+                            description: The filename of the key.
+                          password:
+                            type: string
+                            example: <REDACTED>
+                            description: The password of the private key.
+                          id:
+                            type: integer
+                            format: int64
+                            example: 1
+                            description: The unique ID of the key.
+                          createdAt:
+                            type: string
+                            readOnly: true
+                            example: '2022-09-14T14:35:37.801Z'
+                            title: CreatedAt
+                            description: 'Timestamp of when the item was created, in UTC.
+
+                              This field is read_only, and the system always sets the value.'
+                          updatedAt:
+                            type: string
+                            readOnly: true
+                            example: '2022-09-14T14:35:38.099Z'
+                            title: UpdatedAt
+                            description: 'Timestamp of when the item was last updated, in UTC.
+
+                              This field is read_only, and the system always sets the value.'
+                          createdBy:
+                            type: string
+                            readOnly: true
+                            example: abcdefgh1234
+                            title: CreatedBy
+                            description: 'Member ID of who created the item.
+
+                              This field is read-only, and the system always sets the value.'
+                          updatedBy:
+                            type: string
+                            readOnly: true
+                            example: abcdefgh1234
+                            title: UpdatedBy
+                            description: 'Member ID of who last updated the item.
+
+                              This field is read-only, and the system always sets the value.'
+                        required:
+                        - content
+                        - fileExtension
+                        - filename
+                        - id
+                        - createdAt
+                        - updatedAt
+                        - createdBy
+                        - updatedBy
+                        type: object
+                      id:
+                        type: integer
+                        format: int64
+                        example: 1
+                        title: CertificateId
+                        description: The unique ID of the certificate.
+                      expiresAt:
+                        type:
+                        - string
+                        - 'null'
+                        example: '2026-09-14T14:35:37.801Z'
+                        title: CertificateExpiresAt
+                        description: Timestamp of when the certificate will expire, in UTC.
+                    required:
+                    - name
+                    - domain
+                    - createdAt
+                    - updatedAt
+                    - createdBy
+                    - updatedBy
+                    - publicKey
+                    - privateKey
+                    - id
+                    type: object
+              examples:
+                example:
+                  value:
+                    certificate:
+                      createdAt: '2022-09-14T14:35:37.801Z'
+                      createdBy: abcdefgh1234
+                      description: My awesome client certificate
+                      domain: app.us1.observability.splunkcloud.com
+                      expiresAt: '2026-09-14T14:35:37.801Z'
+                      id: 1
+                      name: foo
+                      privateKey:
+                        content: <REDACTED>
+                        createdAt: '2022-09-14T14:35:37.801Z'
+                        createdBy: abcdefgh1234
+                        fileExtension: pem
+                        filename: my_cert.pem
+                        id: 1
+                        password: <REDACTED>
+                        updatedAt: '2022-09-14T14:35:38.099Z'
+                        updatedBy: abcdefgh1234
+                      publicKey:
+                        content: <REDACTED>
+                        createdAt: '2022-09-14T14:35:37.801Z'
+                        createdBy: abcdefgh1234
+                        fileExtension: pem
+                        filename: my_cert.pem
+                        id: 1
+                        updatedAt: '2022-09-14T14:35:38.099Z'
+                        updatedBy: abcdefgh1234
+                      updatedAt: '2022-09-14T14:35:38.099Z'
+                      updatedBy: abcdefgh1234
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Could not create Certificate
+                  details:
+                    type: object
+                    properties:
+                      name:
+                        type: array
+                        items:
+                          type: string
+                          example: is already taken
+                        description: 'This is a dynamic schema that consists of:
+
+                          "fieldName": ["reason"]'
+                type: object
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details:
+                      name:
+                      - is already taken
+                    message: Could not create Certificate
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics certificates
+  /certificates/{id}:
+    get:
+      summary: getSingleClientCertificate
+      description: 'Retrieves a single client certificate.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin, power, or read_only role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of a client certificate you want to retrieve.
+        required: true
+        schema:
+          type: integer
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  certificate:
+                    title: CertificateResponse
+                    properties:
+                      name:
+                        type: string
+                        example: foo
+                        title: CertificateName
+                        description: The name of your client certificate.
+                      domain:
+                        type: string
+                        example: app.us1.observability.splunkcloud.com
+                        title: CertificateDomain
+                        description: The domain of your client certificate.
+                      description:
+                        type: string
+                        example: My awesome client certificate
+                        title: CertificateDescription
+                        description: The description of your client certificate.
+                      createdAt:
+                        type: string
+                        readOnly: true
+                        example: '2022-09-14T14:35:37.801Z'
+                        title: CreatedAt
+                        description: 'Timestamp of when the item was created, in UTC.
+
+                          This field is read_only, and the system always sets the value.'
+                      updatedAt:
+                        type: string
+                        readOnly: true
+                        example: '2022-09-14T14:35:38.099Z'
+                        title: UpdatedAt
+                        description: 'Timestamp of when the item was last updated, in UTC.
+
+                          This field is read_only, and the system always sets the value.'
+                      createdBy:
+                        type: string
+                        readOnly: true
+                        example: abcdefgh1234
+                        title: CreatedBy
+                        description: 'Member ID of who created the item.
+
+                          This field is read-only, and the system always sets the value.'
+                      updatedBy:
+                        type: string
+                        readOnly: true
+                        example: abcdefgh1234
+                        title: UpdatedBy
+                        description: 'Member ID of who last updated the item.
+
+                          This field is read-only, and the system always sets the value.'
+                      publicKey:
+                        title: CertificatePublicKeyResponse
+                        properties:
+                          content:
+                            type: string
+                            example: <REDACTED>
+                            description: The public key of the client certificate.
+                          fileExtension:
+                            type: string
+                            example: pem
+                            description: The file extension of the key.
+                          filename:
+                            type: string
+                            example: my_cert.pem
+                            description: The filename of the key.
+                          id:
+                            type: integer
+                            format: int64
+                            example: 1
+                            description: The unique ID of the key.
+                          createdAt:
+                            type: string
+                            readOnly: true
+                            example: '2022-09-14T14:35:37.801Z'
+                            title: CreatedAt
+                            description: 'Timestamp of when the item was created, in UTC.
+
+                              This field is read_only, and the system always sets the value.'
+                          updatedAt:
+                            type: string
+                            readOnly: true
+                            example: '2022-09-14T14:35:38.099Z'
+                            title: UpdatedAt
+                            description: 'Timestamp of when the item was last updated, in UTC.
+
+                              This field is read_only, and the system always sets the value.'
+                          createdBy:
+                            type: string
+                            readOnly: true
+                            example: abcdefgh1234
+                            title: CreatedBy
+                            description: 'Member ID of who created the item.
+
+                              This field is read-only, and the system always sets the value.'
+                          updatedBy:
+                            type: string
+                            readOnly: true
+                            example: abcdefgh1234
+                            title: UpdatedBy
+                            description: 'Member ID of who last updated the item.
+
+                              This field is read-only, and the system always sets the value.'
+                        required:
+                        - content
+                        - fileExtension
+                        - filename
+                        - id
+                        - createdAt
+                        - updatedAt
+                        - createdBy
+                        - updatedBy
+                        type: object
+                      privateKey:
+                        title: CertificatePrivateKeyResponse
+                        properties:
+                          content:
+                            type: string
+                            example: <REDACTED>
+                            description: The private key of the client certificate.
+                          fileExtension:
+                            type: string
+                            example: pem
+                            description: The file extension of the key.
+                          filename:
+                            type: string
+                            example: my_cert.pem
+                            description: The filename of the key.
+                          password:
+                            type: string
+                            example: <REDACTED>
+                            description: The password of the private key.
+                          id:
+                            type: integer
+                            format: int64
+                            example: 1
+                            description: The unique ID of the key.
+                          createdAt:
+                            type: string
+                            readOnly: true
+                            example: '2022-09-14T14:35:37.801Z'
+                            title: CreatedAt
+                            description: 'Timestamp of when the item was created, in UTC.
+
+                              This field is read_only, and the system always sets the value.'
+                          updatedAt:
+                            type: string
+                            readOnly: true
+                            example: '2022-09-14T14:35:38.099Z'
+                            title: UpdatedAt
+                            description: 'Timestamp of when the item was last updated, in UTC.
+
+                              This field is read_only, and the system always sets the value.'
+                          createdBy:
+                            type: string
+                            readOnly: true
+                            example: abcdefgh1234
+                            title: CreatedBy
+                            description: 'Member ID of who created the item.
+
+                              This field is read-only, and the system always sets the value.'
+                          updatedBy:
+                            type: string
+                            readOnly: true
+                            example: abcdefgh1234
+                            title: UpdatedBy
+                            description: 'Member ID of who last updated the item.
+
+                              This field is read-only, and the system always sets the value.'
+                        required:
+                        - content
+                        - fileExtension
+                        - filename
+                        - id
+                        - createdAt
+                        - updatedAt
+                        - createdBy
+                        - updatedBy
+                        type: object
+                      id:
+                        type: integer
+                        format: int64
+                        example: 1
+                        title: CertificateId
+                        description: The unique ID of the certificate.
+                      expiresAt:
+                        type:
+                        - string
+                        - 'null'
+                        example: '2026-09-14T14:35:37.801Z'
+                        title: CertificateExpiresAt
+                        description: Timestamp of when the certificate will expire, in UTC.
+                    required:
+                    - name
+                    - domain
+                    - createdAt
+                    - updatedAt
+                    - createdBy
+                    - updatedBy
+                    - publicKey
+                    - privateKey
+                    - id
+                    type: object
+              examples:
+                example:
+                  value:
+                    certificate:
+                      createdAt: '2022-09-14T14:35:37.801Z'
+                      createdBy: abcdefgh1234
+                      description: My awesome client certificate
+                      domain: app.us1.observability.splunkcloud.com
+                      expiresAt: '2026-09-14T14:35:37.801Z'
+                      id: 1
+                      name: foo
+                      privateKey:
+                        content: <REDACTED>
+                        createdAt: '2022-09-14T14:35:37.801Z'
+                        createdBy: abcdefgh1234
+                        fileExtension: pem
+                        filename: my_cert.pem
+                        id: 1
+                        password: <REDACTED>
+                        updatedAt: '2022-09-14T14:35:38.099Z'
+                        updatedBy: abcdefgh1234
+                      publicKey:
+                        content: <REDACTED>
+                        createdAt: '2022-09-14T14:35:37.801Z'
+                        createdBy: abcdefgh1234
+                        fileExtension: pem
+                        filename: my_cert.pem
+                        id: 1
+                        updatedAt: '2022-09-14T14:35:38.099Z'
+                        updatedBy: abcdefgh1234
+                      updatedAt: '2022-09-14T14:35:38.099Z'
+                      updatedBy: abcdefgh1234
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Could not find certificate
+                  details:
+                    type: object
+                    example: '{}'
+                type: object
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Could not find certificate
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics certificates
+    put:
+      summary: updateSingleClientCertificate
+      description: 'Update an existing client certificate
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the client certificate you are updating
+        required: true
+        schema:
+          type: integer
+          example: 1
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Certificate
+              required:
+              - name
+              - domain
+              - createdAt
+              - updatedAt
+              - createdBy
+              - updatedBy
+              - publicKey
+              - privateKey
+              properties:
+                name:
+                  type: string
+                  example: foo
+                  title: CertificateName
+                  description: The name of your client certificate.
+                domain:
+                  type: string
+                  example: app.us1.observability.splunkcloud.com
+                  title: CertificateDomain
+                  description: The domain of your client certificate.
+                description:
+                  type: string
+                  example: My awesome client certificate
+                  title: CertificateDescription
+                  description: The description of your client certificate.
+                createdAt:
+                  type: string
+                  readOnly: true
+                  example: '2022-09-14T14:35:37.801Z'
+                  title: CreatedAt
+                  description: 'Timestamp of when the item was created, in UTC.
+
+                    This field is read_only, and the system always sets the value.'
+                updatedAt:
+                  type: string
+                  readOnly: true
+                  example: '2022-09-14T14:35:38.099Z'
+                  title: UpdatedAt
+                  description: 'Timestamp of when the item was last updated, in UTC.
+
+                    This field is read_only, and the system always sets the value.'
+                createdBy:
+                  type: string
+                  readOnly: true
+                  example: abcdefgh1234
+                  title: CreatedBy
+                  description: 'Member ID of who created the item.
+
+                    This field is read-only, and the system always sets the value.'
+                updatedBy:
+                  type: string
+                  readOnly: true
+                  example: abcdefgh1234
+                  title: UpdatedBy
+                  description: 'Member ID of who last updated the item.
+
+                    This field is read-only, and the system always sets the value.'
+                publicKey:
+                  type: object
+                  required:
+                  - content
+                  - fileExtension
+                  - filename
+                  properties:
+                    content:
+                      type: string
+                      example: '"QmFnIEF0dHJpYnV0ZXMKICAgIGxvY2FsS2V5SUQ6IEY0IEVGIEVFIDU3IDE4IEU4IDE3IDczIEZBIDQ0IDI2IDZEIERCBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQo="
+
+                        '
+                      description: The public key content encoded in Base64.
+                    fileExtension:
+                      type: string
+                      example: pem
+                      description: The file extension of the key.
+                    filename:
+                      type: string
+                      example: my_cert.pem
+                      description: The filename of the key.
+                  title: CertificatePublicKey
+                privateKey:
+                  title: CertificatePrivateKey
+                  properties:
+                    content:
+                      type: string
+                      example: '"QmFnIEF0dHJpYnV0ZXMKICAgIGxvY2FsS2V5SUQ6IEY0IEVGIEVFIDU3IDE4IEU4IDE3IDczIEZBIDQ0IDI2IDZEIERFIDVEIEExIDIwjdjPQotLS0tLUVORCBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQo="
+
+                        '
+                      description: The private key content encoded in Base64.
+                    fileExtension:
+                      type: string
+                      example: pem
+                      description: The file extension of the key.
+                    filename:
+                      type: string
+                      example: my_cert.pem
+                      description: The filename of the key.
+                    password:
+                      type: string
+                      example: my_password
+                      description: The password of the private key.
+                  required:
+                  - content
+                  - fileExtension
+                  - filename
+                  type: object
+            examples:
+              example:
+                value:
+                  createdAt: '2022-09-14T14:35:37.801Z'
+                  createdBy: abcdefgh1234
+                  description: My awesome client certificate
+                  domain: app.us1.observability.splunkcloud.com
+                  name: foo
+                  privateKey:
+                    content: '"QmFnIEF0dHJpYnV0ZXMKICAgIGxvY2FsS2V5SUQ6IEY0IEVGIEVFIDU3IDE4IEU4IDE3IDczIEZBIDQ0IDI2IDZEIERFIDVEIEExIDIwjdjPQotLS0tLUVORCBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQo="
+
+                      '
+                    fileExtension: pem
+                    filename: my_cert.pem
+                    password: my_password
+                  publicKey:
+                    content: '"QmFnIEF0dHJpYnV0ZXMKICAgIGxvY2FsS2V5SUQ6IEY0IEVGIEVFIDU3IDE4IEU4IDE3IDczIEZBIDQ0IDI2IDZEIERCBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQo="
+
+                      '
+                    fileExtension: pem
+                    filename: my_cert.pem
+                  updatedAt: '2022-09-14T14:35:38.099Z'
+                  updatedBy: abcdefgh1234
+      responses:
+        '200':
+          description: HTTP 200 response
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Could not find certificate
+                  details:
+                    type: object
+                    example: '{}'
+                type: object
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Could not find certificate
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Could not update client certificate
+                  details:
+                    type: object
+                    properties:
+                      name:
+                        type: array
+                        items:
+                          type: string
+                          example: is already taken
+                        description: 'This is a dynamic schema that consists of:
+
+                          "fieldName": ["reason"]'
+                type: object
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details:
+                      name:
+                      - is already taken
+                    message: Could not update client certificate
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics certificates
+    delete:
+      summary: deleteClientCertificate
+      description: 'Deletes a client certificate
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of a client certificate
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: HTTP 204 response
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics certificates
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.

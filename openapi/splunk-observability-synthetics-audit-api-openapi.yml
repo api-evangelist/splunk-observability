@@ -1,0 +1,460 @@
+openapi: 3.2.0
+info:
+  title: Splunk Observability Cloud Synthetics audit API
+  version: 1.0.0
+  description: 'API for retrieving audit log in Splunk Synthetic Monitoring.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You need the Splunk Observability Cloud admin, power, or read_only role to use this API.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's. Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2/synthetics
+  description: Endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+tags:
+- name: Synthetics audit
+paths:
+  /audits:
+    get:
+      summary: getAudits
+      description: 'Returns a list of all audits.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin, power, or read_only role.'
+      parameters:
+      - name: timeFrom
+        in: query
+        description: Filter audits from this time (inclusive)
+        schema:
+          type: string
+          format: date-time
+      - name: timeTo
+        in: query
+        description: Filter audits up to this time (inclusive)
+        schema:
+          type: string
+          format: date-time
+      - name: resourceType
+        in: query
+        description: 'Returns only audits for specified resource type. Possible values:
+
+
+          Test::Browser: Browser test resource
+
+          Test::Api: API test resource
+
+          Test::Http: HTTP test resource
+
+          Test::Port: Port test resource
+
+          DowntimeConfiguration: Downtime configuration resource
+
+          Mfa::Totp: Multi-factor authentication TOTP resource
+
+          PrivateLocation: Private location resource
+
+          RunnerToken: Runner token for private location resource
+
+          Variable::Secret: Secret variable resource
+
+          Variable::PlainText: Plain text variable resource'
+        schema:
+          type: string
+          enum:
+          - Test::Browser
+          - Test::Api
+          - Test::Http
+          - Test::Port
+          - DowntimeConfiguration
+          - Mfa::Totp
+          - PrivateLocation
+          - RunnerToken
+          - Variable::Secret
+          - Variable::PlainText
+      - name: resourceTypes
+        in: query
+        description: 'Returns only audits for specified resource type. Possible values:
+
+
+          Test::Browser: Browser test resource
+
+          Test::Api: API test resource
+
+          Test::Http: HTTP test resource
+
+          Test::Port: Port test resource
+
+          DowntimeConfiguration: Downtime configuration resource
+
+          Mfa::Totp: Multi-factor authentication TOTP resource
+
+          PrivateLocation: Private location resource
+
+          RunnerToken: Runner token for private location resource
+
+          Variable::Secret: Secret variable resource
+
+          Variable::PlainText: Plain text variable resource'
+        schema:
+          type: string
+      - name: resourceId
+        in: query
+        description: Filter by resource ID.
+        schema:
+          type: string
+      - name: resourceIds
+        in: query
+        description: Comma-separated list of resource IDs
+        schema:
+          type: string
+      - name: userId
+        in: query
+        description: Filter by user ID
+        schema:
+          type: string
+      - name: requestUuid
+        in: query
+        description: Filter by request UUID
+        schema:
+          type: string
+      - name: associatedType
+        in: query
+        description: 'Filter by associated resource type.
+
+          Possible values:
+
+
+          PrivateLocation: List all Runner tokens for private location'
+        schema:
+          type: string
+          enum:
+          - PrivateLocation
+      - name: associatedId
+        in: query
+        description: 'Filter by associated resource ID. Use with associatedType to filter
+
+          by associated resource ID.
+
+          To filter Runner tokens for a Private location, use associatedType=PrivateLocation
+
+          and associatedId=<privateLocationId>.'
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: The page to return. Must be greater than 0.
+        schema:
+          type: integer
+          default: 1
+      - name: perPage
+        in: query
+        description: Number of items to return in the response. Must be greater than 0.
+        schema:
+          type: integer
+          default: 100
+      - name: sortDirection
+        in: query
+        description: Sort direction (asc or desc)
+        schema:
+          type: string
+          default: desc
+          enum:
+          - asc
+          - desc
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always "application/json".
+        required: true
+        schema:
+          type: string
+          default: application/json
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                    format: int32
+                    description: 'The page of results. If the page is not supplied, the value of this
+
+                      field will be 1. If it is supplied, then the value will be what was
+
+                      supplied.'
+                  perPage:
+                    type: integer
+                    format: int32
+                    example: 150
+                    title: PerPage
+                    description: 'Number of results per page. If perPage is not supplied, the value of
+
+                      this field will be 100. If it is supplied, then the value will be what
+
+                      was supplied.'
+                  totalCount:
+                    type: integer
+                    format: int32
+                    example: 50
+                    title: TotalCount
+                    description: 'Number of audits in the result set that match the search criteria.
+
+                      Note: Count is not the same as the number of objects returned
+
+                      in the response body.'
+                  organizationId:
+                    type: string
+                    description: The unique ID of the organization.
+                  audits:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        uuid:
+                          type: string
+                          example: 79669a7b-fa73-99b7-8c29-d3c3d037d797
+                          description: Unique ID of the request to the API.
+                        time:
+                          type: string
+                          format: date-time
+                          example: '2025-03-27T21:57:57.010Z'
+                          description: Date and time when the audit was created.
+                        action:
+                          type: string
+                          enum:
+                          - create
+                          - update
+                          - destroy
+                          title: Action
+                          description: 'Action performed on the resource. Possible values:
+
+
+                            create: Resource was created
+
+                            update: Resource was updated
+
+                            destroy: Resource was deleted'
+                        userId:
+                          type: string
+                          description: 'ID of the user who performed the action.
+
+                            Use /v2/user/<userId> API to get the user details.'
+                        resourceId:
+                          type: string
+                          title: ResourceId
+                          description: The unique identifier of the resource that was affected by the action.
+                        resourceType:
+                          type: string
+                          title: ResourceType
+                          description: 'Type of resource that was affected. Possible values:
+
+
+                            Test::Browser: Browser test resource
+
+                            Test::Api: API test resource
+
+                            Test::Http: HTTP test resource
+
+                            Test::Port: Port test resource
+
+                            DowntimeConfiguration: Downtime configuration resource
+
+                            Mfa::Totp: Multi-factor authentication TOTP resource
+
+                            PrivateLocation: Private location resource
+
+                            RunnerToken: Runner token for private location resource
+
+                            Variable::Secret: Secret variable resource
+
+                            Variable::PlainText: Plain text variable resource'
+                        data:
+                          type: object
+                          title: AuditData
+                          description: 'Data associated with the audit. The data is a JSON object that
+
+                            contains fields used to create or update the resource.'
+                        changes:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              field:
+                                type: string
+                                example: transactions.0.steps.1.name
+                                description: Name of the field that was changed. For JSON objects, it contains the path to the field that was changed.
+                              before:
+                                type: string
+                                example: Old step name
+                                description: Value of the field before the change.
+                              after:
+                                type: string
+                                example: New step name
+                                description: Value of the field after the change.
+                            description: 'Details of a change made to a resource. Each item contains the field
+
+                              that was changed, and the values before and after the change.'
+                          title: AuditChanges
+                          description: 'Changes made to the resource. The changes are a JSON array of
+
+                            objects that contain the fields that were changed, and the values
+
+                            before and after the change.'
+                        associations:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              action:
+                                type: string
+                                enum:
+                                - create
+                                - update
+                                - destroy
+                                title: Action
+                                description: 'Action performed on the resource. Possible values:
+
+
+                                  create: Resource was created
+
+                                  update: Resource was updated
+
+                                  destroy: Resource was deleted'
+                              resourceId:
+                                type: string
+                                title: ResourceId
+                                description: The unique identifier of the resource that was affected by the action.
+                              resourceType:
+                                type: string
+                                title: ResourceType
+                                description: 'Type of resource that was affected. Possible values:
+
+
+                                  Test::Browser: Browser test resource
+
+                                  Test::Api: API test resource
+
+                                  Test::Http: HTTP test resource
+
+                                  Test::Port: Port test resource
+
+                                  DowntimeConfiguration: Downtime configuration resource
+
+                                  Mfa::Totp: Multi-factor authentication TOTP resource
+
+                                  PrivateLocation: Private location resource
+
+                                  RunnerToken: Runner token for private location resource
+
+                                  Variable::Secret: Secret variable resource
+
+                                  Variable::PlainText: Plain text variable resource'
+                              changes:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    field:
+                                      type: string
+                                      example: transactions.0.steps.1.name
+                                      description: Name of the field that was changed. For JSON objects, it contains the path to the field that was changed.
+                                    before:
+                                      type: string
+                                      example: Old step name
+                                      description: Value of the field before the change.
+                                    after:
+                                      type: string
+                                      example: New step name
+                                      description: Value of the field after the change.
+                                  description: 'Details of a change made to a resource. Each item contains the field
+
+                                    that was changed, and the values before and after the change.'
+                                title: AuditChanges
+                                description: 'Changes made to the resource. The changes are a JSON array of
+
+                                  objects that contain the fields that were changed, and the values
+
+                                  before and after the change.'
+                              data:
+                                type: object
+                                title: AuditData
+                                description: 'Data associated with the audit. The data is a JSON object that
+
+                                  contains fields used to create or update the resource.'
+                      title: Audit
+                      description: Properties of an audit.
+                    description: 'Query results, in the form of a JSON array of
+
+                      objects. Each element is an audit log entry.'
+                title: GetAuditsResponse
+                description: Returns a list of all audits.
+              examples:
+                example:
+                  value:
+                    audits:
+                    - action: create
+                      associations:
+                      - action: create
+                        changes:
+                        - after: New step name
+                          before: Old step name
+                          field: transactions.0.steps.1.name
+                        resourceId: string
+                        resourceType: string
+                      changes:
+                      - after: New step name
+                        before: Old step name
+                        field: transactions.0.steps.1.name
+                      resourceId: string
+                      resourceType: string
+                      time: '2025-03-27T21:57:57.010Z'
+                      userId: string
+                      uuid: 79669a7b-fa73-99b7-8c29-d3c3d037d797
+                    organizationId: string
+                    page: 0
+                    perPage: 150
+                    totalCount: 50
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics audit
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.

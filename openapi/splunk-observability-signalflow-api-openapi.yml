@@ -1,0 +1,550 @@
+openapi: 3.2.0
+info:
+  title: Splunk Observability Cloud Signal Flow API
+  version: 3.2.0
+  description: 'API for streaming data to SignalFlow and managing SignalFlow background
+
+    computations.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You must have the Splunk Observability Cloud admin or power role to use the POST /execute, POST /preflight, POST /{id}/stop, POST /{id}/stop, and POST /start operations.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's. Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://stream.{REALM}.observability.splunkcloud.com/v2/signalflow
+  description: SignalFlow API endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+tags:
+- name: SignalFlow
+paths:
+  /{id}/feedback:
+    get:
+      summary: Retrieve Computation Feedback
+      description: Retrieves status and feedback messages for a SignalFlow computation
+      parameters:
+      - name: id
+        in: path
+        description: 'The computation ID returned in the `"handle" property in an SSE
+
+          message.'
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+      security:
+      - SessionToken: []
+      tags:
+      - SignalFlow
+  /{id}/stop:
+    post:
+      summary: Stop SignalFlow Computation
+      description: 'Stops a SignalFlow computation identified by its ID (computation
+
+        handle). The computation must belong to the same organization as the
+
+        user whose access token you used to start the computation.'
+      parameters:
+      - name: id
+        in: path
+        description: 'The computation ID returned in the `"handle" property in an SSE
+
+          message. SignalFlow stops the computation based on this ID.'
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: '''"You must use your user session"'''
+                  code:
+                    type: integer
+                    description: '"401"'
+              examples:
+                example:
+                  value:
+                    code: 0
+                    message: string
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    description: '"message" : "HTTP 404 Not Found"'
+      security:
+      - SessionToken: []
+      tags:
+      - SignalFlow
+  /connect:
+    get:
+      summary: Create WebSocket Connection
+      description: "Creates a WebSocket connection with which you can send SignalFlow programs to the system.\nThis request returns HTTP response code 101 if it's successful.\nAfter you have a successful connection, you need to authenticate using a WebSocket message. Send the following JSON within 5 seconds after connecting:\n{\n    \"type\": \"authenticate\",\n    \"token\": \"AUTH_TOKEN\"\n}\n\nIf the system drops the connection for any reason, connect and authenticate\nagain. After you start a SignalFlow program, a connection drop doesn't stop the program.\nIf you connect and authenticate again and the authentication fails, the system\ncloses the connection and terminates all programs you sent.\n\nNote: Only use this request if you're using WebSocket to communicate with SignalFlow.\nIf you're using REST and SSE, you don't need a WebSocket connection."
+      responses:
+        '101':
+          description: HTTP 101 response
+      tags:
+      - SignalFlow
+  /execute:
+    post:
+      summary: Execute SignalFlow computation
+      description: 'Executes the SignalFlow program in the request body and synchronously returns the data to awaiting client. Control the computation by specifying query parameters in
+
+        the request.
+
+        Note: Due to the use of scientific notation in the API, the output of SignalFlow API calls doesn''t exactly match the output from SignalFlow programs in charts in the UI.'
+      parameters:
+      - name: start
+        in: query
+        description: The date and time that the computation should start, in *nix time in milliseconds
+        schema:
+          type: integer
+          format: int64
+      - name: stop
+        in: query
+        description: The date and time that the computation should stop, in *nix time in milliseconds
+        schema:
+          type: integer
+          format: int64
+      - name: resolution
+        in: query
+        description: 'The minimum data resolution you want to use in the computation, in
+
+          milliseconds. To learn more about data resolution, see the
+
+          Splunk Infrastructure Monitoring Analytics topic
+
+          in the user documentation.'
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+      - name: maxDelay
+        in: query
+        description: 'The maximum time that you want the computation to wait after it
+
+          detects that input data has stopped arriving, in milliseconds. To
+
+          get the automatic maximum, specify 0. The maximum delay you can
+
+          specify yourself is 900000, or 15 minutes.'
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 900000
+      - name: immediate
+        in: query
+        description: 'Flag that controls the stop timestamp. If true, the flag overrides
+
+          the stop timestamp, and the computation doesn''t wait for future
+
+          incoming data'
+        schema:
+          type: boolean
+      - name: timezone
+        in: query
+        description: 'Specifies which time zone SignalFlow should use as the basis of
+
+          time-related calculations in calendar window
+
+          transformation methods.
+
+          For a list of supported time zones, see the section
+
+          Time Zones Supported by Splunk Observability Cloud.'
+        schema:
+          type: string
+          default: UTC
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Either "text/plain" or "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      - name: Last-Event-ID
+        in: header
+        description: 'ID of the last Server-Sent Event you received. This value lets you
+
+          resume a computation that''s paused.'
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: Program Text Info
+              type: object
+              required:
+              - programText
+              properties:
+                programText:
+                  title: SignalFlow program text string
+                  type: string
+                  example: A = data('trans.latency').mean(over=Args['ui.dashboard_window']).mean().publish(); detect(when(A>threshold(5))).publish('detector_name');
+                  description: Text string containing a SignalFlow program that has one or more detect().publish() output streams.
+                programArgs:
+                  title: SignalFlow program arguments
+                  type: object
+                  properties:
+                    ui.dashboard_window:
+                      title: Chart width
+                      type: string
+                      example: 10m
+                      description: A time range value for the dashboard window transformation (ui.dashboard_window).
+                  example:
+                    ui.dashboard_window: 10m
+                  description: Argument values for the SignalFlow program. Use this property only when you use Args construct in programText.
+              description: SignalFlow program and arguments text strings
+            examples:
+              example:
+                value:
+                  programArgs:
+                    ui.dashboard_window: 10m
+                  programText: A = data('trans.latency').mean(over=Args['ui.dashboard_window']).mean().publish(); detect(when(A>threshold(5))).publish('detector_name');
+      responses:
+        '200':
+          description: HTTP 200 response
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Always contains "You must use your user session"
+                  code:
+                    type: integer
+                    description: Always contains 401
+              examples:
+                example:
+                  value:
+                    code: 0
+                    message: string
+      security:
+      - SessionToken: []
+      tags:
+      - SignalFlow
+  /preflight:
+    post:
+      summary: Preview Detector Alert Count
+      description: 'Generates a preview of the number of alerts a detector will generate
+
+        during a specified time period. In the UI, this feature is
+
+        called Alert Preview.
+
+        In the request body, specify the detector you want to preview as plain
+
+        text or a JSON object containing a SignalFlow program with one or more
+
+        detect().publish() output streams.
+
+        Note: This is an asynchronous request that returns data to your client in the
+
+        form of Server-Sent Event (SSE) messages. To learn more about these
+
+        messages, see the SignalFlow Stream Messages Reference topic
+
+        in the Developer Guide.'
+      parameters:
+      - name: start
+        in: query
+        description: Preview start timestamp, in *nix time in milliseconds
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: stop
+        in: query
+        description: Preview stop timestamp, in *nix time in milliseconds
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: maxDelay
+        in: query
+        description: 'Maximum time that the computation should wait after input data
+
+          stops arriving, in milliseconds.'
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Either "text/plain" or "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: Program Text Info
+              type: object
+              required:
+              - programText
+              properties:
+                programText:
+                  title: SignalFlow program text string
+                  type: string
+                  example: A = data('trans.latency').mean(over=Args['ui.dashboard_window']).mean().publish(); detect(when(A>threshold(5))).publish('detector_name');
+                  description: Text string containing a SignalFlow program that has one or more detect().publish() output streams.
+                programArgs:
+                  title: SignalFlow program arguments
+                  type: object
+                  properties:
+                    ui.dashboard_window:
+                      title: Chart width
+                      type: string
+                      example: 10m
+                      description: A time range value for the dashboard window transformation (ui.dashboard_window).
+                  example:
+                    ui.dashboard_window: 10m
+                  description: Argument values for the SignalFlow program. Use this property only when you use Args construct in programText.
+              description: SignalFlow program and arguments text strings
+            examples:
+              example:
+                value:
+                  programArgs:
+                    ui.dashboard_window: 10m
+                  programText: A = data('trans.latency').mean(over=Args['ui.dashboard_window']).mean().publish(); detect(when(A>threshold(5))).publish('detector_name');
+      responses:
+        '200':
+          description: HTTP 200 response
+        '400':
+          description: HTTP 400 response
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Text string, always "You must use your user session".
+                  code:
+                    type: integer
+                    description: HTTP response code, always 401
+              examples:
+                default:
+                  value:
+                    code: 401
+                    message: You must use your user session
+        '403':
+          description: HTTP 403 response
+        '429':
+          description: HTTP 429 response
+      security:
+      - SessionToken: []
+      tags:
+      - SignalFlow
+  /start:
+    post:
+      summary: Start SignalFlow computation
+      description: 'Starts the SignalFlow program in the request body in the background and returns only running job ID. Control the computation by specifying query parameters in
+
+        the request.
+
+        Note: Due to the use of scientific notation in the API, the output of SignalFlow API calls doesn''t exactly match the output from SignalFlow programs in charts in the UI.'
+      parameters:
+      - name: start
+        in: query
+        description: The date and time that the computation should start, in *nix time in milliseconds
+        schema:
+          type: integer
+          format: int64
+      - name: stop
+        in: query
+        description: The date and time that the computation should stop, in *nix time in milliseconds
+        schema:
+          type: integer
+          format: int64
+      - name: resolution
+        in: query
+        description: 'The minimum data resolution you want to use in the computation, in
+
+          milliseconds. To learn more about data resolution, see the
+
+          Splunk Infrastructure Monitoring Analytics topic
+
+          in the user documentation.'
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+      - name: maxDelay
+        in: query
+        description: 'The maximum time that you want the computation to wait after it
+
+          detects that input data has stopped arriving, in milliseconds. To
+
+          get the automatic maximum, specify 0. The maximum delay you can
+
+          specify yourself is 900000, or 15 minutes.'
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 900000
+      - name: timezone
+        in: query
+        description: 'Specifies which time zone SignalFlow should use as the basis of
+
+          time-related calculations in calendar window
+
+          transformation methods.
+
+          For a list of supported time zones, see the section
+
+          Time Zones Supported by Splunk Observability Cloud.'
+        schema:
+          type: string
+          default: UTC
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Either "text/plain" or "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-Token
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      - name: Last-Event-ID
+        in: header
+        description: 'ID of the last Server-Sent Event you received. This value lets you
+
+          resume a computation that''s paused.'
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: Program Text Info
+              type: object
+              required:
+              - programText
+              properties:
+                programText:
+                  title: SignalFlow program text string
+                  type: string
+                  example: A = data('trans.latency').mean(over=Args['ui.dashboard_window']).mean().publish(); detect(when(A>threshold(5))).publish('detector_name');
+                  description: Text string containing a SignalFlow program that has one or more detect().publish() output streams.
+                programArgs:
+                  title: SignalFlow program arguments
+                  type: object
+                  properties:
+                    ui.dashboard_window:
+                      title: Chart width
+                      type: string
+                      example: 10m
+                      description: A time range value for the dashboard window transformation (ui.dashboard_window).
+                  example:
+                    ui.dashboard_window: 10m
+                  description: Argument values for the SignalFlow program. Use this property only when you use Args construct in programText.
+              description: SignalFlow program and arguments text strings
+            examples:
+              example:
+                value:
+                  programArgs:
+                    ui.dashboard_window: 10m
+                  programText: A = data('trans.latency').mean(over=Args['ui.dashboard_window']).mean().publish(); detect(when(A>threshold(5))).publish('detector_name');
+      responses:
+        '200':
+          description: HTTP 200 response
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Always contains "You must use your user session"
+                  code:
+                    type: integer
+                    description: Always contains 401
+              examples:
+                example:
+                  value:
+                    code: 0
+                    message: string
+      security:
+      - SessionToken: []
+      tags:
+      - SignalFlow
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.

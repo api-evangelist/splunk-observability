@@ -1,0 +1,4184 @@
+openapi: 3.2.0
+info:
+  title: Splunk Observability Cloud Synthetics API tests V2 API
+  version: 1.0.0
+  description: 'V2 API for creating, updating, retrieving, and deleting Splunk Synthetic Monitoring API tests.
+
+    Request bodies follow the same JSON conventions as other Synthetics test APIs in this reference. Successful GET and create responses include deviceId on test.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token endpoint.
+
+    You have to have the Splunk Observability Cloud admin or power role to use the POST /v2/tests/api/try_now, POST /v2/tests/api/validate, PUT /v2/tests/api/{id}/validate, PUT /v2/tests/api/{id}, DELETE /v2/tests/api/{id}, and POST /v2/tests/api operations.
+
+    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the GET /v2/tests/api/{id} operation.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's. Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2/synthetics
+  description: Splunk Synthetic Monitoring API tests V2 endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+tags:
+- name: Synthetics API tests V2
+paths:
+  /v2/tests/api:
+    post:
+      summary: createApiTest
+      description: 'Creates a new API test, based on the specifications in the request body.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token endpoint.
+
+        You have to have the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                test:
+                  type: object
+                  properties:
+                    active:
+                      type: boolean
+                      default: true
+                      example: true
+                      description: Describes if the test is active.
+                    automaticRetries:
+                      type: integer
+                      default: 0
+                      example: 1
+                      description: Automatically retry if the run fails
+                    deviceId:
+                      type: integer
+                      format: int32
+                      example: 1
+                      description: The unique ID of the device.
+                    locationIds:
+                      type: array
+                      items:
+                        type: string
+                      example:
+                      - aws-us-east-1
+                      title: LocationIds
+                      description: An array of location IDs where the test runs.
+                    name:
+                      type: string
+                      example: My API test
+                    frequency:
+                      type: integer
+                      format: int32
+                      example: 5
+                      title: Frequency
+                      description: How often to run your test.
+                    schedulingStrategy:
+                      type: string
+                      example: round_robin
+                      title: SchedulingStrategy
+                      description: 'Type of scheduling strategy. This can only be:
+
+
+                        round_robin
+
+                        concurrent'
+                    requests:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          configuration:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                example: Get products
+                              requestMethod:
+                                type: string
+                                example: GET
+                                description: 'Must be one of the following:
+
+
+                                  GET
+
+                                  POST
+
+                                  PUT
+
+                                  PATCH
+
+                                  DELETE
+
+                                  HEAD
+
+                                  OPTIONS'
+                              url:
+                                type: string
+                                example: https://dummyjson.com/products
+                              headers:
+                                type: object
+                                properties:
+                                  Accept:
+                                    type: string
+                                    example: application/json
+                                  x-foo:
+                                    type: string
+                                    example: bar
+                                description: HTTP headers to add to your request.
+                              body:
+                                type: string
+                                example: '''{"alert_name":"the service is
+
+                                  down","url":"https://foo.com/bar"}''
+
+                                  '
+                              certificateId:
+                                type:
+                                - integer
+                                - 'null'
+                                format: int64
+                                example: 1
+                                description: The unique ID of the client certificate.
+                              httpVersion:
+                                type:
+                                - string
+                                - 'null'
+                                enum:
+                                - '1.1'
+                                - '2.0'
+                                example: '1.1'
+                                description: 'Must be one of the following:
+
+
+                                  1.1
+
+                                  2.0'
+                          setup:
+                            type: array
+                            items:
+                              anyOf:
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: extract_json
+                                    title: ApiTestExtractType
+                                    description: 'The type of document to extract. This should be one of the following:
+
+
+                                      extract_json
+
+                                      extract_html
+
+                                      extract_xml'
+                                  source:
+                                    type: string
+                                    example: '{''foo'': ''bar''}'
+                                    title: ApiTestSource
+                                    description: Source document to extract fields from.
+                                  extractor:
+                                    type: string
+                                    example: $$.foo
+                                    title: ApiTestExtractor
+                                    description: Extracting language. This must be in JSONPath, XMLPath, or HTMLPath
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestExtractSetup
+                                description: Setup instructions for extracting data for API tests.
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: javascript
+                                    description: Value must be javascript
+                                  code:
+                                    type: string
+                                    example: console.log('hello world')
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestJavascript
+                                description: Instructions for custom Javascript code
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: save
+                                    description: Value must be save
+                                  value:
+                                    type: string
+                                    example: '{{response.body}}'
+                                    description: 'The value of the variable you are saving. If you are saving the
+
+                                      response body, the value of this field should be {{response.body}}.
+
+                                      Other valid options include:
+
+
+                                      {{custom.<myCustomVariable>}}
+
+                                      {{env.<myGlobalVariable>}}
+
+                                      {{response.code}}
+
+                                      {{response.first_byte_time}}
+
+                                      {{response.body_size}}
+
+                                      {{response.dns_time}}
+
+                                      {{response.response_time}}
+
+                                      {{headers.<headerName>}}'
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestSave
+                                description: Save a custom field, response value, response header, or response body to a variable.
+                          validations:
+                            type: array
+                            items:
+                              anyOf:
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: My validation step
+                                    title: ApiTestValidationName
+                                    description: Name of your validation step.
+                                  type:
+                                    type: string
+                                    example: assert_numeric
+                                    description: 'Type of assertion. Possible values for this must be paired with a valid comparator. Values are:
+
+
+                                      assert_string
+
+                                      assert_numeric'
+                                  actual:
+                                    type: string
+                                    example: '{{response.code}}'
+                                    description: 'The actual value to validate. This can be any string, a variable, or a metric value. Valid options include:
+
+
+                                      {{custom.<myCustomVariable>}}
+
+
+                                      {{env.<myGlobalVariable>}}
+
+
+                                      {{response.body}}
+
+
+                                      {{response.code}}
+
+
+                                      {{response.first_byte_time}}
+
+
+                                      {{response.body_size}}
+
+
+                                      {{response.dns_time}}
+
+
+                                      {{response.response_time}}
+
+
+                                      {{headers.<headerName>}}'
+                                  expected:
+                                    type: string
+                                    example: 200
+                                    description: What you expect the variable to be.
+                                  comparator:
+                                    type: string
+                                    example: equals
+                                    description: 'Comparator between the actual value and the expected value. Must be
+
+                                      one of the following depending on the type:
+
+                                      For assert_string:
+
+
+                                      is_empty
+
+                                      is_not_empty
+
+                                      contains
+
+                                      does_not_contain
+
+                                      equals
+
+                                      does_not_equal
+
+                                      matches
+
+                                      does_not_match
+
+
+                                      For assert_numeric:
+
+
+                                      is_less_than
+
+                                      is_less_than_or_equal_to
+
+                                      equals
+
+                                      does_not_equal
+
+                                      is_greater_than
+
+                                      is_greater_than_or_equal_to'
+                                title: ApiTestValidationAssert
+                                description: Validation step to assert custom data, response value, response header, or response body.
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: My validation step
+                                    title: ApiTestValidationName
+                                    description: Name of your validation step.
+                                  type:
+                                    type: string
+                                    example: extract_json
+                                    title: ApiTestExtractType
+                                    description: 'The type of document to extract. This should be one of the following:
+
+
+                                      extract_json
+
+                                      extract_html
+
+                                      extract_xml'
+                                  source:
+                                    type: string
+                                    example: '{''foo'': ''bar''}'
+                                    title: ApiTestSource
+                                    description: Source document to extract fields from.
+                                  extractor:
+                                    type: string
+                                    example: $$.foo
+                                    title: ApiTestExtractor
+                                    description: Extracting language. This must be in JSONPath, XMLPath, or HTMLPath
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestValidationExtract
+                                description: 'Validation step to extract values from custom data, response body, response header, or
+
+                                  existing variable'
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: javascript
+                                    description: Value must be javascript
+                                  code:
+                                    type: string
+                                    example: console.log('hello world')
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestJavascript
+                                description: Instructions for custom Javascript code
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: save
+                                    description: Value must be save
+                                  value:
+                                    type: string
+                                    example: '{{response.body}}'
+                                    description: 'The value of the variable you are saving. If you are saving the
+
+                                      response body, the value of this field should be {{response.body}}.
+
+                                      Other valid options include:
+
+
+                                      {{custom.<myCustomVariable>}}
+
+                                      {{env.<myGlobalVariable>}}
+
+                                      {{response.code}}
+
+                                      {{response.first_byte_time}}
+
+                                      {{response.body_size}}
+
+                                      {{response.dns_time}}
+
+                                      {{response.response_time}}
+
+                                      {{headers.<headerName>}}'
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestSave
+                                description: Save a custom field, response value, response header, or response body to a variable.
+                      title: ApiTestRequests
+                    customProperties:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - key
+                        - value
+                        properties:
+                          key:
+                            type: string
+                            example: Env
+                          value:
+                            type: string
+                            example: production
+                      title: CustomProperties
+                      description: An array of custom properties.  The section Custom Properties Criteria lists the requirements for custom property names and values.
+              title: TestRequestBody
+              description: 'The request body sent by the following method/endpoint operations:
+
+
+                POST /v2/tests/api
+
+                PATCH /v2/tests/api/{id}
+
+                PUT /v2/tests/api/{id}
+
+                POST /v2/tests/api/validate
+
+                POST /v2/tests/api/{id}/validate
+
+                PUT /v2/tests/api/{id}/validate'
+            examples:
+              example:
+                value:
+                  test:
+                    active: true
+                    automaticRetries: 1
+                    customProperties:
+                    - key: Env
+                      value: production
+                    deviceId: 1
+                    frequency: 5
+                    locationIds:
+                    - aws-us-east-1
+                    name: My API test
+                    requests:
+                    - configuration:
+                        body: '''{"alert_name":"the service is
+
+                          down","url":"https://foo.com/bar"}''
+
+                          '
+                        certificateId: 1
+                        headers:
+                          Accept: application/json
+                          x-foo: bar
+                        httpVersion: '1.1'
+                        name: Get products
+                        requestMethod: GET
+                        url: https://dummyjson.com/products
+                      setup:
+                      - extractor: $$.foo
+                        name: First setup step
+                        source: '{''foo'': ''bar''}'
+                        type: extract_json
+                        variable: myVariable
+                      validations:
+                      - actual: '{{response.code}}'
+                        comparator: equals
+                        expected: 200
+                        name: My validation step
+                        type: assert_numeric
+                    schedulingStrategy: round_robin
+      responses:
+        '201':
+          description: HTTP 201 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  test:
+                    title: TestApiResponse
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                        readOnly: true
+                        example: 1
+                        description: 'Timestamp of when the test was last updated, in UTC.
+
+                          This field is read-only, and the system always sets the value.'
+                      name:
+                        type: string
+                        example: My Test
+                        description: Name of the test.
+                      active:
+                        type: boolean
+                        example: true
+                        description: Describes if the test is active.
+                      automaticRetries:
+                        type: integer
+                        default: 0
+                        example: 1
+                        description: Automatically retry if the run fails
+                      frequency:
+                        type: integer
+                        format: int32
+                        example: 5
+                        title: Frequency
+                        description: How often to run your test.
+                      schedulingStrategy:
+                        type: string
+                        example: round_robin
+                        title: SchedulingStrategy
+                        description: 'Type of scheduling strategy. This can only be:
+
+
+                          round_robin
+
+                          concurrent'
+                      createdAt:
+                        type: string
+                        readOnly: true
+                        example: '2022-09-14T14:35:37.801Z'
+                        title: CreatedAt
+                        description: 'Timestamp of when the test was last updated, in UTC.
+
+                          This field is read-only, and the system always sets the value.'
+                      createdBy:
+                        type: string
+                        readOnly: true
+                        example: abcdefgh1234
+                        title: CreatedBy
+                        description: 'Member ID of who created the test.
+
+                          This field is read-only, and the system always sets the value.'
+                      updatedAt:
+                        type: string
+                        readOnly: true
+                        example: '2022-09-14T14:35:38.099Z'
+                        title: UpdatedAt
+                        description: 'Timestamp of when the test was last updated, in UTC.
+
+                          This field is read-only, and the system always sets the value.'
+                      updatedBy:
+                        type: string
+                        readOnly: true
+                        example: abcdefgh1234
+                        title: UpdatedBy
+                        description: 'Member ID of who last updated the test.
+
+                          This field is read-only, and the system always sets the value.'
+                      locationIds:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                        - aws-us-east-1
+                        title: LocationIds
+                        description: An array of location IDs where the test runs.
+                      type:
+                        type: string
+                        example: api
+                      customProperties:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                          - key
+                          - value
+                          properties:
+                            key:
+                              type: string
+                              example: Env
+                            value:
+                              type: string
+                              example: production
+                        title: CustomProperties
+                        description: An array of custom properties.  The section Custom Properties Criteria lists the requirements for custom property names and values.
+                      lastRunStatus:
+                        type: string
+                        example: success
+                        enum:
+                        - pending
+                        - success
+                        - failed
+                        title: LastRunStatus
+                        description: Status of the last test run.
+                      lastRunAt:
+                        type: string
+                        readOnly: true
+                        example: '2022-09-14T14:36:45.156Z'
+                        title: LastRunAt
+                        description: 'Timestamp of when the test was last run, in UTC.
+
+                          This field is read-only, and the system always sets the value.'
+                      deviceId:
+                        type: integer
+                        format: int32
+                        example: 1
+                        description: The unique ID of the device used for this test.
+                      requests:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            configuration:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                  example: Get products
+                                requestMethod:
+                                  type: string
+                                  example: GET
+                                  description: 'Must be one of the following:
+
+
+                                    GET
+
+                                    POST
+
+                                    PUT
+
+                                    PATCH
+
+                                    DELETE
+
+                                    HEAD
+
+                                    OPTIONS'
+                                url:
+                                  type: string
+                                  example: https://dummyjson.com/products
+                                headers:
+                                  type: object
+                                  properties:
+                                    Accept:
+                                      type: string
+                                      example: application/json
+                                    x-foo:
+                                      type: string
+                                      example: bar
+                                  description: HTTP headers to add to your request.
+                                body:
+                                  type: string
+                                  example: '''{"alert_name":"the service is
+
+                                    down","url":"https://foo.com/bar"}''
+
+                                    '
+                                certificateId:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  format: int64
+                                  example: 1
+                                  description: The unique ID of the client certificate.
+                                httpVersion:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  enum:
+                                  - '1.1'
+                                  - '2.0'
+                                  example: '1.1'
+                                  description: 'Must be one of the following:
+
+
+                                    1.1
+
+                                    2.0'
+                            setup:
+                              type: array
+                              items:
+                                anyOf:
+                                - type: object
+                                  properties:
+                                    name:
+                                      type: string
+                                      example: First setup step
+                                      title: ApiTestSetupName
+                                      description: Name of your test setup step.
+                                    type:
+                                      type: string
+                                      example: extract_json
+                                      title: ApiTestExtractType
+                                      description: 'The type of document to extract. This should be one of the following:
+
+
+                                        extract_json
+
+                                        extract_html
+
+                                        extract_xml'
+                                    source:
+                                      type: string
+                                      example: '{''foo'': ''bar''}'
+                                      title: ApiTestSource
+                                      description: Source document to extract fields from.
+                                    extractor:
+                                      type: string
+                                      example: $$.foo
+                                      title: ApiTestExtractor
+                                      description: Extracting language. This must be in JSONPath, XMLPath, or HTMLPath
+                                    variable:
+                                      type: string
+                                      example: myVariable
+                                      title: ApiTestVariable
+                                      description: Variable to save your extraction.
+                                  title: ApiTestExtractSetup
+                                  description: Setup instructions for extracting data for API tests.
+                                - type: object
+                                  properties:
+                                    name:
+                                      type: string
+                                      example: First setup step
+                                      title: ApiTestSetupName
+                                      description: Name of your test setup step.
+                                    type:
+                                      type: string
+                                      example: javascript
+                                      description: Value must be javascript
+                                    code:
+                                      type: string
+                                      example: console.log('hello world')
+                                    variable:
+                                      type: string
+                                      example: myVariable
+                                      title: ApiTestVariable
+                                      description: Variable to save your extraction.
+                                  title: ApiTestJavascript
+                                  description: Instructions for custom Javascript code
+                                - type: object
+                                  properties:
+                                    name:
+                                      type: string
+                                      example: First setup step
+                                      title: ApiTestSetupName
+                                      description: Name of your test setup step.
+                                    type:
+                                      type: string
+                                      example: save
+                                      description: Value must be save
+                                    value:
+                                      type: string
+                                      example: '{{response.body}}'
+                                      description: 'The value of the variable you are saving. If you are saving the
+
+                                        response body, the value of this field should be {{response.body}}.
+
+                                        Other valid options include:
+
+
+                                        {{custom.<myCustomVariable>}}
+
+                                        {{env.<myGlobalVariable>}}
+
+                                        {{response.code}}
+
+                                        {{response.first_byte_time}}
+
+                                        {{response.body_size}}
+
+                                        {{response.dns_time}}
+
+                                        {{response.response_time}}
+
+                                        {{headers.<headerName>}}'
+                                    variable:
+                                      type: string
+                                      example: myVariable
+                                      title: ApiTestVariable
+                                      description: Variable to save your extraction.
+                                  title: ApiTestSave
+                                  description: Save a custom field, response value, response header, or response body to a variable.
+                            validations:
+                              type: array
+                              items:
+                                anyOf:
+                                - type: object
+                                  properties:
+                                    name:
+                                      type: string
+                                      example: My validation step
+                                      title: ApiTestValidationName
+                                      description: Name of your validation step.
+                                    type:
+                                      type: string
+                                      example: assert_numeric
+                                      description: 'Type of assertion. Possible values for this must be paired with a valid comparator. Values are:
+
+
+                                        assert_string
+
+                                        assert_numeric'
+                                    actual:
+                                      type: string
+                                      example: '{{response.code}}'
+                                      description: 'The actual value to validate. This can be any string, a variable, or a metric value. Valid options include:
+
+
+                                        {{custom.<myCustomVariable>}}
+
+
+                                        {{env.<myGlobalVariable>}}
+
+
+                                        {{response.body}}
+
+
+                                        {{response.code}}
+
+
+                                        {{response.first_byte_time}}
+
+
+                                        {{response.body_size}}
+
+
+                                        {{response.dns_time}}
+
+
+                                        {{response.response_time}}
+
+
+                                        {{headers.<headerName>}}'
+                                    expected:
+                                      type: string
+                                      example: 200
+                                      description: What you expect the variable to be.
+                                    comparator:
+                                      type: string
+                                      example: equals
+                                      description: 'Comparator between the actual value and the expected value. Must be
+
+                                        one of the following depending on the type:
+
+                                        For assert_string:
+
+
+                                        is_empty
+
+                                        is_not_empty
+
+                                        contains
+
+                                        does_not_contain
+
+                                        equals
+
+                                        does_not_equal
+
+                                        matches
+
+                                        does_not_match
+
+
+                                        For assert_numeric:
+
+
+                                        is_less_than
+
+                                        is_less_than_or_equal_to
+
+                                        equals
+
+                                        does_not_equal
+
+                                        is_greater_than
+
+                                        is_greater_than_or_equal_to'
+                                  title: ApiTestValidationAssert
+                                  description: Validation step to assert custom data, response value, response header, or response body.
+                                - type: object
+                                  properties:
+                                    name:
+                                      type: string
+                                      example: My validation step
+                                      title: ApiTestValidationName
+                                      description: Name of your validation step.
+                                    type:
+                                      type: string
+                                      example: extract_json
+                                      title: ApiTestExtractType
+                                      description: 'The type of document to extract. This should be one of the following:
+
+
+                                        extract_json
+
+                                        extract_html
+
+                                        extract_xml'
+                                    source:
+                                      type: string
+                                      example: '{''foo'': ''bar''}'
+                                      title: ApiTestSource
+                                      description: Source document to extract fields from.
+                                    extractor:
+                                      type: string
+                                      example: $$.foo
+                                      title: ApiTestExtractor
+                                      description: Extracting language. This must be in JSONPath, XMLPath, or HTMLPath
+                                    variable:
+                                      type: string
+                                      example: myVariable
+                                      title: ApiTestVariable
+                                      description: Variable to save your extraction.
+                                  title: ApiTestValidationExtract
+                                  description: 'Validation step to extract values from custom data, response body, response header, or
+
+                                    existing variable'
+                                - type: object
+                                  properties:
+                                    name:
+                                      type: string
+                                      example: First setup step
+                                      title: ApiTestSetupName
+                                      description: Name of your test setup step.
+                                    type:
+                                      type: string
+                                      example: javascript
+                                      description: Value must be javascript
+                                    code:
+                                      type: string
+                                      example: console.log('hello world')
+                                    variable:
+                                      type: string
+                                      example: myVariable
+                                      title: ApiTestVariable
+                                      description: Variable to save your extraction.
+                                  title: ApiTestJavascript
+                                  description: Instructions for custom Javascript code
+                                - type: object
+                                  properties:
+                                    name:
+                                      type: string
+                                      example: First setup step
+                                      title: ApiTestSetupName
+                                      description: Name of your test setup step.
+                                    type:
+                                      type: string
+                                      example: save
+                                      description: Value must be save
+                                    value:
+                                      type: string
+                                      example: '{{response.body}}'
+                                      description: 'The value of the variable you are saving. If you are saving the
+
+                                        response body, the value of this field should be {{response.body}}.
+
+                                        Other valid options include:
+
+
+                                        {{custom.<myCustomVariable>}}
+
+                                        {{env.<myGlobalVariable>}}
+
+                                        {{response.code}}
+
+                                        {{response.first_byte_time}}
+
+                                        {{response.body_size}}
+
+                                        {{response.dns_time}}
+
+                                        {{response.response_time}}
+
+                                        {{headers.<headerName>}}'
+                                    variable:
+                                      type: string
+                                      example: myVariable
+                                      title: ApiTestVariable
+                                      description: Variable to save your extraction.
+                                  title: ApiTestSave
+                                  description: Save a custom field, response value, response header, or response body to a variable.
+                        title: ApiTestRequests
+                    type: object
+                type: object
+              examples:
+                example:
+                  value:
+                    test:
+                      active: true
+                      automaticRetries: 1
+                      createdAt: '2022-09-14T14:35:37.801Z'
+                      createdBy: abcdefgh1234
+                      customProperties:
+                      - key: Env
+                        value: production
+                      deviceId: 1
+                      frequency: 5
+                      id: 1
+                      lastRunAt: '2022-09-14T14:36:45.156Z'
+                      lastRunStatus: success
+                      locationIds:
+                      - aws-us-east-1
+                      name: My Test
+                      requests:
+                      - configuration:
+                          body: '''{"alert_name":"the service is
+
+                            down","url":"https://foo.com/bar"}''
+
+                            '
+                          certificateId: 1
+                          headers:
+                            Accept: application/json
+                            x-foo: bar
+                          httpVersion: '1.1'
+                          name: Get products
+                          requestMethod: GET
+                          url: https://dummyjson.com/products
+                        setup:
+                        - extractor: $$.foo
+                          name: First setup step
+                          source: '{''foo'': ''bar''}'
+                          type: extract_json
+                          variable: myVariable
+                        validations:
+                        - actual: '{{response.code}}'
+                          comparator: equals
+                          expected: 200
+                          name: My validation step
+                          type: assert_numeric
+                      schedulingStrategy: round_robin
+                      type: api
+                      updatedAt: '2022-09-14T14:35:38.099Z'
+                      updatedBy: abcdefgh1234
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Could not create API Test
+                    description: Short explanation of the failure.
+                  details:
+                    type: object
+                    additionalProperties: true
+                example:
+                  code: unprocessable_entity
+                  message: Could not create API Test
+                  details:
+                    locationIds:
+                    - must be present
+                title: UnprocessableEntity
+                description: 'Returned when the request is well-formed but fails validation (422 Unprocessable Entity).
+
+                  The message and details fields summarize what went wrong. Property names in details align with the request body (for example locationIds when the location list is missing or empty).'
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details:
+                      locationIds:
+                      - must be present
+                    message: Could not create API Test
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics API tests V2
+  /v2/tests/api/{id}:
+    get:
+      summary: getSingleApiTest
+      description: 'Retrieves a single API test.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use this endpoint.
+
+        You have to have the Splunk Observability Cloud admin, power, or read_only role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the API test you want to retrieve.
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                properties:
+                  test:
+                    title: TestApiResponse
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                        readOnly: true
+                        example: 1
+                        description: 'Timestamp of when the test was last updated, in UTC.
+
+                          This field is read-only, and the system always sets the value.'
+                      name:
+                        type: string
+                        example: My Test
+                        description: Name of the test.
+                      active:
+                        type: boolean
+                        example: true
+                        description: Describes if the test is active.
+                      automaticRetries:
+                        type: integer
+                        default: 0
+                        example: 1
+                        description: Automatically retry if the run fails
+                      frequency:
+                        type: integer
+                        format: int32
+                        example: 5
+                        title: Frequency
+                        description: How often to run your test.
+                      schedulingStrategy:
+                        type: string
+                        example: round_robin
+                        title: SchedulingStrategy
+                        description: 'Type of scheduling strategy. This can only be:
+
+
+                          round_robin
+
+                          concurrent'
+                      createdAt:
+                        type: string
+                        readOnly: true
+                        example: '2022-09-14T14:35:37.801Z'
+                        title: CreatedAt
+                        description: 'Timestamp of when the test was last updated, in UTC.
+
+                          This field is read-only, and the system always sets the value.'
+                      createdBy:
+                        type: string
+                        readOnly: true
+                        example: abcdefgh1234
+                        title: CreatedBy
+                        description: 'Member ID of who created the test.
+
+                          This field is read-only, and the system always sets the value.'
+                      updatedAt:
+                        type: string
+                        readOnly: true
+                        example: '2022-09-14T14:35:38.099Z'
+                        title: UpdatedAt
+                        description: 'Timestamp of when the test was last updated, in UTC.
+
+                          This field is read-only, and the system always sets the value.'
+                      updatedBy:
+                        type: string
+                        readOnly: true
+                        example: abcdefgh1234
+                        title: UpdatedBy
+                        description: 'Member ID of who last updated the test.
+
+                          This field is read-only, and the system always sets the value.'
+                      locationIds:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                        - aws-us-east-1
+                        title: LocationIds
+                        description: An array of location IDs where the test runs.
+                      type:
+                        type: string
+                        example: api
+                      customProperties:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                          - key
+                          - value
+                          properties:
+                            key:
+                              type: string
+                              example: Env
+                            value:
+                              type: string
+                              example: production
+                        title: CustomProperties
+                        description: An array of custom properties.  The section Custom Properties Criteria lists the requirements for custom property names and values.
+                      lastRunStatus:
+                        type: string
+                        example: success
+                        enum:
+                        - pending
+                        - success
+                        - failed
+                        title: LastRunStatus
+                        description: Status of the last test run.
+                      lastRunAt:
+                        type: string
+                        readOnly: true
+                        example: '2022-09-14T14:36:45.156Z'
+                        title: LastRunAt
+                        description: 'Timestamp of when the test was last run, in UTC.
+
+                          This field is read-only, and the system always sets the value.'
+                      deviceId:
+                        type: integer
+                        format: int32
+                        example: 1
+                        description: The unique ID of the device used for this test.
+                      requests:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            configuration:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                  example: Get products
+                                requestMethod:
+                                  type: string
+                                  example: GET
+                                  description: 'Must be one of the following:
+
+
+                                    GET
+
+                                    POST
+
+                                    PUT
+
+                                    PATCH
+
+                                    DELETE
+
+                                    HEAD
+
+                                    OPTIONS'
+                                url:
+                                  type: string
+                                  example: https://dummyjson.com/products
+                                headers:
+                                  type: object
+                                  properties:
+                                    Accept:
+                                      type: string
+                                      example: application/json
+                                    x-foo:
+                                      type: string
+                                      example: bar
+                                  description: HTTP headers to add to your request.
+                                body:
+                                  type: string
+                                  example: '''{"alert_name":"the service is
+
+                                    down","url":"https://foo.com/bar"}''
+
+                                    '
+                                certificateId:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  format: int64
+                                  example: 1
+                                  description: The unique ID of the client certificate.
+                                httpVersion:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  enum:
+                                  - '1.1'
+                                  - '2.0'
+                                  example: '1.1'
+                                  description: 'Must be one of the following:
+
+
+                                    1.1
+
+                                    2.0'
+                            setup:
+                              type: array
+                              items:
+                                anyOf:
+                                - type: object
+                                  properties:
+                                    name:
+                                      type: string
+                                      example: First setup step
+                                      title: ApiTestSetupName
+                                      description: Name of your test setup step.
+                                    type:
+                                      type: string
+                                      example: extract_json
+                                      title: ApiTestExtractType
+                                      description: 'The type of document to extract. This should be one of the following:
+
+
+                                        extract_json
+
+                                        extract_html
+
+                                        extract_xml'
+                                    source:
+                                      type: string
+                                      example: '{''foo'': ''bar''}'
+                                      title: ApiTestSource
+                                      description: Source document to extract fields from.
+                                    extractor:
+                                      type: string
+                                      example: $$.foo
+                                      title: ApiTestExtractor
+                                      description: Extracting language. This must be in JSONPath, XMLPath, or HTMLPath
+                                    variable:
+                                      type: string
+                                      example: myVariable
+                                      title: ApiTestVariable
+                                      description: Variable to save your extraction.
+                                  title: ApiTestExtractSetup
+                                  description: Setup instructions for extracting data for API tests.
+                                - type: object
+                                  properties:
+                                    name:
+                                      type: string
+                                      example: First setup step
+                                      title: ApiTestSetupName
+                                      description: Name of your test setup step.
+                                    type:
+                                      type: string
+                                      example: javascript
+                                      description: Value must be javascript
+                                    code:
+                                      type: string
+                                      example: console.log('hello world')
+                                    variable:
+                                      type: string
+                                      example: myVariable
+                                      title: ApiTestVariable
+                                      description: Variable to save your extraction.
+                                  title: ApiTestJavascript
+                                  description: Instructions for custom Javascript code
+                                - type: object
+                                  properties:
+                                    name:
+                                      type: string
+                                      example: First setup step
+                                      title: ApiTestSetupName
+                                      description: Name of your test setup step.
+                                    type:
+                                      type: string
+                                      example: save
+                                      description: Value must be save
+                                    value:
+                                      type: string
+                                      example: '{{response.body}}'
+                                      description: 'The value of the variable you are saving. If you are saving the
+
+                                        response body, the value of this field should be {{response.body}}.
+
+                                        Other valid options include:
+
+
+                                        {{custom.<myCustomVariable>}}
+
+                                        {{env.<myGlobalVariable>}}
+
+                                        {{response.code}}
+
+                                        {{response.first_byte_time}}
+
+                                        {{response.body_size}}
+
+                                        {{response.dns_time}}
+
+                                        {{response.response_time}}
+
+                                        {{headers.<headerName>}}'
+                                    variable:
+                                      type: string
+                                      example: myVariable
+                                      title: ApiTestVariable
+                                      description: Variable to save your extraction.
+                                  title: ApiTestSave
+                                  description: Save a custom field, response value, response header, or response body to a variable.
+                            validations:
+                              type: array
+                              items:
+                                anyOf:
+                                - type: object
+                                  properties:
+                                    name:
+                                      type: string
+                                      example: My validation step
+                                      title: ApiTestValidationName
+                                      description: Name of your validation step.
+                                    type:
+                                      type: string
+                                      example: assert_numeric
+                                      description: 'Type of assertion. Possible values for this must be paired with a valid comparator. Values are:
+
+
+                                        assert_string
+
+                                        assert_numeric'
+                                    actual:
+                                      type: string
+                                      example: '{{response.code}}'
+                                      description: 'The actual value to validate. This can be any string, a variable, or a metric value. Valid options include:
+
+
+                                        {{custom.<myCustomVariable>}}
+
+
+                                        {{env.<myGlobalVariable>}}
+
+
+                                        {{response.body}}
+
+
+                                        {{response.code}}
+
+
+                                        {{response.first_byte_time}}
+
+
+                                        {{response.body_size}}
+
+
+                                        {{response.dns_time}}
+
+
+                                        {{response.response_time}}
+
+
+                                        {{headers.<headerName>}}'
+                                    expected:
+                                      type: string
+                                      example: 200
+                                      description: What you expect the variable to be.
+                                    comparator:
+                                      type: string
+                                      example: equals
+                                      description: 'Comparator between the actual value and the expected value. Must be
+
+                                        one of the following depending on the type:
+
+                                        For assert_string:
+
+
+                                        is_empty
+
+                                        is_not_empty
+
+                                        contains
+
+                                        does_not_contain
+
+                                        equals
+
+                                        does_not_equal
+
+                                        matches
+
+                                        does_not_match
+
+
+                                        For assert_numeric:
+
+
+                                        is_less_than
+
+                                        is_less_than_or_equal_to
+
+                                        equals
+
+                                        does_not_equal
+
+                                        is_greater_than
+
+                                        is_greater_than_or_equal_to'
+                                  title: ApiTestValidationAssert
+                                  description: Validation step to assert custom data, response value, response header, or response body.
+                                - type: object
+                                  properties:
+                                    name:
+                                      type: string
+                                      example: My validation step
+                                      title: ApiTestValidationName
+                                      description: Name of your validation step.
+                                    type:
+                                      type: string
+                                      example: extract_json
+                                      title: ApiTestExtractType
+                                      description: 'The type of document to extract. This should be one of the following:
+
+
+                                        extract_json
+
+                                        extract_html
+
+                                        extract_xml'
+                                    source:
+                                      type: string
+                                      example: '{''foo'': ''bar''}'
+                                      title: ApiTestSource
+                                      description: Source document to extract fields from.
+                                    extractor:
+                                      type: string
+                                      example: $$.foo
+                                      title: ApiTestExtractor
+                                      description: Extracting language. This must be in JSONPath, XMLPath, or HTMLPath
+                                    variable:
+                                      type: string
+                                      example: myVariable
+                                      title: ApiTestVariable
+                                      description: Variable to save your extraction.
+                                  title: ApiTestValidationExtract
+                                  description: 'Validation step to extract values from custom data, response body, response header, or
+
+                                    existing variable'
+                                - type: object
+                                  properties:
+                                    name:
+                                      type: string
+                                      example: First setup step
+                                      title: ApiTestSetupName
+                                      description: Name of your test setup step.
+                                    type:
+                                      type: string
+                                      example: javascript
+                                      description: Value must be javascript
+                                    code:
+                                      type: string
+                                      example: console.log('hello world')
+                                    variable:
+                                      type: string
+                                      example: myVariable
+                                      title: ApiTestVariable
+                                      description: Variable to save your extraction.
+                                  title: ApiTestJavascript
+                                  description: Instructions for custom Javascript code
+                                - type: object
+                                  properties:
+                                    name:
+                                      type: string
+                                      example: First setup step
+                                      title: ApiTestSetupName
+                                      description: Name of your test setup step.
+                                    type:
+                                      type: string
+                                      example: save
+                                      description: Value must be save
+                                    value:
+                                      type: string
+                                      example: '{{response.body}}'
+                                      description: 'The value of the variable you are saving. If you are saving the
+
+                                        response body, the value of this field should be {{response.body}}.
+
+                                        Other valid options include:
+
+
+                                        {{custom.<myCustomVariable>}}
+
+                                        {{env.<myGlobalVariable>}}
+
+                                        {{response.code}}
+
+                                        {{response.first_byte_time}}
+
+                                        {{response.body_size}}
+
+                                        {{response.dns_time}}
+
+                                        {{response.response_time}}
+
+                                        {{headers.<headerName>}}'
+                                    variable:
+                                      type: string
+                                      example: myVariable
+                                      title: ApiTestVariable
+                                      description: Variable to save your extraction.
+                                  title: ApiTestSave
+                                  description: Save a custom field, response value, response header, or response body to a variable.
+                        title: ApiTestRequests
+                    type: object
+                type: object
+              examples:
+                example:
+                  value:
+                    test:
+                      active: true
+                      automaticRetries: 1
+                      createdAt: '2022-09-14T14:35:37.801Z'
+                      createdBy: abcdefgh1234
+                      customProperties:
+                      - key: Env
+                        value: production
+                      deviceId: 1
+                      frequency: 5
+                      id: 1
+                      lastRunAt: '2022-09-14T14:36:45.156Z'
+                      lastRunStatus: success
+                      locationIds:
+                      - aws-us-east-1
+                      name: My Test
+                      requests:
+                      - configuration:
+                          body: '''{"alert_name":"the service is
+
+                            down","url":"https://foo.com/bar"}''
+
+                            '
+                          certificateId: 1
+                          headers:
+                            Accept: application/json
+                            x-foo: bar
+                          httpVersion: '1.1'
+                          name: Get products
+                          requestMethod: GET
+                          url: https://dummyjson.com/products
+                        setup:
+                        - extractor: $$.foo
+                          name: First setup step
+                          source: '{''foo'': ''bar''}'
+                          type: extract_json
+                          variable: myVariable
+                        validations:
+                        - actual: '{{response.code}}'
+                          comparator: equals
+                          expected: 200
+                          name: My validation step
+                          type: assert_numeric
+                      schedulingStrategy: round_robin
+                      type: api
+                      updatedAt: '2022-09-14T14:35:38.099Z'
+                      updatedBy: abcdefgh1234
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Can't find test.
+                  details:
+                    type: object
+                    example: '{}'
+                title: NotFound
+                description: Not Found
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Can't find test.
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics API tests V2
+    put:
+      summary: updateSingleApiTest
+      description: 'Update an existing API test.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token endpoint.
+
+        You have to have the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the API test you want to update.
+        required: true
+        schema:
+          type: integer
+          example: 1
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                test:
+                  type: object
+                  properties:
+                    active:
+                      type: boolean
+                      default: true
+                      example: true
+                      description: Describes if the test is active.
+                    automaticRetries:
+                      type: integer
+                      default: 0
+                      example: 1
+                      description: Automatically retry if the run fails
+                    deviceId:
+                      type: integer
+                      format: int32
+                      example: 1
+                      description: The unique ID of the device.
+                    locationIds:
+                      type: array
+                      items:
+                        type: string
+                      example:
+                      - aws-us-east-1
+                      title: LocationIds
+                      description: An array of location IDs where the test runs.
+                    name:
+                      type: string
+                      example: My API test
+                    frequency:
+                      type: integer
+                      format: int32
+                      example: 5
+                      title: Frequency
+                      description: How often to run your test.
+                    schedulingStrategy:
+                      type: string
+                      example: round_robin
+                      title: SchedulingStrategy
+                      description: 'Type of scheduling strategy. This can only be:
+
+
+                        round_robin
+
+                        concurrent'
+                    requests:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          configuration:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                example: Get products
+                              requestMethod:
+                                type: string
+                                example: GET
+                                description: 'Must be one of the following:
+
+
+                                  GET
+
+                                  POST
+
+                                  PUT
+
+                                  PATCH
+
+                                  DELETE
+
+                                  HEAD
+
+                                  OPTIONS'
+                              url:
+                                type: string
+                                example: https://dummyjson.com/products
+                              headers:
+                                type: object
+                                properties:
+                                  Accept:
+                                    type: string
+                                    example: application/json
+                                  x-foo:
+                                    type: string
+                                    example: bar
+                                description: HTTP headers to add to your request.
+                              body:
+                                type: string
+                                example: '''{"alert_name":"the service is
+
+                                  down","url":"https://foo.com/bar"}''
+
+                                  '
+                              certificateId:
+                                type:
+                                - integer
+                                - 'null'
+                                format: int64
+                                example: 1
+                                description: The unique ID of the client certificate.
+                              httpVersion:
+                                type:
+                                - string
+                                - 'null'
+                                enum:
+                                - '1.1'
+                                - '2.0'
+                                example: '1.1'
+                                description: 'Must be one of the following:
+
+
+                                  1.1
+
+                                  2.0'
+                          setup:
+                            type: array
+                            items:
+                              anyOf:
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: extract_json
+                                    title: ApiTestExtractType
+                                    description: 'The type of document to extract. This should be one of the following:
+
+
+                                      extract_json
+
+                                      extract_html
+
+                                      extract_xml'
+                                  source:
+                                    type: string
+                                    example: '{''foo'': ''bar''}'
+                                    title: ApiTestSource
+                                    description: Source document to extract fields from.
+                                  extractor:
+                                    type: string
+                                    example: $$.foo
+                                    title: ApiTestExtractor
+                                    description: Extracting language. This must be in JSONPath, XMLPath, or HTMLPath
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestExtractSetup
+                                description: Setup instructions for extracting data for API tests.
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: javascript
+                                    description: Value must be javascript
+                                  code:
+                                    type: string
+                                    example: console.log('hello world')
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestJavascript
+                                description: Instructions for custom Javascript code
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: save
+                                    description: Value must be save
+                                  value:
+                                    type: string
+                                    example: '{{response.body}}'
+                                    description: 'The value of the variable you are saving. If you are saving the
+
+                                      response body, the value of this field should be {{response.body}}.
+
+                                      Other valid options include:
+
+
+                                      {{custom.<myCustomVariable>}}
+
+                                      {{env.<myGlobalVariable>}}
+
+                                      {{response.code}}
+
+                                      {{response.first_byte_time}}
+
+                                      {{response.body_size}}
+
+                                      {{response.dns_time}}
+
+                                      {{response.response_time}}
+
+                                      {{headers.<headerName>}}'
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestSave
+                                description: Save a custom field, response value, response header, or response body to a variable.
+                          validations:
+                            type: array
+                            items:
+                              anyOf:
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: My validation step
+                                    title: ApiTestValidationName
+                                    description: Name of your validation step.
+                                  type:
+                                    type: string
+                                    example: assert_numeric
+                                    description: 'Type of assertion. Possible values for this must be paired with a valid comparator. Values are:
+
+
+                                      assert_string
+
+                                      assert_numeric'
+                                  actual:
+                                    type: string
+                                    example: '{{response.code}}'
+                                    description: 'The actual value to validate. This can be any string, a variable, or a metric value. Valid options include:
+
+
+                                      {{custom.<myCustomVariable>}}
+
+
+                                      {{env.<myGlobalVariable>}}
+
+
+                                      {{response.body}}
+
+
+                                      {{response.code}}
+
+
+                                      {{response.first_byte_time}}
+
+
+                                      {{response.body_size}}
+
+
+                                      {{response.dns_time}}
+
+
+                                      {{response.response_time}}
+
+
+                                      {{headers.<headerName>}}'
+                                  expected:
+                                    type: string
+                                    example: 200
+                                    description: What you expect the variable to be.
+                                  comparator:
+                                    type: string
+                                    example: equals
+                                    description: 'Comparator between the actual value and the expected value. Must be
+
+                                      one of the following depending on the type:
+
+                                      For assert_string:
+
+
+                                      is_empty
+
+                                      is_not_empty
+
+                                      contains
+
+                                      does_not_contain
+
+                                      equals
+
+                                      does_not_equal
+
+                                      matches
+
+                                      does_not_match
+
+
+                                      For assert_numeric:
+
+
+                                      is_less_than
+
+                                      is_less_than_or_equal_to
+
+                                      equals
+
+                                      does_not_equal
+
+                                      is_greater_than
+
+                                      is_greater_than_or_equal_to'
+                                title: ApiTestValidationAssert
+                                description: Validation step to assert custom data, response value, response header, or response body.
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: My validation step
+                                    title: ApiTestValidationName
+                                    description: Name of your validation step.
+                                  type:
+                                    type: string
+                                    example: extract_json
+                                    title: ApiTestExtractType
+                                    description: 'The type of document to extract. This should be one of the following:
+
+
+                                      extract_json
+
+                                      extract_html
+
+                                      extract_xml'
+                                  source:
+                                    type: string
+                                    example: '{''foo'': ''bar''}'
+                                    title: ApiTestSource
+                                    description: Source document to extract fields from.
+                                  extractor:
+                                    type: string
+                                    example: $$.foo
+                                    title: ApiTestExtractor
+                                    description: Extracting language. This must be in JSONPath, XMLPath, or HTMLPath
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestValidationExtract
+                                description: 'Validation step to extract values from custom data, response body, response header, or
+
+                                  existing variable'
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: javascript
+                                    description: Value must be javascript
+                                  code:
+                                    type: string
+                                    example: console.log('hello world')
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestJavascript
+                                description: Instructions for custom Javascript code
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: save
+                                    description: Value must be save
+                                  value:
+                                    type: string
+                                    example: '{{response.body}}'
+                                    description: 'The value of the variable you are saving. If you are saving the
+
+                                      response body, the value of this field should be {{response.body}}.
+
+                                      Other valid options include:
+
+
+                                      {{custom.<myCustomVariable>}}
+
+                                      {{env.<myGlobalVariable>}}
+
+                                      {{response.code}}
+
+                                      {{response.first_byte_time}}
+
+                                      {{response.body_size}}
+
+                                      {{response.dns_time}}
+
+                                      {{response.response_time}}
+
+                                      {{headers.<headerName>}}'
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestSave
+                                description: Save a custom field, response value, response header, or response body to a variable.
+                      title: ApiTestRequests
+                    customProperties:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - key
+                        - value
+                        properties:
+                          key:
+                            type: string
+                            example: Env
+                          value:
+                            type: string
+                            example: production
+                      title: CustomProperties
+                      description: An array of custom properties.  The section Custom Properties Criteria lists the requirements for custom property names and values.
+              title: TestRequestBody
+              description: 'The request body sent by the following method/endpoint operations:
+
+
+                POST /v2/tests/api
+
+                PATCH /v2/tests/api/{id}
+
+                PUT /v2/tests/api/{id}
+
+                POST /v2/tests/api/validate
+
+                POST /v2/tests/api/{id}/validate
+
+                PUT /v2/tests/api/{id}/validate'
+            examples:
+              example:
+                value:
+                  test:
+                    active: true
+                    automaticRetries: 1
+                    customProperties:
+                    - key: Env
+                      value: production
+                    deviceId: 1
+                    frequency: 5
+                    locationIds:
+                    - aws-us-east-1
+                    name: My API test
+                    requests:
+                    - configuration:
+                        body: '''{"alert_name":"the service is
+
+                          down","url":"https://foo.com/bar"}''
+
+                          '
+                        certificateId: 1
+                        headers:
+                          Accept: application/json
+                          x-foo: bar
+                        httpVersion: '1.1'
+                        name: Get products
+                        requestMethod: GET
+                        url: https://dummyjson.com/products
+                      setup:
+                      - extractor: $$.foo
+                        name: First setup step
+                        source: '{''foo'': ''bar''}'
+                        type: extract_json
+                        variable: myVariable
+                      validations:
+                      - actual: '{{response.code}}'
+                        comparator: equals
+                        expected: 200
+                        name: My validation step
+                        type: assert_numeric
+                    schedulingStrategy: round_robin
+      responses:
+        '200':
+          description: HTTP 200 response
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Can't find test.
+                  details:
+                    type: object
+                    example: '{}'
+                title: NotFound
+                description: Not Found
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Can't find test.
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Could not create API Test
+                    description: Short explanation of the failure.
+                  details:
+                    type: object
+                    additionalProperties: true
+                example:
+                  code: unprocessable_entity
+                  message: Could not create API Test
+                  details:
+                    locationIds:
+                    - must be present
+                title: UnprocessableEntity
+                description: 'Returned when the request is well-formed but fails validation (422 Unprocessable Entity).
+
+                  The message and details fields summarize what went wrong. Property names in details align with the request body (for example locationIds when the location list is missing or empty).'
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details:
+                      locationIds:
+                      - must be present
+                    message: Could not create API Test
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics API tests V2
+    delete:
+      summary: deleteApiTest
+      description: 'Deletes an API test.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token endpoint.
+
+        You have to have the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of a Test
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: HTTP 204 response
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics API tests V2
+  /v2/tests/api/{id}/validate:
+    put:
+      summary: validateSingleApiTest
+      description: 'Validate an API test.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use this endpoint.
+
+        You have to have the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the API test you want to validate.
+        required: true
+        schema:
+          type: integer
+          example: 1
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                test:
+                  type: object
+                  properties:
+                    active:
+                      type: boolean
+                      default: true
+                      example: true
+                      description: Describes if the test is active.
+                    automaticRetries:
+                      type: integer
+                      default: 0
+                      example: 1
+                      description: Automatically retry if the run fails
+                    deviceId:
+                      type: integer
+                      format: int32
+                      example: 1
+                      description: The unique ID of the device.
+                    locationIds:
+                      type: array
+                      items:
+                        type: string
+                      example:
+                      - aws-us-east-1
+                      title: LocationIds
+                      description: An array of location IDs where the test runs.
+                    name:
+                      type: string
+                      example: My API test
+                    frequency:
+                      type: integer
+                      format: int32
+                      example: 5
+                      title: Frequency
+                      description: How often to run your test.
+                    schedulingStrategy:
+                      type: string
+                      example: round_robin
+                      title: SchedulingStrategy
+                      description: 'Type of scheduling strategy. This can only be:
+
+
+                        round_robin
+
+                        concurrent'
+                    requests:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          configuration:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                example: Get products
+                              requestMethod:
+                                type: string
+                                example: GET
+                                description: 'Must be one of the following:
+
+
+                                  GET
+
+                                  POST
+
+                                  PUT
+
+                                  PATCH
+
+                                  DELETE
+
+                                  HEAD
+
+                                  OPTIONS'
+                              url:
+                                type: string
+                                example: https://dummyjson.com/products
+                              headers:
+                                type: object
+                                properties:
+                                  Accept:
+                                    type: string
+                                    example: application/json
+                                  x-foo:
+                                    type: string
+                                    example: bar
+                                description: HTTP headers to add to your request.
+                              body:
+                                type: string
+                                example: '''{"alert_name":"the service is
+
+                                  down","url":"https://foo.com/bar"}''
+
+                                  '
+                              certificateId:
+                                type:
+                                - integer
+                                - 'null'
+                                format: int64
+                                example: 1
+                                description: The unique ID of the client certificate.
+                              httpVersion:
+                                type:
+                                - string
+                                - 'null'
+                                enum:
+                                - '1.1'
+                                - '2.0'
+                                example: '1.1'
+                                description: 'Must be one of the following:
+
+
+                                  1.1
+
+                                  2.0'
+                          setup:
+                            type: array
+                            items:
+                              anyOf:
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: extract_json
+                                    title: ApiTestExtractType
+                                    description: 'The type of document to extract. This should be one of the following:
+
+
+                                      extract_json
+
+                                      extract_html
+
+                                      extract_xml'
+                                  source:
+                                    type: string
+                                    example: '{''foo'': ''bar''}'
+                                    title: ApiTestSource
+                                    description: Source document to extract fields from.
+                                  extractor:
+                                    type: string
+                                    example: $$.foo
+                                    title: ApiTestExtractor
+                                    description: Extracting language. This must be in JSONPath, XMLPath, or HTMLPath
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestExtractSetup
+                                description: Setup instructions for extracting data for API tests.
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: javascript
+                                    description: Value must be javascript
+                                  code:
+                                    type: string
+                                    example: console.log('hello world')
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestJavascript
+                                description: Instructions for custom Javascript code
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: save
+                                    description: Value must be save
+                                  value:
+                                    type: string
+                                    example: '{{response.body}}'
+                                    description: 'The value of the variable you are saving. If you are saving the
+
+                                      response body, the value of this field should be {{response.body}}.
+
+                                      Other valid options include:
+
+
+                                      {{custom.<myCustomVariable>}}
+
+                                      {{env.<myGlobalVariable>}}
+
+                                      {{response.code}}
+
+                                      {{response.first_byte_time}}
+
+                                      {{response.body_size}}
+
+                                      {{response.dns_time}}
+
+                                      {{response.response_time}}
+
+                                      {{headers.<headerName>}}'
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestSave
+                                description: Save a custom field, response value, response header, or response body to a variable.
+                          validations:
+                            type: array
+                            items:
+                              anyOf:
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: My validation step
+                                    title: ApiTestValidationName
+                                    description: Name of your validation step.
+                                  type:
+                                    type: string
+                                    example: assert_numeric
+                                    description: 'Type of assertion. Possible values for this must be paired with a valid comparator. Values are:
+
+
+                                      assert_string
+
+                                      assert_numeric'
+                                  actual:
+                                    type: string
+                                    example: '{{response.code}}'
+                                    description: 'The actual value to validate. This can be any string, a variable, or a metric value. Valid options include:
+
+
+                                      {{custom.<myCustomVariable>}}
+
+
+                                      {{env.<myGlobalVariable>}}
+
+
+                                      {{response.body}}
+
+
+                                      {{response.code}}
+
+
+                                      {{response.first_byte_time}}
+
+
+                                      {{response.body_size}}
+
+
+                                      {{response.dns_time}}
+
+
+                                      {{response.response_time}}
+
+
+                                      {{headers.<headerName>}}'
+                                  expected:
+                                    type: string
+                                    example: 200
+                                    description: What you expect the variable to be.
+                                  comparator:
+                                    type: string
+                                    example: equals
+                                    description: 'Comparator between the actual value and the expected value. Must be
+
+                                      one of the following depending on the type:
+
+                                      For assert_string:
+
+
+                                      is_empty
+
+                                      is_not_empty
+
+                                      contains
+
+                                      does_not_contain
+
+                                      equals
+
+                                      does_not_equal
+
+                                      matches
+
+                                      does_not_match
+
+
+                                      For assert_numeric:
+
+
+                                      is_less_than
+
+                                      is_less_than_or_equal_to
+
+                                      equals
+
+                                      does_not_equal
+
+                                      is_greater_than
+
+                                      is_greater_than_or_equal_to'
+                                title: ApiTestValidationAssert
+                                description: Validation step to assert custom data, response value, response header, or response body.
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: My validation step
+                                    title: ApiTestValidationName
+                                    description: Name of your validation step.
+                                  type:
+                                    type: string
+                                    example: extract_json
+                                    title: ApiTestExtractType
+                                    description: 'The type of document to extract. This should be one of the following:
+
+
+                                      extract_json
+
+                                      extract_html
+
+                                      extract_xml'
+                                  source:
+                                    type: string
+                                    example: '{''foo'': ''bar''}'
+                                    title: ApiTestSource
+                                    description: Source document to extract fields from.
+                                  extractor:
+                                    type: string
+                                    example: $$.foo
+                                    title: ApiTestExtractor
+                                    description: Extracting language. This must be in JSONPath, XMLPath, or HTMLPath
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestValidationExtract
+                                description: 'Validation step to extract values from custom data, response body, response header, or
+
+                                  existing variable'
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: javascript
+                                    description: Value must be javascript
+                                  code:
+                                    type: string
+                                    example: console.log('hello world')
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestJavascript
+                                description: Instructions for custom Javascript code
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: save
+                                    description: Value must be save
+                                  value:
+                                    type: string
+                                    example: '{{response.body}}'
+                                    description: 'The value of the variable you are saving. If you are saving the
+
+                                      response body, the value of this field should be {{response.body}}.
+
+                                      Other valid options include:
+
+
+                                      {{custom.<myCustomVariable>}}
+
+                                      {{env.<myGlobalVariable>}}
+
+                                      {{response.code}}
+
+                                      {{response.first_byte_time}}
+
+                                      {{response.body_size}}
+
+                                      {{response.dns_time}}
+
+                                      {{response.response_time}}
+
+                                      {{headers.<headerName>}}'
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestSave
+                                description: Save a custom field, response value, response header, or response body to a variable.
+                      title: ApiTestRequests
+                    customProperties:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - key
+                        - value
+                        properties:
+                          key:
+                            type: string
+                            example: Env
+                          value:
+                            type: string
+                            example: production
+                      title: CustomProperties
+                      description: An array of custom properties.  The section Custom Properties Criteria lists the requirements for custom property names and values.
+              title: TestRequestBody
+              description: 'The request body sent by the following method/endpoint operations:
+
+
+                POST /v2/tests/api
+
+                PATCH /v2/tests/api/{id}
+
+                PUT /v2/tests/api/{id}
+
+                POST /v2/tests/api/validate
+
+                POST /v2/tests/api/{id}/validate
+
+                PUT /v2/tests/api/{id}/validate'
+            examples:
+              example:
+                value:
+                  test:
+                    active: true
+                    automaticRetries: 1
+                    customProperties:
+                    - key: Env
+                      value: production
+                    deviceId: 1
+                    frequency: 5
+                    locationIds:
+                    - aws-us-east-1
+                    name: My API test
+                    requests:
+                    - configuration:
+                        body: '''{"alert_name":"the service is
+
+                          down","url":"https://foo.com/bar"}''
+
+                          '
+                        certificateId: 1
+                        headers:
+                          Accept: application/json
+                          x-foo: bar
+                        httpVersion: '1.1'
+                        name: Get products
+                        requestMethod: GET
+                        url: https://dummyjson.com/products
+                      setup:
+                      - extractor: $$.foo
+                        name: First setup step
+                        source: '{''foo'': ''bar''}'
+                        type: extract_json
+                        variable: myVariable
+                      validations:
+                      - actual: '{{response.code}}'
+                        comparator: equals
+                        expected: 200
+                        name: My validation step
+                        type: assert_numeric
+                    schedulingStrategy: round_robin
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: ValidateApiResponse
+                properties:
+                  valid:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: API test is not valid.
+                anyOf:
+                - type: object
+                  properties:
+                    requests:
+                      type: array
+                      items:
+                        type: string
+                        example: configuration url is missing
+                  title: ExampleInvalidApiTestConfiguration
+                  description: Example of an invalid API test configuration.
+                - properties:
+                    requests:
+                      type: array
+                      example: []
+                      items:
+                        type: string
+                  title: EmptyArray
+                  description: Empty array
+                type: object
+              examples:
+                ExampleInvalidApiTestConfiguration:
+                  value:
+                    requests:
+                    - configuration url is missing
+                EmptyArray:
+                  value:
+                    requests: []
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Can't find test.
+                  details:
+                    type: object
+                    example: '{}'
+                title: NotFound
+                description: Not Found
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Can't find test.
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics API tests V2
+  /v2/tests/api/try_now:
+    post:
+      summary: createTryNowAPITest
+      description: 'Create an API test to use try now on to verify if your test passes. Run results aren''t stored.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use this endpoint.
+
+        You have to have the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: locationId
+        in: query
+        description: The ID of the location you want to run your test from.
+        required: true
+        schema:
+          type: string
+          example: aws-us-east-1
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                test:
+                  type: object
+                  properties:
+                    active:
+                      type: boolean
+                      default: true
+                      example: true
+                      description: Describes if the test is active.
+                    automaticRetries:
+                      type: integer
+                      default: 0
+                      example: 1
+                      description: Automatically retry if the run fails
+                    deviceId:
+                      type: integer
+                      format: int32
+                      example: 1
+                      description: The unique ID of the device.
+                    locationIds:
+                      type: array
+                      items:
+                        type: string
+                      example:
+                      - aws-us-east-1
+                      title: LocationIds
+                      description: An array of location IDs where the test runs.
+                    name:
+                      type: string
+                      example: My API test
+                    frequency:
+                      type: integer
+                      format: int32
+                      example: 5
+                      title: Frequency
+                      description: How often to run your test.
+                    schedulingStrategy:
+                      type: string
+                      example: round_robin
+                      title: SchedulingStrategy
+                      description: 'Type of scheduling strategy. This can only be:
+
+
+                        round_robin
+
+                        concurrent'
+                    requests:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          configuration:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                example: Get products
+                              requestMethod:
+                                type: string
+                                example: GET
+                                description: 'Must be one of the following:
+
+
+                                  GET
+
+                                  POST
+
+                                  PUT
+
+                                  PATCH
+
+                                  DELETE
+
+                                  HEAD
+
+                                  OPTIONS'
+                              url:
+                                type: string
+                                example: https://dummyjson.com/products
+                              headers:
+                                type: object
+                                properties:
+                                  Accept:
+                                    type: string
+                                    example: application/json
+                                  x-foo:
+                                    type: string
+                                    example: bar
+                                description: HTTP headers to add to your request.
+                              body:
+                                type: string
+                                example: '''{"alert_name":"the service is
+
+                                  down","url":"https://foo.com/bar"}''
+
+                                  '
+                              certificateId:
+                                type:
+                                - integer
+                                - 'null'
+                                format: int64
+                                example: 1
+                                description: The unique ID of the client certificate.
+                              httpVersion:
+                                type:
+                                - string
+                                - 'null'
+                                enum:
+                                - '1.1'
+                                - '2.0'
+                                example: '1.1'
+                                description: 'Must be one of the following:
+
+
+                                  1.1
+
+                                  2.0'
+                          setup:
+                            type: array
+                            items:
+                              anyOf:
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: extract_json
+                                    title: ApiTestExtractType
+                                    description: 'The type of document to extract. This should be one of the following:
+
+
+                                      extract_json
+
+                                      extract_html
+
+                                      extract_xml'
+                                  source:
+                                    type: string
+                                    example: '{''foo'': ''bar''}'
+                                    title: ApiTestSource
+                                    description: Source document to extract fields from.
+                                  extractor:
+                                    type: string
+                                    example: $$.foo
+                                    title: ApiTestExtractor
+                                    description: Extracting language. This must be in JSONPath, XMLPath, or HTMLPath
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestExtractSetup
+                                description: Setup instructions for extracting data for API tests.
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: javascript
+                                    description: Value must be javascript
+                                  code:
+                                    type: string
+                                    example: console.log('hello world')
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestJavascript
+                                description: Instructions for custom Javascript code
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: save
+                                    description: Value must be save
+                                  value:
+                                    type: string
+                                    example: '{{response.body}}'
+                                    description: 'The value of the variable you are saving. If you are saving the
+
+                                      response body, the value of this field should be {{response.body}}.
+
+                                      Other valid options include:
+
+
+                                      {{custom.<myCustomVariable>}}
+
+                                      {{env.<myGlobalVariable>}}
+
+                                      {{response.code}}
+
+                                      {{response.first_byte_time}}
+
+                                      {{response.body_size}}
+
+                                      {{response.dns_time}}
+
+                                      {{response.response_time}}
+
+                                      {{headers.<headerName>}}'
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestSave
+                                description: Save a custom field, response value, response header, or response body to a variable.
+                          validations:
+                            type: array
+                            items:
+                              anyOf:
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: My validation step
+                                    title: ApiTestValidationName
+                                    description: Name of your validation step.
+                                  type:
+                                    type: string
+                                    example: assert_numeric
+                                    description: 'Type of assertion. Possible values for this must be paired with a valid comparator. Values are:
+
+
+                                      assert_string
+
+                                      assert_numeric'
+                                  actual:
+                                    type: string
+                                    example: '{{response.code}}'
+                                    description: 'The actual value to validate. This can be any string, a variable, or a metric value. Valid options include:
+
+
+                                      {{custom.<myCustomVariable>}}
+
+
+                                      {{env.<myGlobalVariable>}}
+
+
+                                      {{response.body}}
+
+
+                                      {{response.code}}
+
+
+                                      {{response.first_byte_time}}
+
+
+                                      {{response.body_size}}
+
+
+                                      {{response.dns_time}}
+
+
+                                      {{response.response_time}}
+
+
+                                      {{headers.<headerName>}}'
+                                  expected:
+                                    type: string
+                                    example: 200
+                                    description: What you expect the variable to be.
+                                  comparator:
+                                    type: string
+                                    example: equals
+                                    description: 'Comparator between the actual value and the expected value. Must be
+
+                                      one of the following depending on the type:
+
+                                      For assert_string:
+
+
+                                      is_empty
+
+                                      is_not_empty
+
+                                      contains
+
+                                      does_not_contain
+
+                                      equals
+
+                                      does_not_equal
+
+                                      matches
+
+                                      does_not_match
+
+
+                                      For assert_numeric:
+
+
+                                      is_less_than
+
+                                      is_less_than_or_equal_to
+
+                                      equals
+
+                                      does_not_equal
+
+                                      is_greater_than
+
+                                      is_greater_than_or_equal_to'
+                                title: ApiTestValidationAssert
+                                description: Validation step to assert custom data, response value, response header, or response body.
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: My validation step
+                                    title: ApiTestValidationName
+                                    description: Name of your validation step.
+                                  type:
+                                    type: string
+                                    example: extract_json
+                                    title: ApiTestExtractType
+                                    description: 'The type of document to extract. This should be one of the following:
+
+
+                                      extract_json
+
+                                      extract_html
+
+                                      extract_xml'
+                                  source:
+                                    type: string
+                                    example: '{''foo'': ''bar''}'
+                                    title: ApiTestSource
+                                    description: Source document to extract fields from.
+                                  extractor:
+                                    type: string
+                                    example: $$.foo
+                                    title: ApiTestExtractor
+                                    description: Extracting language. This must be in JSONPath, XMLPath, or HTMLPath
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestValidationExtract
+                                description: 'Validation step to extract values from custom data, response body, response header, or
+
+                                  existing variable'
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: javascript
+                                    description: Value must be javascript
+                                  code:
+                                    type: string
+                                    example: console.log('hello world')
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestJavascript
+                                description: Instructions for custom Javascript code
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: save
+                                    description: Value must be save
+                                  value:
+                                    type: string
+                                    example: '{{response.body}}'
+                                    description: 'The value of the variable you are saving. If you are saving the
+
+                                      response body, the value of this field should be {{response.body}}.
+
+                                      Other valid options include:
+
+
+                                      {{custom.<myCustomVariable>}}
+
+                                      {{env.<myGlobalVariable>}}
+
+                                      {{response.code}}
+
+                                      {{response.first_byte_time}}
+
+                                      {{response.body_size}}
+
+                                      {{response.dns_time}}
+
+                                      {{response.response_time}}
+
+                                      {{headers.<headerName>}}'
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestSave
+                                description: Save a custom field, response value, response header, or response body to a variable.
+                      title: ApiTestRequests
+                    customProperties:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - key
+                        - value
+                        properties:
+                          key:
+                            type: string
+                            example: Env
+                          value:
+                            type: string
+                            example: production
+                      title: CustomProperties
+                      description: An array of custom properties.  The section Custom Properties Criteria lists the requirements for custom property names and values.
+              title: TestRequestBody
+              description: 'The request body sent by the following method/endpoint operations:
+
+
+                POST /v2/tests/api
+
+                PATCH /v2/tests/api/{id}
+
+                PUT /v2/tests/api/{id}
+
+                POST /v2/tests/api/validate
+
+                POST /v2/tests/api/{id}/validate
+
+                PUT /v2/tests/api/{id}/validate'
+            examples:
+              example:
+                value:
+                  test:
+                    active: true
+                    automaticRetries: 1
+                    customProperties:
+                    - key: Env
+                      value: production
+                    deviceId: 1
+                    frequency: 5
+                    locationIds:
+                    - aws-us-east-1
+                    name: My API test
+                    requests:
+                    - configuration:
+                        body: '''{"alert_name":"the service is
+
+                          down","url":"https://foo.com/bar"}''
+
+                          '
+                        certificateId: 1
+                        headers:
+                          Accept: application/json
+                          x-foo: bar
+                        httpVersion: '1.1'
+                        name: Get products
+                        requestMethod: GET
+                        url: https://dummyjson.com/products
+                      setup:
+                      - extractor: $$.foo
+                        name: First setup step
+                        source: '{''foo'': ''bar''}'
+                        type: extract_json
+                        variable: myVariable
+                      validations:
+                      - actual: '{{response.code}}'
+                        comparator: equals
+                        expected: 200
+                        name: My validation step
+                        type: assert_numeric
+                    schedulingStrategy: round_robin
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runId:
+                    type: string
+                    format: uuid
+                    example: 1c4d52be-e7e1-4611-97f9-73c6ddfbeed9
+                    description: The UUID of the try now run.
+                  testId:
+                    type: string
+                    format: uuid
+                    example: b8354c68-3fe8-4192-81b2-a4f7cb40e18b
+                    description: The UUID of the try now test.
+                  locationId:
+                    type: string
+                    example: aws-us-east-1
+                    description: The location ID where the test was executed.
+                  testName:
+                    type: string
+                    example: My API test
+                    description: The name of the test.
+                  testType:
+                    type: string
+                    example: api
+                    description: The type of the test.
+                title: TryNowResponse
+              examples:
+                example:
+                  value:
+                    locationId: aws-us-east-1
+                    runId: 1c4d52be-e7e1-4611-97f9-73c6ddfbeed9
+                    testId: b8354c68-3fe8-4192-81b2-a4f7cb40e18b
+                    testName: My API test
+                    testType: api
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Could not create API Test
+                    description: Short explanation of the failure.
+                  details:
+                    type: object
+                    additionalProperties: true
+                example:
+                  code: unprocessable_entity
+                  message: Could not create API Test
+                  details:
+                    locationIds:
+                    - must be present
+                title: UnprocessableEntity
+                description: 'Returned when the request is well-formed but fails validation (422 Unprocessable Entity).
+
+                  The message and details fields summarize what went wrong. Property names in details align with the request body (for example locationIds when the location list is missing or empty).'
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details:
+                      locationIds:
+                      - must be present
+                    message: Could not create API Test
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics API tests V2
+  /v2/tests/api/validate:
+    post:
+      summary: validateApiTest
+      description: 'Validate an API test.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the this endpoint.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                test:
+                  type: object
+                  properties:
+                    active:
+                      type: boolean
+                      default: true
+                      example: true
+                      description: Describes if the test is active.
+                    automaticRetries:
+                      type: integer
+                      default: 0
+                      example: 1
+                      description: Automatically retry if the run fails
+                    deviceId:
+                      type: integer
+                      format: int32
+                      example: 1
+                      description: The unique ID of the device.
+                    locationIds:
+                      type: array
+                      items:
+                        type: string
+                      example:
+                      - aws-us-east-1
+                      title: LocationIds
+                      description: An array of location IDs where the test runs.
+                    name:
+                      type: string
+                      example: My API test
+                    frequency:
+                      type: integer
+                      format: int32
+                      example: 5
+                      title: Frequency
+                      description: How often to run your test.
+                    schedulingStrategy:
+                      type: string
+                      example: round_robin
+                      title: SchedulingStrategy
+                      description: 'Type of scheduling strategy. This can only be:
+
+
+                        round_robin
+
+                        concurrent'
+                    requests:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          configuration:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                example: Get products
+                              requestMethod:
+                                type: string
+                                example: GET
+                                description: 'Must be one of the following:
+
+
+                                  GET
+
+                                  POST
+
+                                  PUT
+
+                                  PATCH
+
+                                  DELETE
+
+                                  HEAD
+
+                                  OPTIONS'
+                              url:
+                                type: string
+                                example: https://dummyjson.com/products
+                              headers:
+                                type: object
+                                properties:
+                                  Accept:
+                                    type: string
+                                    example: application/json
+                                  x-foo:
+                                    type: string
+                                    example: bar
+                                description: HTTP headers to add to your request.
+                              body:
+                                type: string
+                                example: '''{"alert_name":"the service is
+
+                                  down","url":"https://foo.com/bar"}''
+
+                                  '
+                              certificateId:
+                                type:
+                                - integer
+                                - 'null'
+                                format: int64
+                                example: 1
+                                description: The unique ID of the client certificate.
+                              httpVersion:
+                                type:
+                                - string
+                                - 'null'
+                                enum:
+                                - '1.1'
+                                - '2.0'
+                                example: '1.1'
+                                description: 'Must be one of the following:
+
+
+                                  1.1
+
+                                  2.0'
+                          setup:
+                            type: array
+                            items:
+                              anyOf:
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: extract_json
+                                    title: ApiTestExtractType
+                                    description: 'The type of document to extract. This should be one of the following:
+
+
+                                      extract_json
+
+                                      extract_html
+
+                                      extract_xml'
+                                  source:
+                                    type: string
+                                    example: '{''foo'': ''bar''}'
+                                    title: ApiTestSource
+                                    description: Source document to extract fields from.
+                                  extractor:
+                                    type: string
+                                    example: $$.foo
+                                    title: ApiTestExtractor
+                                    description: Extracting language. This must be in JSONPath, XMLPath, or HTMLPath
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestExtractSetup
+                                description: Setup instructions for extracting data for API tests.
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: javascript
+                                    description: Value must be javascript
+                                  code:
+                                    type: string
+                                    example: console.log('hello world')
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestJavascript
+                                description: Instructions for custom Javascript code
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: save
+                                    description: Value must be save
+                                  value:
+                                    type: string
+                                    example: '{{response.body}}'
+                                    description: 'The value of the variable you are saving. If you are saving the
+
+                                      response body, the value of this field should be {{response.body}}.
+
+                                      Other valid options include:
+
+
+                                      {{custom.<myCustomVariable>}}
+
+                                      {{env.<myGlobalVariable>}}
+
+                                      {{response.code}}
+
+                                      {{response.first_byte_time}}
+
+                                      {{response.body_size}}
+
+                                      {{response.dns_time}}
+
+                                      {{response.response_time}}
+
+                                      {{headers.<headerName>}}'
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestSave
+                                description: Save a custom field, response value, response header, or response body to a variable.
+                          validations:
+                            type: array
+                            items:
+                              anyOf:
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: My validation step
+                                    title: ApiTestValidationName
+                                    description: Name of your validation step.
+                                  type:
+                                    type: string
+                                    example: assert_numeric
+                                    description: 'Type of assertion. Possible values for this must be paired with a valid comparator. Values are:
+
+
+                                      assert_string
+
+                                      assert_numeric'
+                                  actual:
+                                    type: string
+                                    example: '{{response.code}}'
+                                    description: 'The actual value to validate. This can be any string, a variable, or a metric value. Valid options include:
+
+
+                                      {{custom.<myCustomVariable>}}
+
+
+                                      {{env.<myGlobalVariable>}}
+
+
+                                      {{response.body}}
+
+
+                                      {{response.code}}
+
+
+                                      {{response.first_byte_time}}
+
+
+                                      {{response.body_size}}
+
+
+                                      {{response.dns_time}}
+
+
+                                      {{response.response_time}}
+
+
+                                      {{headers.<headerName>}}'
+                                  expected:
+                                    type: string
+                                    example: 200
+                                    description: What you expect the variable to be.
+                                  comparator:
+                                    type: string
+                                    example: equals
+                                    description: 'Comparator between the actual value and the expected value. Must be
+
+                                      one of the following depending on the type:
+
+                                      For assert_string:
+
+
+                                      is_empty
+
+                                      is_not_empty
+
+                                      contains
+
+                                      does_not_contain
+
+                                      equals
+
+                                      does_not_equal
+
+                                      matches
+
+                                      does_not_match
+
+
+                                      For assert_numeric:
+
+
+                                      is_less_than
+
+                                      is_less_than_or_equal_to
+
+                                      equals
+
+                                      does_not_equal
+
+                                      is_greater_than
+
+                                      is_greater_than_or_equal_to'
+                                title: ApiTestValidationAssert
+                                description: Validation step to assert custom data, response value, response header, or response body.
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: My validation step
+                                    title: ApiTestValidationName
+                                    description: Name of your validation step.
+                                  type:
+                                    type: string
+                                    example: extract_json
+                                    title: ApiTestExtractType
+                                    description: 'The type of document to extract. This should be one of the following:
+
+
+                                      extract_json
+
+                                      extract_html
+
+                                      extract_xml'
+                                  source:
+                                    type: string
+                                    example: '{''foo'': ''bar''}'
+                                    title: ApiTestSource
+                                    description: Source document to extract fields from.
+                                  extractor:
+                                    type: string
+                                    example: $$.foo
+                                    title: ApiTestExtractor
+                                    description: Extracting language. This must be in JSONPath, XMLPath, or HTMLPath
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestValidationExtract
+                                description: 'Validation step to extract values from custom data, response body, response header, or
+
+                                  existing variable'
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: javascript
+                                    description: Value must be javascript
+                                  code:
+                                    type: string
+                                    example: console.log('hello world')
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestJavascript
+                                description: Instructions for custom Javascript code
+                              - type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    example: First setup step
+                                    title: ApiTestSetupName
+                                    description: Name of your test setup step.
+                                  type:
+                                    type: string
+                                    example: save
+                                    description: Value must be save
+                                  value:
+                                    type: string
+                                    example: '{{response.body}}'
+                                    description: 'The value of the variable you are saving. If you are saving the
+
+                                      response body, the value of this field should be {{response.body}}.
+
+                                      Other valid options include:
+
+
+                                      {{custom.<myCustomVariable>}}
+
+                                      {{env.<myGlobalVariable>}}
+
+                                      {{response.code}}
+
+                                      {{response.first_byte_time}}
+
+                                      {{response.body_size}}
+
+                                      {{response.dns_time}}
+
+                                      {{response.response_time}}
+
+                                      {{headers.<headerName>}}'
+                                  variable:
+                                    type: string
+                                    example: myVariable
+                                    title: ApiTestVariable
+                                    description: Variable to save your extraction.
+                                title: ApiTestSave
+                                description: Save a custom field, response value, response header, or response body to a variable.
+                      title: ApiTestRequests
+                    customProperties:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                        - key
+                        - value
+                        properties:
+                          key:
+                            type: string
+                            example: Env
+                          value:
+                            type: string
+                            example: production
+                      title: CustomProperties
+                      description: An array of custom properties.  The section Custom Properties Criteria lists the requirements for custom property names and values.
+              title: TestRequestBody
+              description: 'The request body sent by the following method/endpoint operations:
+
+
+                POST /v2/tests/api
+
+                PATCH /v2/tests/api/{id}
+
+                PUT /v2/tests/api/{id}
+
+                POST /v2/tests/api/validate
+
+                POST /v2/tests/api/{id}/validate
+
+                PUT /v2/tests/api/{id}/validate'
+            examples:
+              example:
+                value:
+                  test:
+                    active: true
+                    automaticRetries: 1
+                    customProperties:
+                    - key: Env
+                      value: production
+                    deviceId: 1
+                    frequency: 5
+                    locationIds:
+                    - aws-us-east-1
+                    name: My API test
+                    requests:
+                    - configuration:
+                        body: '''{"alert_name":"the service is
+
+                          down","url":"https://foo.com/bar"}''
+
+                          '
+                        certificateId: 1
+                        headers:
+                          Accept: application/json
+                          x-foo: bar
+                        httpVersion: '1.1'
+                        name: Get products
+                        requestMethod: GET
+                        url: https://dummyjson.com/products
+                      setup:
+                      - extractor: $$.foo
+                        name: First setup step
+                        source: '{''foo'': ''bar''}'
+                        type: extract_json
+                        variable: myVariable
+                      validations:
+                      - actual: '{{response.code}}'
+                        comparator: equals
+                        expected: 200
+                        name: My validation step
+                        type: assert_numeric
+                    schedulingStrategy: round_robin
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: ValidateApiResponse
+                properties:
+                  valid:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: API test is not valid.
+                anyOf:
+                - type: object
+                  properties:
+                    requests:
+                      type: array
+                      items:
+                        type: string
+                        example: configuration url is missing
+                  title: ExampleInvalidApiTestConfiguration
+                  description: Example of an invalid API test configuration.
+                - properties:
+                    requests:
+                      type: array
+                      example: []
+                      items:
+                        type: string
+                  title: EmptyArray
+                  description: Empty array
+                type: object
+              examples:
+                ExampleInvalidApiTestConfiguration:
+                  value:
+                    requests:
+                    - configuration url is missing
+                EmptyArray:
+                  value:
+                    requests: []
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics API tests V2
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.

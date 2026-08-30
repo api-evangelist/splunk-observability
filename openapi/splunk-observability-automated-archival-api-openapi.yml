@@ -1,0 +1,935 @@
+openapi: 3.2.0
+info:
+  title: Splunk Observability Cloud Automated archival API
+  version: '2.0'
+  description: API for automated archival.
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's. Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2
+  description: Endpoint URL for automated archiving API
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+tags:
+- name: Automated archival
+paths:
+  /automated-archival/exempt-metrics:
+    get:
+      summary: retrieveExemptMetrics
+      description: Shows all of the exempt metrics for the current version of your org's pipeline automation rule.
+      parameters:
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token. If you use an org token, it needs to have an authorization scope that includes API.
+        required: true
+        schema:
+          type: string
+      - name: Accept
+        in: header
+        description: Format of the response body. Always "application/json".
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                - creator: creator
+                  lastUpdatedBy: updatedBy
+                  created: 1743440733169
+                  lastUpdated: 1743440733169
+                  id: unique_id
+                  orgId: orgId
+                  name: exempt.metric.1
+                - creator: creator
+                  lastUpdatedBy: updatedBy
+                  created: 1743440733169
+                  lastUpdated: 1743440733169
+                  id: unique_id
+                  orgId: orgId
+                  name: exempt.metric.2
+              examples:
+                example:
+                  value:
+                  - created: 1743440733169
+                    creator: creator
+                    id: unique_id
+                    lastUpdated: 1743440733169
+                    lastUpdatedBy: updatedBy
+                    name: exempt.metric.1
+                    orgId: orgId
+                  - created: 1743440733169
+                    creator: creator
+                    id: unique_id
+                    lastUpdated: 1743440733169
+                    lastUpdatedBy: updatedBy
+                    name: exempt.metric.2
+                    orgId: orgId
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                title: Response body returned for an invalid request
+                type: object
+                properties:
+                  code:
+                    title: Error code
+                    type: integer
+                    example: 400
+                    description: HTTP response code for the error
+                  message:
+                    title: Error message
+                    type: string
+                    description: 'Cause of the error. The following list describes the error message and its cause:
+
+
+                      Please provide a name for this token.: In the request body, the name field is missing or null.
+
+                      Unable to create or update the given token. Please try again later.: An internal error occurred, and Splunk Observability Cloud can''t create the token.
+
+                      A token with the same name already exists!: For a POST request, you specified a value for name that''s the same as the name of an existing token.
+
+                      DPM quota cannot be set on a Hosts subscription plan: Your organization uses host-based pricing, but you tried to set a DPM limit.
+
+                      Category quota cannot be set on a DPM subscription plan: Your organization uses DPM-based pricing, but you tried to set a host-based limit.
+
+                      Host/Container quota cannot be set on a MTS subscription plan: Your organization uses custom metric-based pricing, but you tried
+
+                      to set a host or container limit.
+
+                      A principalId is required and may not be empty for acl entry: Problem with a field in permissions -- principalId is either missing or empty.
+
+                      One or more of provided users could not be validated [<principal_id_value]: Problem with a field in permissions -- The value of principalId
+
+                      isn''t an existing user, team, or org ID.
+
+                      Permissions are required with one (and only one) of permission types present. Either provide custom ACL for this object or PARENT ID from which permissions should be inherited.
+
+                      Problem with a field in permissions -- The value of acl is null.
+
+                      Actions are required and may not be empty for acl entry: Problem with a field in permissions -- The value of actions in acl is null.
+
+                      A principalType is required and may not be empty for acl entry: Problem with a field in permissions -- principalType is either missing or empty.
+
+                      Failed to deserialize payload at: sf.rest.shared.model.NamedToken[\"permissions\"]->sf.domain.accesscontrol.ObjectPermissions[\"acl\"]->java.util.HashSet[0]->sf.domain.accesscontrol.AclEntry[\"actions\"]->java.util.HashSet[0]:
+
+                      Problem with a field in permissions -- The value of the actions field isn''t READ or WRITE.
+
+                      Failed to deserialize payload at: sf.rest.shared.model.NamedToken[\"permissions\"]->sf.domain.accesscontrol.ObjectPermissions[\"acl\"]->java.util.HashSet[0]->sf.domain.accesscontrol.AclEntry[\"principalType\"]
+
+                      Problem with a field in permissions -- The value of the principalType field isn''t USER, TEAM, or ORG.'
+                description: Response error code and message, in the form of a JSON object
+              examples:
+                example:
+                  value:
+                    code: 400
+                    message: string
+        '401':
+          description: HTTP 401 response
+      security:
+      - SessionToken: []
+      tags:
+      - Automated archival
+    post:
+      summary: addExemptMetrics
+      description: Adds a list of exempt metrics to the current version of the pipeline automation rule.
+      parameters:
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token. If you use an org token, it needs to have an authorization scope that includes API.
+        required: true
+        schema:
+          type: string
+      - name: Accept
+        in: header
+        description: Format of the response body. Always "application/json".
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: Request body format. Always "application/json".
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: List of exempt metrics to add
+              type: array
+              items:
+                title: A metric name.
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: exempt.metric.1
+                    description: Name of an exempt metric
+                required:
+                - name
+                example:
+                  name: exempt.metric.1
+                description: A JSON object containing a key-value pair that defines an exempt metric name.
+              example:
+              - name: exempt.metric.1
+              - name: exempt.metric.2
+              description: List of the exempt metrics to add to the pipeline automation rule, in the form of a JSON array. Each element is a JSON object containing a key-value pair that defines an exempt metric name.
+            examples:
+              example:
+                value:
+                - name: exempt.metric.1
+                - name: exempt.metric.2
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                - creator: creator
+                  lastUpdatedBy: updatedBy
+                  created: 1743440733169
+                  lastUpdated: 1743440733169
+                  id: unique_id
+                  orgId: orgId
+                  name: exempt.metric.1
+                - creator: creator
+                  lastUpdatedBy: updatedBy
+                  created: 1743440733169
+                  lastUpdated: 1743440733169
+                  id: unique_id
+                  orgId: orgId
+                  name: exempt.metric.2
+              examples:
+                example:
+                  value:
+                  - created: 1743440733169
+                    creator: creator
+                    id: unique_id
+                    lastUpdated: 1743440733169
+                    lastUpdatedBy: updatedBy
+                    name: exempt.metric.1
+                    orgId: orgId
+                  - created: 1743440733169
+                    creator: creator
+                    id: unique_id
+                    lastUpdated: 1743440733169
+                    lastUpdatedBy: updatedBy
+                    name: exempt.metric.2
+                    orgId: orgId
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                title: Response body returned for an invalid request
+                type: object
+                properties:
+                  code:
+                    title: Error code
+                    type: integer
+                    example: 400
+                    description: HTTP response code for the error
+                  message:
+                    title: Error message
+                    type: string
+                    description: 'Cause of the error. The following list describes the error message and its cause:
+
+
+                      Please provide a name for this token.: In the request body, the name field is missing or null.
+
+                      Unable to create or update the given token. Please try again later.: An internal error occurred, and Splunk Observability Cloud can''t create the token.
+
+                      A token with the same name already exists!: For a POST request, you specified a value for name that''s the same as the name of an existing token.
+
+                      DPM quota cannot be set on a Hosts subscription plan: Your organization uses host-based pricing, but you tried to set a DPM limit.
+
+                      Category quota cannot be set on a DPM subscription plan: Your organization uses DPM-based pricing, but you tried to set a host-based limit.
+
+                      Host/Container quota cannot be set on a MTS subscription plan: Your organization uses custom metric-based pricing, but you tried
+
+                      to set a host or container limit.
+
+                      A principalId is required and may not be empty for acl entry: Problem with a field in permissions -- principalId is either missing or empty.
+
+                      One or more of provided users could not be validated [<principal_id_value]: Problem with a field in permissions -- The value of principalId
+
+                      isn''t an existing user, team, or org ID.
+
+                      Permissions are required with one (and only one) of permission types present. Either provide custom ACL for this object or PARENT ID from which permissions should be inherited.
+
+                      Problem with a field in permissions -- The value of acl is null.
+
+                      Actions are required and may not be empty for acl entry: Problem with a field in permissions -- The value of actions in acl is null.
+
+                      A principalType is required and may not be empty for acl entry: Problem with a field in permissions -- principalType is either missing or empty.
+
+                      Failed to deserialize payload at: sf.rest.shared.model.NamedToken[\"permissions\"]->sf.domain.accesscontrol.ObjectPermissions[\"acl\"]->java.util.HashSet[0]->sf.domain.accesscontrol.AclEntry[\"actions\"]->java.util.HashSet[0]:
+
+                      Problem with a field in permissions -- The value of the actions field isn''t READ or WRITE.
+
+                      Failed to deserialize payload at: sf.rest.shared.model.NamedToken[\"permissions\"]->sf.domain.accesscontrol.ObjectPermissions[\"acl\"]->java.util.HashSet[0]->sf.domain.accesscontrol.AclEntry[\"principalType\"]
+
+                      Problem with a field in permissions -- The value of the principalType field isn''t USER, TEAM, or ORG.'
+                description: Response error code and message, in the form of a JSON object
+              examples:
+                example:
+                  value:
+                    code: 400
+                    message: string
+        '401':
+          description: HTTP 401 response
+      security:
+      - SessionToken: []
+      tags:
+      - Automated archival
+    delete:
+      summary: removeExemptMetrics
+      description: Removes exempt metrics from the current version of the pipeline automation rule.
+      parameters:
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token. If you use an org token, it needs to have an authorization scope that includes API.
+        required: true
+        schema:
+          type: string
+      - name: Accept
+        in: header
+        description: Format of the response body. Always "application/json".
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: Request body format. Always "application/json".
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: Properties for removing exempt metrics
+              type: object
+              required:
+              - ids
+              properties:
+                ids:
+                  title: List of exempt metric IDs
+                  type: array
+                  items:
+                    title: A metric ID.
+                    type: string
+                    example: GtCBQ9rAAAA
+                    description: ID of the exempt metric.
+                  example:
+                  - GtCBQ9rAAAA
+                  - Gy4HsKAAEKg
+                  description: List of the IDs of exempt metrics to remove from the pipeline automation rule, in the form of a JSON array. Each element is a string specifying a metric ID.
+              description: Properties to use in removing exempt metrics from the pipeline automation rule using the API.
+            examples:
+              example:
+                value:
+                  ids:
+                  - GtCBQ9rAAAA
+                  - Gy4HsKAAEKg
+      responses:
+        '200':
+          description: HTTP 200 response
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                title: Response body returned for an invalid request
+                type: object
+                properties:
+                  code:
+                    title: Error code
+                    type: integer
+                    example: 400
+                    description: HTTP response code for the error
+                  message:
+                    title: Error message
+                    type: string
+                    description: 'Cause of the error. The following list describes the error message and its cause:
+
+
+                      Please provide a name for this token.: In the request body, the name field is missing or null.
+
+                      Unable to create or update the given token. Please try again later.: An internal error occurred, and Splunk Observability Cloud can''t create the token.
+
+                      A token with the same name already exists!: For a POST request, you specified a value for name that''s the same as the name of an existing token.
+
+                      DPM quota cannot be set on a Hosts subscription plan: Your organization uses host-based pricing, but you tried to set a DPM limit.
+
+                      Category quota cannot be set on a DPM subscription plan: Your organization uses DPM-based pricing, but you tried to set a host-based limit.
+
+                      Host/Container quota cannot be set on a MTS subscription plan: Your organization uses custom metric-based pricing, but you tried
+
+                      to set a host or container limit.
+
+                      A principalId is required and may not be empty for acl entry: Problem with a field in permissions -- principalId is either missing or empty.
+
+                      One or more of provided users could not be validated [<principal_id_value]: Problem with a field in permissions -- The value of principalId
+
+                      isn''t an existing user, team, or org ID.
+
+                      Permissions are required with one (and only one) of permission types present. Either provide custom ACL for this object or PARENT ID from which permissions should be inherited.
+
+                      Problem with a field in permissions -- The value of acl is null.
+
+                      Actions are required and may not be empty for acl entry: Problem with a field in permissions -- The value of actions in acl is null.
+
+                      A principalType is required and may not be empty for acl entry: Problem with a field in permissions -- principalType is either missing or empty.
+
+                      Failed to deserialize payload at: sf.rest.shared.model.NamedToken[\"permissions\"]->sf.domain.accesscontrol.ObjectPermissions[\"acl\"]->java.util.HashSet[0]->sf.domain.accesscontrol.AclEntry[\"actions\"]->java.util.HashSet[0]:
+
+                      Problem with a field in permissions -- The value of the actions field isn''t READ or WRITE.
+
+                      Failed to deserialize payload at: sf.rest.shared.model.NamedToken[\"permissions\"]->sf.domain.accesscontrol.ObjectPermissions[\"acl\"]->java.util.HashSet[0]->sf.domain.accesscontrol.AclEntry[\"principalType\"]
+
+                      Problem with a field in permissions -- The value of the principalType field isn''t USER, TEAM, or ORG.'
+                description: Response error code and message, in the form of a JSON object
+              examples:
+                example:
+                  value:
+                    code: 400
+                    message: string
+        '401':
+          description: HTTP 401 response
+      security:
+      - SessionToken: []
+      tags:
+      - Automated archival
+  /automated-archival/preview:
+    get:
+      summary: previewMetricUsage
+      description: 'Shows a preview of your current metric usage, formatted as an octet stream.
+
+        Previewing metric usage doesn''t create pipeline automation rules.'
+      parameters:
+      - name: lookbackPeriod
+        in: query
+        description: The lookback period, formatted as "PXXD", where the "XX" is replaced by the number of days to look back (maximum 60).
+        schema:
+          type: string
+      - name: gracePeriod
+        in: query
+        description: The grace period for the preview, formatted as "PXXD", where the "XX" is replaced by the number of grace period days (maximum 60).
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token. If you use an org token, it needs to have an authorization scope that includes API.
+        required: true
+        schema:
+          type: string
+      - name: Accept
+        in: header
+        description: Format of the response body. Always "application/octet-stream".
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                title: Response body returned for an invalid request
+                type: object
+                properties:
+                  code:
+                    title: Error code
+                    type: integer
+                    example: 400
+                    description: HTTP response code for the error
+                  message:
+                    title: Error message
+                    type: string
+                    description: 'Cause of the error. The following list describes the error message and its cause:
+
+
+                      Please provide a name for this token.: In the request body, the name field is missing or null.
+
+                      Unable to create or update the given token. Please try again later.: An internal error occurred, and Splunk Observability Cloud can''t create the token.
+
+                      A token with the same name already exists!: For a POST request, you specified a value for name that''s the same as the name of an existing token.
+
+                      DPM quota cannot be set on a Hosts subscription plan: Your organization uses host-based pricing, but you tried to set a DPM limit.
+
+                      Category quota cannot be set on a DPM subscription plan: Your organization uses DPM-based pricing, but you tried to set a host-based limit.
+
+                      Host/Container quota cannot be set on a MTS subscription plan: Your organization uses custom metric-based pricing, but you tried
+
+                      to set a host or container limit.
+
+                      A principalId is required and may not be empty for acl entry: Problem with a field in permissions -- principalId is either missing or empty.
+
+                      One or more of provided users could not be validated [<principal_id_value]: Problem with a field in permissions -- The value of principalId
+
+                      isn''t an existing user, team, or org ID.
+
+                      Permissions are required with one (and only one) of permission types present. Either provide custom ACL for this object or PARENT ID from which permissions should be inherited.
+
+                      Problem with a field in permissions -- The value of acl is null.
+
+                      Actions are required and may not be empty for acl entry: Problem with a field in permissions -- The value of actions in acl is null.
+
+                      A principalType is required and may not be empty for acl entry: Problem with a field in permissions -- principalType is either missing or empty.
+
+                      Failed to deserialize payload at: sf.rest.shared.model.NamedToken[\"permissions\"]->sf.domain.accesscontrol.ObjectPermissions[\"acl\"]->java.util.HashSet[0]->sf.domain.accesscontrol.AclEntry[\"actions\"]->java.util.HashSet[0]:
+
+                      Problem with a field in permissions -- The value of the actions field isn''t READ or WRITE.
+
+                      Failed to deserialize payload at: sf.rest.shared.model.NamedToken[\"permissions\"]->sf.domain.accesscontrol.ObjectPermissions[\"acl\"]->java.util.HashSet[0]->sf.domain.accesscontrol.AclEntry[\"principalType\"]
+
+                      Problem with a field in permissions -- The value of the principalType field isn''t USER, TEAM, or ORG.'
+                description: Response error code and message, in the form of a JSON object
+              examples:
+                example:
+                  value:
+                    code: 400
+                    message: string
+        '401':
+          description: HTTP 401 response
+      security:
+      - SessionToken: []
+      tags:
+      - Automated archival
+  /automated-archival/settings:
+    get:
+      summary: createCurrentConfig
+      description: Retrieves the current configuration of the pipeline automation rule associated with your org.
+      parameters:
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token. If you use an org token, it needs to have an authorization scope that includes API.
+        required: true
+        schema:
+          type: string
+      - name: Accept
+        in: header
+        description: Format of the response body. Always "application/json".
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Properties of pipeline automation settings
+                properties:
+                  creator:
+                    title: Creator ID.
+                    type: string
+                    example: creatorID
+                    description: ID of the user who created this pipeline automation rule.
+                  created:
+                    title: Pipeline automation rule creation time.
+                    type: integer
+                    format: int64
+                    example: 1741967107063
+                    readOnly: true
+                    description: 'The pipeline automation rule creation time, in *nix time in milliseconds.
+
+                      The system sets this value, and you can''t modify it.'
+                  lastUpdated:
+                    title: Pipeline automation rule most recent update time.
+                    type: integer
+                    format: int64
+                    example: 1743206281680
+                    readOnly: true
+                    description: 'Time at which the pipeline automation rule was most recently updated, in *nix time in milliseconds.
+
+                      The system sets this value, and you can''t modify it.'
+                  lastUpdatedBy:
+                    title: Updator ID.
+                    type: string
+                    example: updatorID
+                    description: ID of the user who most recently updated the pipeline automation rule.
+                  enabled:
+                    title: Enabled/disabled.
+                    type: boolean
+                    example: true
+                    description: Indicates whether the pipeline automation rule is currently active. If false, the rule is inactive.
+                  version:
+                    title: Version of the pipeline automation rule.
+                    type: integer
+                    format: int32
+                    example: 31
+                    description: 'Version number of the pipeline automation rule.
+
+                      If you''re updating or creating a pipeline automation rule, you must include the version number of the current configuration in your request. You can find the current version number by using GET /v2/automated-archival/settings.'
+                  orgId:
+                    title: Org ID.
+                    type: string
+                    example: myOrg
+                    description: ID of the organization associated with this pipeline automation rule.
+                  rulesetLimit:
+                    title: Maximum number of rulesets.
+                    type: integer
+                    format: int32
+                    example: 500
+                    description: The maximum number of rulesets for this pipeline automation rule.
+                  gracePeriod:
+                    title: Grace period for the rule.
+                    type: string
+                    example: P60D
+                    description: 'The grace period for this pipeline automation rule. After the grace period ends, new metrics that have been unused during the grace period will be archived.
+
+                      For example, a gracePeriod value of "P30D", denoting 30 days, means that a new metric can be unused for up to 30 days before being automatically archived. The grace period must be between 0 and 60 days.'
+                  lookbackPeriod:
+                    title: Lookback period for the rule.
+                    type: string
+                    example: P60D
+                    description: 'The look back period for the pipeline automation rule. This is the time period for which the API will look for unused metrics to archive.
+
+                      For example, a lookbackPeriod value of "P30D", denoting 30 days, tells the API to look for metrics from the previous 30 days. The look back period must be between 0 and 60 days.'
+                description: Properties of pipeline automation settings, in the form of a JSON object.
+              examples:
+                example:
+                  value:
+                    created: 1741967107063
+                    creator: creatorID
+                    enabled: true
+                    gracePeriod: P60D
+                    lastUpdated: 1743206281680
+                    lastUpdatedBy: updatorID
+                    lookbackPeriod: P60D
+                    orgId: myOrg
+                    rulesetLimit: 500
+                    version: 31
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                title: Response body returned for an invalid request
+                type: object
+                properties:
+                  code:
+                    title: Error code
+                    type: integer
+                    example: 400
+                    description: HTTP response code for the error
+                  message:
+                    title: Error message
+                    type: string
+                    description: 'Cause of the error. The following list describes the error message and its cause:
+
+
+                      Please provide a name for this token.: In the request body, the name field is missing or null.
+
+                      Unable to create or update the given token. Please try again later.: An internal error occurred, and Splunk Observability Cloud can''t create the token.
+
+                      A token with the same name already exists!: For a POST request, you specified a value for name that''s the same as the name of an existing token.
+
+                      DPM quota cannot be set on a Hosts subscription plan: Your organization uses host-based pricing, but you tried to set a DPM limit.
+
+                      Category quota cannot be set on a DPM subscription plan: Your organization uses DPM-based pricing, but you tried to set a host-based limit.
+
+                      Host/Container quota cannot be set on a MTS subscription plan: Your organization uses custom metric-based pricing, but you tried
+
+                      to set a host or container limit.
+
+                      A principalId is required and may not be empty for acl entry: Problem with a field in permissions -- principalId is either missing or empty.
+
+                      One or more of provided users could not be validated [<principal_id_value]: Problem with a field in permissions -- The value of principalId
+
+                      isn''t an existing user, team, or org ID.
+
+                      Permissions are required with one (and only one) of permission types present. Either provide custom ACL for this object or PARENT ID from which permissions should be inherited.
+
+                      Problem with a field in permissions -- The value of acl is null.
+
+                      Actions are required and may not be empty for acl entry: Problem with a field in permissions -- The value of actions in acl is null.
+
+                      A principalType is required and may not be empty for acl entry: Problem with a field in permissions -- principalType is either missing or empty.
+
+                      Failed to deserialize payload at: sf.rest.shared.model.NamedToken[\"permissions\"]->sf.domain.accesscontrol.ObjectPermissions[\"acl\"]->java.util.HashSet[0]->sf.domain.accesscontrol.AclEntry[\"actions\"]->java.util.HashSet[0]:
+
+                      Problem with a field in permissions -- The value of the actions field isn''t READ or WRITE.
+
+                      Failed to deserialize payload at: sf.rest.shared.model.NamedToken[\"permissions\"]->sf.domain.accesscontrol.ObjectPermissions[\"acl\"]->java.util.HashSet[0]->sf.domain.accesscontrol.AclEntry[\"principalType\"]
+
+                      Problem with a field in permissions -- The value of the principalType field isn''t USER, TEAM, or ORG.'
+                description: Response error code and message, in the form of a JSON object
+              examples:
+                example:
+                  value:
+                    code: 400
+                    message: string
+        '401':
+          description: HTTP 401 response
+      security:
+      - SessionToken: []
+      tags:
+      - Automated archival
+    put:
+      summary: createNewConfig
+      description: Creates a new configuration for the pipeline automation rule associated with your org.
+      parameters:
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token. If you use an org token, it needs to have an authorization scope that includes API.
+        required: true
+        schema:
+          type: string
+      - name: Accept
+        in: header
+        description: Format of the response body. Always "application/json".
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: Request body format. Always "application/json".
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: Create pipeline automation rule response body.
+              properties:
+                enabled:
+                  title: Enabled/disabled.
+                  type: boolean
+                  example: true
+                  description: Indicates whether the pipeline automation rule is currently active. If false, the rule is inactive.
+                version:
+                  title: Version of the pipeline automation rule.
+                  type: integer
+                  format: int32
+                  example: 31
+                  description: 'Version number of the pipeline automation rule.
+
+                    If you''re updating or creating a pipeline automation rule, you must include the version number of the current configuration in your request. You can find the current version number by using GET /v2/automated-archival/settings.'
+                orgId:
+                  title: Org ID.
+                  type: string
+                  example: myOrg
+                  description: ID of the organization associated with this pipeline automation rule.
+                rulesetLimit:
+                  title: Maximum number of rulesets.
+                  type: integer
+                  format: int32
+                  example: 500
+                  description: The maximum number of rulesets for this pipeline automation rule.
+                gracePeriod:
+                  title: Grace period for the rule.
+                  type: string
+                  example: P60D
+                  description: 'The grace period for this pipeline automation rule. After the grace period ends, new metrics that have been unused during the grace period will be archived.
+
+                    For example, a gracePeriod value of "P30D", denoting 30 days, means that a new metric can be unused for up to 30 days before being automatically archived. The grace period must be between 0 and 60 days.'
+                lookbackPeriod:
+                  title: Lookback period for the rule.
+                  type: string
+                  example: P60D
+                  description: 'The look back period for the pipeline automation rule. This is the time period for which the API will look for unused metrics to archive.
+
+                    For example, a lookbackPeriod value of "P30D", denoting 30 days, tells the API to look for metrics from the previous 30 days. The look back period must be between 0 and 60 days.'
+              description: Request body that updates a pipeline automation rule.
+            examples:
+              example:
+                value:
+                  enabled: true
+                  gracePeriod: P60D
+                  lookbackPeriod: P60D
+                  orgId: myOrg
+                  rulesetLimit: 500
+                  version: 31
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Properties of pipeline automation settings
+                properties:
+                  creator:
+                    title: Creator ID.
+                    type: string
+                    example: creatorID
+                    description: ID of the user who created this pipeline automation rule.
+                  created:
+                    title: Pipeline automation rule creation time.
+                    type: integer
+                    format: int64
+                    example: 1741967107063
+                    readOnly: true
+                    description: 'The pipeline automation rule creation time, in *nix time in milliseconds.
+
+                      The system sets this value, and you can''t modify it.'
+                  lastUpdated:
+                    title: Pipeline automation rule most recent update time.
+                    type: integer
+                    format: int64
+                    example: 1743206281680
+                    readOnly: true
+                    description: 'Time at which the pipeline automation rule was most recently updated, in *nix time in milliseconds.
+
+                      The system sets this value, and you can''t modify it.'
+                  lastUpdatedBy:
+                    title: Updator ID.
+                    type: string
+                    example: updatorID
+                    description: ID of the user who most recently updated the pipeline automation rule.
+                  enabled:
+                    title: Enabled/disabled.
+                    type: boolean
+                    example: true
+                    description: Indicates whether the pipeline automation rule is currently active. If false, the rule is inactive.
+                  version:
+                    title: Version of the pipeline automation rule.
+                    type: integer
+                    format: int32
+                    example: 31
+                    description: 'Version number of the pipeline automation rule.
+
+                      If you''re updating or creating a pipeline automation rule, you must include the version number of the current configuration in your request. You can find the current version number by using GET /v2/automated-archival/settings.'
+                  orgId:
+                    title: Org ID.
+                    type: string
+                    example: myOrg
+                    description: ID of the organization associated with this pipeline automation rule.
+                  rulesetLimit:
+                    title: Maximum number of rulesets.
+                    type: integer
+                    format: int32
+                    example: 500
+                    description: The maximum number of rulesets for this pipeline automation rule.
+                  gracePeriod:
+                    title: Grace period for the rule.
+                    type: string
+                    example: P60D
+                    description: 'The grace period for this pipeline automation rule. After the grace period ends, new metrics that have been unused during the grace period will be archived.
+
+                      For example, a gracePeriod value of "P30D", denoting 30 days, means that a new metric can be unused for up to 30 days before being automatically archived. The grace period must be between 0 and 60 days.'
+                  lookbackPeriod:
+                    title: Lookback period for the rule.
+                    type: string
+                    example: P60D
+                    description: 'The look back period for the pipeline automation rule. This is the time period for which the API will look for unused metrics to archive.
+
+                      For example, a lookbackPeriod value of "P30D", denoting 30 days, tells the API to look for metrics from the previous 30 days. The look back period must be between 0 and 60 days.'
+                description: Properties of pipeline automation settings, in the form of a JSON object.
+              examples:
+                example:
+                  value:
+                    created: 1741967107063
+                    creator: creatorID
+                    enabled: true
+                    gracePeriod: P60D
+                    lastUpdated: 1743206281680
+                    lastUpdatedBy: updatorID
+                    lookbackPeriod: P60D
+                    orgId: myOrg
+                    rulesetLimit: 500
+                    version: 31
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                title: Response body returned for an invalid request
+                type: object
+                properties:
+                  code:
+                    title: Error code
+                    type: integer
+                    example: 400
+                    description: HTTP response code for the error
+                  message:
+                    title: Error message
+                    type: string
+                    description: 'Cause of the error. The following list describes the error message and its cause:
+
+
+                      Please provide a name for this token.: In the request body, the name field is missing or null.
+
+                      Unable to create or update the given token. Please try again later.: An internal error occurred, and Splunk Observability Cloud can''t create the token.
+
+                      A token with the same name already exists!: For a POST request, you specified a value for name that''s the same as the name of an existing token.
+
+                      DPM quota cannot be set on a Hosts subscription plan: Your organization uses host-based pricing, but you tried to set a DPM limit.
+
+                      Category quota cannot be set on a DPM subscription plan: Your organization uses DPM-based pricing, but you tried to set a host-based limit.
+
+                      Host/Container quota cannot be set on a MTS subscription plan: Your organization uses custom metric-based pricing, but you tried
+
+                      to set a host or container limit.
+
+                      A principalId is required and may not be empty for acl entry: Problem with a field in permissions -- principalId is either missing or empty.
+
+                      One or more of provided users could not be validated [<principal_id_value]: Problem with a field in permissions -- The value of principalId
+
+                      isn''t an existing user, team, or org ID.
+
+                      Permissions are required with one (and only one) of permission types present. Either provide custom ACL for this object or PARENT ID from which permissions should be inherited.
+
+                      Problem with a field in permissions -- The value of acl is null.
+
+                      Actions are required and may not be empty for acl entry: Problem with a field in permissions -- The value of actions in acl is null.
+
+                      A principalType is required and may not be empty for acl entry: Problem with a field in permissions -- principalType is either missing or empty.
+
+                      Failed to deserialize payload at: sf.rest.shared.model.NamedToken[\"permissions\"]->sf.domain.accesscontrol.ObjectPermissions[\"acl\"]->java.util.HashSet[0]->sf.domain.accesscontrol.AclEntry[\"actions\"]->java.util.HashSet[0]:
+
+                      Problem with a field in permissions -- The value of the actions field isn''t READ or WRITE.
+
+                      Failed to deserialize payload at: sf.rest.shared.model.NamedToken[\"permissions\"]->sf.domain.accesscontrol.ObjectPermissions[\"acl\"]->java.util.HashSet[0]->sf.domain.accesscontrol.AclEntry[\"principalType\"]
+
+                      Problem with a field in permissions -- The value of the principalType field isn''t USER, TEAM, or ORG.'
+                description: Response error code and message, in the form of a JSON object
+              examples:
+                example:
+                  value:
+                    code: 400
+                    message: string
+        '401':
+          description: HTTP 401 response
+      security:
+      - SessionToken: []
+      tags:
+      - Automated archival
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.

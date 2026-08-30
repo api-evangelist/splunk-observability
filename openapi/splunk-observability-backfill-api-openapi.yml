@@ -1,0 +1,180 @@
+openapi: 3.2.0
+info:
+  title: Splunk Observability Cloud Backfill API
+  version: 1.1.0
+  description: 'API for sending historical metric time series (MTS) data points to Splunk Observability Cloud, overwriting any existing data points for the same time period.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You have to have the Splunk Observability Cloud admin or power role to use the POST /backfill operation.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's. Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://backfill.{REALM}.observability.splunkcloud.com/v1
+  description: Endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+tags:
+- name: Backfill
+paths:
+  /backfill:
+    post:
+      summary: Backfill MTS
+      description: 'Sends historical metric time series (MTS) data points to Splunk Observability Cloud, overwriting any
+
+        existing data points for the same time period. Be aware of the following when you use /backfill:
+
+
+        A single call to /backfill can only refer to a single MTS
+
+        specified by its metric type, metric name, and dimensions.
+
+        Use the API in bulk mode. It''s designed to accept thousands of
+
+        data points in each call, such as 1 hour of points with a resolution
+
+        of one second or one day of points with a resolution of one minute.
+
+        Timestamps for each data points must be monotonically ascending.
+
+        A single call to /backfill must contain one or more hour-long
+
+        groups of data points, with each hour starting one millisecond after
+
+        the top of the hour and ending exactly at the top of the following
+
+        hour.
+
+        Avoid large gaps in the data, because the provided data replaces
+
+        all of the data in the equivalent time period of existing data. For
+
+        example, if you have one hundred data points for an MTS over one
+
+        hour, and you backfill with 20 data points for the same MTS over the
+
+        same hour, you''re left with 20 data points.
+
+
+        Note: /backfill doesn''t support the built-in sf_hires dimension
+
+        that marks data points as high resolution.'
+      parameters:
+      - name: orgid
+        in: query
+        description: 'The ID for the organization that should receive
+
+          the incoming data.'
+        schema:
+          type: string
+      - name: metric_type
+        in: query
+        description: 'The metric type for the metric you''re backfilling. Allowed values
+
+          are gauge, counter, and cumulative_counter. To learn more, refer to the
+
+          Metric types section in the user documentation.'
+        schema:
+          type: string
+          enum:
+          - gauge
+          - counter
+          - cumulative_counter
+      - name: metric
+        in: query
+        description: For backfilled MTS, name of metric
+        required: true
+        schema:
+          type: string
+      - name: sfxdim_<dimension_name>
+        in: query
+        description: 'Specifies the dimensions for the MTS you''re backfilling. Use the dimension
+
+          name and value for each dimension, up to the limit of 36 dimensions.
+
+          For example, if you want to specify sfxdim_demo_datacenter:Paris as one
+
+          dimension and sfxdim_demo_host:server1 as another dimension, use the following
+
+          in your URL: sfxdim_demo_datacenter:Paris&sfxdim_demo_host:server1
+
+          You must specify all the dimensions associated with the
+
+          MTS. If you don''t, the backfill creates a new MTS based on the
+
+          dimensions you specify.'
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: Always `application/json'.
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Access token (org token) with authScope set to INGEST
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - timestamp
+              - value
+              properties:
+                timestamp:
+                  type: integer
+                  format: int64
+                  description: 'Timestamp of the historical data points, expressed in
+
+                    *nix time in milliseconds. The values of timestamp must be monotonically
+
+                    ascending.'
+                value:
+                  type: number
+                  description: The metric value, as an integer or floating-point number.
+              example:
+                timestamp: 205344000000
+                value: 400
+            examples:
+              example:
+                value:
+                  timestamp: 205344000000
+                  value: 400
+      responses:
+        '200':
+          description: HTTP 200 response
+      security:
+      - SessionToken: []
+      tags:
+      - Backfill
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.

@@ -1,0 +1,314 @@
+openapi: 3.2.0
+info:
+  title: Splunk Observability Cloud Session tokens API
+  version: 3.1.0
+  description: 'API for creating and deleting session tokens.
+
+    Note: This API doesn''t handle access tokens (org tokens). To manage access tokens, use the org tokens API.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's. Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2
+  description: Session Token API endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+tags:
+- name: Session tokens
+paths:
+  /session:
+    post:
+      summary: Create Session Token
+      description: 'Creates a session token (referred to as an User API Access Token  in
+
+        the UI) that provides authentication for other API
+
+        calls.
+
+        Session tokens require an email and password. You can''t create a session token if your organization uses SSO authentication unless your organization has also activated email/password authentication.
+
+        To create a token that doesn''t require email/password authentication, use the Org Tokens API.
+
+        Note: You can''t use a session token for authenticating a /datapoint, /backfill, or /event API call. These APIs require an organization access token (org token), referred to as an access token in the UI, with ingest permission.'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - email
+              - password
+              properties:
+                email:
+                  title: User email address
+                  type: string
+                  format: email
+                  example: edickinson@example.com
+                  description: 'The email address you used to join the organization for which you
+
+                    want a session token.
+
+                    Note: This has to be the email address that Splunk Splunk Observability Cloud
+
+                    used to invite you to the organization. If you''re using an
+
+                    external protocol such as SAML or LDAP to connect to Splunk Observability Cloud,
+
+                    you can''t use that protocol''s credentials.'
+                organizationId:
+                  title: Organization Id
+                  type: string
+                  example: abcdefgh1234
+                  description: Optional. The id for your organization. It it's not specified, the token is created for the default org of the user.
+                password:
+                  title: User password
+                  type: string
+                  format: password
+                  example: DontUseThisPassword
+                  description: 'The password you provided to Splunk Observability Cloud when you accepted an
+
+                    invitation to join an organization. If you''re using an
+
+                    external protocol such as SAML or LDAP to connect to
+
+                    Splunk Observability Cloud, you can''t use that protocol''s credentials.'
+            examples:
+              createToken:
+                summary: Create session token request body
+                description: 'Example
+
+                  '
+                x-description: 'Contains the email and password of a user who has
+
+                  authorization to create session tokens.
+
+                  '
+                value:
+                  email: edickinson@example.com
+                  organizationId: abcdefgh1234
+                  password: DontUseThisPassword
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                title: Response body for a successful token creation
+                type: object
+                properties:
+                  accessToken:
+                    title: The session token returned by the API
+                    type: string
+                    description: 'A session token (User API Access Token) generated by the API. This
+
+                      token remains valid for 30 days.'
+                  createdBy:
+                    title: User ID of the token creator
+                    type: string
+                    description: The internal user ID of the user who created the token.
+                  createdMs:
+                    title: When created
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1549963264000
+                    description: 'The date and time that the token was created, in *nix time in milliseconds
+
+                      This property is set by the system, and you can''t change it.'
+                  disabled:
+                    title: Disabled token indicator
+                    type: boolean
+                    description: 'Indicates if the token is disabled or not. When you first create a
+
+                      token, the value of disabled is false.'
+                  email:
+                    title: Email address of the token creator
+                    type: string
+                    description: The email address submitted in the request to create the token
+                  expiryMs:
+                    title: Token expiration timestamp
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1561886464000
+                    description: The date and time that the token will expire, in *nix time in milliseconds
+                  id:
+                    title: Token ID
+                    type: string
+                    description: The identifier of this access token
+                  organizationId:
+                    title: Organization ID
+                    type: string
+                    description: The identifier of the organization that the user belongs to
+                  sessionType:
+                    title: Session type
+                    type: string
+                    description: Always set to ORG_USER
+                  updatedBy:
+                    title: User who updated the token
+                    type: string
+                    description: For a successful "create token" request, this value is null.
+                  updatedMs:
+                    title: Token updated timestamp
+                    type: integer
+                    format: int64
+                    readOnly: true
+                    example: 1556702464000
+                    description: 'The date and time that the token was updated, in *nix time in milliseconds
+
+                      For a successful "create token" request, this value is the same as that
+
+                      for createdMs.
+
+                      This value is set by the system, and you can''t change it.'
+                  userId:
+                    title: User ID of the user that created the token
+                    type: string
+                    description: The identifier of the user who created the token
+                  username:
+                    title: User name of the user that created the token
+                    type: string
+                    description: Always null
+              examples:
+                confirmation-success:
+                  summary: Example of a successful session token create request
+                  value:
+                    accessToken: <USER-API-ACCESS-TOKEN>
+                    createdBy: CkClZUKAIAQ
+                    createdMs: 1549963264000
+                    disabled: false
+                    email: user@organization.com
+                    expiryMs: 1561886464000
+                    id: CkSfGddAAAg
+                    organizationId: abcdefgh1234
+                    sessionType: ORG_USER
+                    updatedBy: null
+                    updatedMs: 1556702464000
+                    userId: CkClZUKAIAQ
+                    userName: null
+        '401':
+          description: HTTP 401 response
+          content:
+            application/json:
+              schema:
+                title: Response body for a failed token creation request
+                type: object
+                properties:
+                  type:
+                    title: The type of response
+                    type: string
+                    description: 'The type of response that this response body represents. Always set
+
+                      to "error".'
+                  status:
+                    title: HTTP status code
+                    type: integer
+                    description: 'The numeric HTTP status code for this response. The API always
+
+                      returns 401 for a failed create token request.'
+                  message:
+                    title: Error message
+                    type: string
+                    description: 'The error message associated with the HTTP status code. The API
+
+                      always returns The email/password combination was entered incorrectly. Please try again."'
+              examples:
+                default:
+                  value:
+                    summary: Example of a failed session token create request
+                    value:
+                      type: error
+                      status: 401
+                      message: 'The email/password combination was entered incorrectly.
+
+                        Please try again.
+
+                        '
+      tags:
+      - Session tokens
+    delete:
+      summary: Delete Session Token
+      description: 'Invalidates an existing session token (referred to as an User API
+
+        Access Tokenin the UI). If the invalidation succeeds, you  receive
+
+        the HTTP status code ''204''. This means that the API successfully
+
+        processed the request, but it won''t return headers or a response
+
+        body.
+
+        Note: You can''t use this API to delete an org token
+
+        (referred to as an access token in the UI.)'
+      parameters:
+      - name: Content-Type
+        in: header
+        description: Format of the request payload. The only allowed value is "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: The session token (User API Access Token) you want to delete
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: HTTP 204 response
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: HTTP response code. Always set to "404"
+                  message:
+                    description: Error cause. Always set to "Session not found"
+              examples:
+                default:
+                  value:
+                    code: 404
+                    message: Session not found
+      security:
+      - SessionToken: []
+      tags:
+      - Session tokens
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.

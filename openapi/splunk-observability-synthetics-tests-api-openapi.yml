@@ -1,0 +1,1126 @@
+openapi: 3.2.0
+info:
+  title: Splunk Observability Cloud Synthetics tests API
+  version: 1.0.4
+  description: 'API for retrieving and deleting tests in Splunk Synthetic Monitoring.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You need the Splunk Observability Cloud admin, power, or read_only role to use this API.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's. Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2/synthetics
+  description: Endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+tags:
+- name: Synthetics tests
+paths:
+  /tests:
+    get:
+      summary: getTests
+      description: 'Returns a list of all tests.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin, power, or read_only role.'
+      parameters:
+      - name: page
+        in: query
+        description: 'The page to return. Must be greater than 0, but will default to 1
+
+          otherwise.'
+        schema:
+          type: integer
+          default: 1
+      - name: perPage
+        in: query
+        description: Number of tests to return for a given request.
+        schema:
+          type: integer
+          default: 50
+      - name: testType
+        in: query
+        description: 'Returns only tests based on the specified type. Possible values:
+
+
+          browser: Browser tests
+
+          api: API tests
+
+          http: HTTP tests
+
+          port: Port tests
+
+          uptime: HTTP or Port tests
+
+          ssl: SSL tests'
+        schema:
+          type: string
+      - name: orderby
+        in: query
+        description: 'Sorts tests by the specified value. Possible values:
+
+
+          id: Test ID
+
+          name: Test name
+
+          active: Active status
+
+          type: Test type
+
+          frequency: Test run frequency
+
+          created_at: Date and time when tests were created.
+
+          updated_at: Date and time when tests were last updated.
+
+          scheduling_strategy: Scheduling strategy
+
+          last_run_at: Date and time when tests were last run
+
+          last_run_status: Status of the last time tests were run'
+        schema:
+          type: string
+      - name: search
+        in: query
+        description: Returns a list of tests that have match the value you specified for Name or Type.
+        schema:
+          type: string
+      - name: locationId
+        in: query
+        description: Returns a list of tests that are configured to run from the given locationId.
+        schema:
+          type: string
+      - name: customProperties
+        in: query
+        description: Returns a list of tests which have the given customProperties. The properties should be in the format "key:value".
+        schema:
+          type: array
+          items:
+            type: string
+            example: key:value
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+      - name: testTypes
+        in: query
+        description: 'Returns only tests based on the specified types. Possible values:
+
+
+          browser: Browser tests
+
+          api: API tests
+
+          http: HTTP tests
+
+          port: Port tests
+
+          uptime: HTTP or Port tests
+
+          ssl: SSL tests'
+        schema:
+          type: array
+          items:
+            type: string
+      - name: frequencies
+        in: query
+        description: Returns a list of tests that are configured to run with the given frequencies.
+        schema:
+          type: array
+          items:
+            type: integer
+      - name: locationIds
+        in: query
+        description: Returns a list of tests that are configured to run from the given locationIds.
+        schema:
+          type: array
+          items:
+            type: string
+      - name: lastRunStatus
+        in: query
+        description: 'Returns only tests based off of the lastRunStatus. Possible values:
+
+
+          success: Last test run was successful
+
+          failed: Last test run failed
+
+          pending: Test has not been run yet'
+        schema:
+          type: array
+          items:
+            type: string
+      - name: schedulingStragety
+        in: query
+        description: 'Returns only tests based on the specified schedulingStrategy. Possible values:
+
+
+          round_robin
+
+          concurrent'
+        schema:
+          type: string
+      - name: active
+        in: query
+        description: When true, returns only active tests. When false, returns only paused tests.
+        schema:
+          type: boolean
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always  "application/json".
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  perPage:
+                    type: string
+                    example: 50
+                    title: PerPage
+                    description: 'Number of results per page. If perPage is not supplied, the value of
+
+                      this field will be 50. If it is supplied, then the value will be what
+
+                      was supplied.'
+                  totalCount:
+                    type: integer
+                    format: int32
+                    example: 1
+                    title: TotalCount
+                    description: 'Number of test in the result set that match the search criteria.
+
+                      Note: Count is not the same as the number of objects returned
+
+                      in the response body.'
+                  nextPageLink:
+                    type: integer
+                    format: int32
+                    description: 'The href to the next page of results. If there is not a next page,
+
+                      this will be null.'
+                  tests:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          readOnly: true
+                          example: 1
+                          description: The unique ID of the test.
+                        name:
+                          type: string
+                          example: My Test
+                          description: Name of the test.
+                        active:
+                          type: boolean
+                          example: true
+                          description: Describes if the test is active.
+                        automaticRetries:
+                          type: integer
+                          default: 0
+                          example: 1
+                          description: Automatically retry if the run fails
+                        frequency:
+                          type: integer
+                          format: int32
+                          example: 5
+                          title: Frequency
+                          description: How often to run your test.
+                        schedulingStrategy:
+                          type: string
+                          example: round_robin
+                          title: SchedulingStrategy
+                          description: 'Type of scheduling strategy. This can only be:
+
+
+                            round_robin
+
+                            concurrent'
+                        createdAt:
+                          type: string
+                          readOnly: true
+                          example: '2022-09-14T14:35:37.801Z'
+                          title: CreatedAt
+                          description: 'Timestamp of when the test was last updated, in UTC.
+
+                            This field is read-only, and the system always sets the value.'
+                        createdBy:
+                          type: string
+                          readOnly: true
+                          example: abcdefgh1234
+                          title: CreatedBy
+                          description: 'Member ID of who created the test.
+
+                            This field is read-only, and the system always sets the value.'
+                        updatedAt:
+                          type: string
+                          readOnly: true
+                          example: '2022-09-14T14:35:38.099Z'
+                          title: UpdatedAt
+                          description: 'Timestamp of when the test was last updated, in UTC.
+
+                            This field is read-only, and the system always sets the value.'
+                        updatedBy:
+                          type: string
+                          readOnly: true
+                          example: abcdefgh1234
+                          title: UpdatedBy
+                          description: 'Member ID of who last updated the test.
+
+                            This field is read-only, and the system always sets the value.'
+                        locationIds:
+                          type: array
+                          items:
+                            type: string
+                          example:
+                          - aws-us-east-1
+                          title: LocationIds
+                          description: An array of location IDs where the test runs.
+                        customProperties:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              key:
+                                type: string
+                                example: foo
+                              value:
+                                type: string
+                                example: bar
+                          title: CustomProperties
+                          description: An array of custom properties for the test.
+                        lastRunStatus:
+                          type: string
+                          example: success
+                          enum:
+                          - pending
+                          - success
+                          - failed
+                          title: LastRunStatus
+                          description: Status of the last test run.
+                        lastRunAt:
+                          type: string
+                          readOnly: true
+                          example: '2022-09-14T14:36:45.156Z'
+                          title: LastRunAt
+                          description: 'Timestamp of when the test was last run, in UTC.
+
+                            This field is read-only, and the system always sets the value.'
+                        type:
+                          type: string
+                          example: browser
+                          description: 'Type of tests, for example:
+
+
+                            browser
+
+                            http
+
+                            api
+
+                            port'
+                      title: Test
+                      description: Properties of a test.
+                    description: 'Query results, in the form of a JSON array of
+
+                      objects. Each element is a test.'
+                title: GetTestsResponse
+                description: Returns a list of all tests.
+              examples:
+                example:
+                  value:
+                    nextPageLink: 0
+                    perPage: 50
+                    tests:
+                    - active: true
+                      automaticRetries: 1
+                      createdAt: '2022-09-14T14:35:37.801Z'
+                      createdBy: abcdefgh1234
+                      customProperties:
+                      - key: foo
+                        value: bar
+                      frequency: 5
+                      id: 1
+                      lastRunAt: '2022-09-14T14:36:45.156Z'
+                      lastRunStatus: success
+                      locationIds:
+                      - aws-us-east-1
+                      name: My Test
+                      schedulingStrategy: round_robin
+                      type: browser
+                      updatedAt: '2022-09-14T14:35:38.099Z'
+                      updatedBy: abcdefgh1234
+                    totalCount: 1
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics tests
+  /tests/{id}:
+    delete:
+      summary: deleteTest
+      description: 'Deletes a Test.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of a test
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: HTTP 204 response
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Can't find test.
+                  details:
+                    type: object
+                    example: '{}'
+                title: NotFound
+                description: Not Found
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Can't find test.
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics tests
+  /tests/{id}/run_now:
+    post:
+      summary: runTestNow
+      description: 'Triggers a run of the specified test.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of a test
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runId:
+                    type: string
+                    format: uuid
+                    example: 1c4d52be-e7e1-4611-97f9-73c6ddfbeed9
+                    description: The UUID of the triggered run
+                  testId:
+                    type: string
+                    example: '123'
+                    description: The ID of the test
+                  locationId:
+                    type: string
+                    example: aws-us-east-1
+                    description: The location ID where the test was executed.
+                  testName:
+                    type: string
+                    example: My Test
+                    description: The name of the test.
+                  testType:
+                    type: string
+                    example: api
+                    description: The type of the test.
+                title: RunNowResponse
+              examples:
+                example:
+                  value:
+                    locationId: aws-us-east-1
+                    runId: 1c4d52be-e7e1-4611-97f9-73c6ddfbeed9
+                    testId: '123'
+                    testName: My Test
+                    testType: api
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Can't find test.
+                  details:
+                    type: object
+                    example: '{}'
+                title: NotFound
+                description: Not Found
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Can't find test.
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: 'Test is currently paused due to an active downtime configuration. Use {"force": true} to override.'
+                  details:
+                    type: object
+                    example: '{}'
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details: '{}'
+                    message: 'Test is currently paused due to an active downtime configuration. Use {"force": true} to override.'
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics tests
+  /tests/{id}/runs:
+    get:
+      summary: retrieveRunsForTest
+      description: 'Retrieve a paginated list of runs for a specific synthetic test.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.'
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the test whose runs you want to retrieve.
+        required: true
+        schema:
+          type: integer
+          description: Integer ID for a persisted test.
+      - name: startTime
+        in: query
+        description: Start time in ISO8601 format.
+        schema:
+          type: string
+          format: date-time
+      - name: endTime
+        in: query
+        description: End time for the runs to include, as an ISO8601 timestamp.
+        schema:
+          type: string
+          format: date-time
+      - name: success
+        in: query
+        description: 'Filter runs by success status. When true, only successful runs are returned.
+
+          When false, only failed runs are returned.'
+        schema:
+          type: boolean
+      - name: triggerType
+        in: query
+        description: 'Filter runs by trigger type. Possible values:
+
+
+          scheduled
+
+          manual'
+        schema:
+          type: string
+          enum:
+          - scheduled
+          - manual
+      - name: locationIds
+        in: query
+        description: Returns runs that were executed from the given locations.
+        schema:
+          type: array
+          items:
+            type: string
+      - name: page
+        in: query
+        description: Page of runs to return. Must be greater than 0. Defaults to 1.
+        schema:
+          type: integer
+          default: 1
+      - name: perPage
+        in: query
+        description: Number of runs to return per page. Maximum 1000.
+        schema:
+          type: integer
+          default: 20
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always "application/json".
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        runId:
+                          type: string
+                          description: The UUID of the run.
+                        testId:
+                          type: integer
+                          description: The ID of the test associated with this run.
+                        testType:
+                          type: string
+                          enum:
+                          - browser
+                          - api
+                          - http
+                          - port
+                          - uptime
+                          - ssl
+                          description: The type of the test.
+                        locationId:
+                          type: string
+                          description: The location ID of the run.
+                        triggerType:
+                          type: string
+                          enum:
+                          - scheduled
+                          - manual
+                          description: The type of trigger that initiated the run.
+                        success:
+                          type: boolean
+                          description: Whether the run was successful.
+                        message:
+                          type: string
+                          description: A description of any run failure. null if the run has completed successfully.
+                        timestamp:
+                          type: string
+                          description: This field is only used internally and has no relevance for API consumers
+                        artifactsTimestampMs:
+                          type: integer
+                          description: Time since epoch in milliseconds when artifacts were generated and stored.
+                        autoRetry:
+                          type: boolean
+                          description: Whether the run was automatically retried.
+                        location:
+                          type: string
+                          description: The human readable location of the run.
+                        runDurationMs:
+                          type: integer
+                          description: Duration of the run in milliseconds.
+                      description: Summary information for a run.
+                  page:
+                    type: integer
+                    description: Current page of results.
+                  perPage:
+                    type: integer
+                    description: Number of runs per page.
+                  nextPageLink:
+                    type:
+                    - string
+                    - 'null'
+                    description: URL to the next page of results, if any.
+                  totalCount:
+                    type: integer
+                    description: Total number of runs matching the filters.
+              examples:
+                example:
+                  value:
+                    nextPageLink: string
+                    page: 0
+                    perPage: 0
+                    runs:
+                    - artifactsTimestampMs: 0
+                      autoRetry: true
+                      location: string
+                      locationId: string
+                      message: string
+                      runDurationMs: 0
+                      runId: string
+                      success: true
+                      testId: 0
+                      testType: browser
+                      timestamp: string
+                      triggerType: scheduled
+                    totalCount: 0
+        '400':
+          description: HTTP 400 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: bad_request
+                  message:
+                    type: string
+                    example: Invalid query params
+                  details:
+                    type: object
+              examples:
+                example:
+                  value:
+                    code: bad_request
+                    message: Invalid query params
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Can't find test.
+                  details:
+                    type: object
+                    example: '{}'
+                title: NotFound
+                description: Not Found
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: Can't find test.
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics tests
+  /tests/bulk_delete:
+    post:
+      summary: deleteMultipleTests
+      description: 'Deletes the tests specified in requestBody. Maximum of 500 test IDs in one request.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always "application/json".
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                testIds:
+                  type: array
+                  example:
+                  - 15
+                  - 123
+                  - 19955
+                  items:
+                    type: integer
+                    format: int32
+              title: ListOfIds
+              description: List of Test IDs
+            examples:
+              example:
+                value:
+                  testIds:
+                  - 15
+                  - 123
+                  - 19955
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                title: OkResponse
+              examples:
+                example:
+                  value:
+                    success: true
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Invalid request body
+                  details:
+                    type: object
+                    properties:
+                      testIds:
+                        type: object
+                        properties:
+                          '0':
+                            type: array
+                            items:
+                              type: string
+                              example: must be an integer
+                          '2':
+                            type: array
+                            items:
+                              type: string
+                              example: must be an integer
+                title: UnprocessableEntity
+                description: UnprocessableEntity
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details:
+                      testIds:
+                        '0':
+                        - must be an integer
+                        '2':
+                        - must be an integer
+                    message: Invalid request body
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics tests
+  /tests/pause:
+    put:
+      summary: pauseMultipleTests
+      description: 'Deactivates the tests specified in requestBody. Maximum of 500 test IDs in one request.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always "application/json".
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                testIds:
+                  type: array
+                  example:
+                  - 15
+                  - 123
+                  - 19955
+                  items:
+                    type: integer
+                    format: int32
+              title: ListOfIds
+              description: List of Test IDs
+            examples:
+              example:
+                value:
+                  testIds:
+                  - 15
+                  - 123
+                  - 19955
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                title: OkResponse
+              examples:
+                example:
+                  value:
+                    success: true
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Invalid request body
+                  details:
+                    type: object
+                    properties:
+                      testIds:
+                        type: object
+                        properties:
+                          '0':
+                            type: array
+                            items:
+                              type: string
+                              example: must be an integer
+                          '2':
+                            type: array
+                            items:
+                              type: string
+                              example: must be an integer
+                title: UnprocessableEntity
+                description: UnprocessableEntity
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details:
+                      testIds:
+                        '0':
+                        - must be an integer
+                        '2':
+                        - must be an integer
+                    message: Invalid request body
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics tests
+  /tests/play:
+    put:
+      summary: playMultipleTests
+      description: 'Activates the tests specified in requestBody. Maximum of 500 test IDs in one request.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin or power role.'
+      parameters:
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: Format of the request body. Always "application/json".
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                testIds:
+                  type: array
+                  example:
+                  - 15
+                  - 123
+                  - 19955
+                  items:
+                    type: integer
+                    format: int32
+              title: ListOfIds
+              description: List of Test IDs
+            examples:
+              example:
+                value:
+                  testIds:
+                  - 15
+                  - 123
+                  - 19955
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                title: OkResponse
+              examples:
+                example:
+                  value:
+                    success: true
+        '422':
+          description: HTTP 422 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: unprocessable_entity
+                  message:
+                    type: string
+                    example: Invalid request body
+                  details:
+                    type: object
+                    properties:
+                      testIds:
+                        type: object
+                        properties:
+                          '0':
+                            type: array
+                            items:
+                              type: string
+                              example: must be an integer
+                          '2':
+                            type: array
+                            items:
+                              type: string
+                              example: must be an integer
+                title: UnprocessableEntity
+                description: UnprocessableEntity
+              examples:
+                example:
+                  value:
+                    code: unprocessable_entity
+                    details:
+                      testIds:
+                        '0':
+                        - must be an integer
+                        '2':
+                        - must be an integer
+                    message: Invalid request body
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics tests
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.

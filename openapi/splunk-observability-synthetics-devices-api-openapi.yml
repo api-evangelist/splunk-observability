@@ -1,0 +1,156 @@
+openapi: 3.2.0
+info:
+  title: Splunk Observability Cloud Synthetics devices API
+  version: 1.0.1
+  description: 'API for retrieving devices used in Splunk Synthetic Monitoring tests.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token to use the API.
+
+    You need the Splunk Observability Cloud admin, power, or read_only role to use this API.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's. Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2/synthetics
+  description: Endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+tags:
+- name: Synthetics devices
+paths:
+  /devices:
+    get:
+      summary: syntheticsDevices
+      description: 'Returns a list of viewport and network configurations that can be used in Splunk Synthetic Monitoring tests to simulate different devices.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin, power, or read_only role.'
+      parameters:
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  defaultDeviceId:
+                    type: integer
+                    format: int32
+                    example: '1'
+                    description: Default device ID
+                  devices:
+                    type: array
+                    items:
+                      type: object
+                      title: Device
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          example: 1
+                          description: The unique ID of the device.
+                        label:
+                          type: string
+                          example: iPhone
+                          description: User facing label of the device.
+                        viewportWidth:
+                          type: integer
+                          format: int32
+                          example: 375
+                          description: Viewport width of the device.
+                        viewportHeight:
+                          type: integer
+                          format: int32
+                          example: 844
+                          description: Viewport height of the device.
+                        networkConnection:
+                          type: object
+                          title: Network Connection
+                          properties:
+                            description:
+                              type:
+                              - string
+                              - 'null'
+                              example: Mobile LTE
+                              description: Type of network connection.
+                            uploadBandwidth:
+                              type:
+                              - integer
+                              - 'null'
+                              format: int32
+                              example: 12000
+                              description: Upload limit of the network connection, in Kbps.
+                            downloadBandwidth:
+                              type:
+                              - integer
+                              - 'null'
+                              format: int32
+                              example: 12000
+                              description: Download limit of the network connection, in Kbps.
+                            latency:
+                              type:
+                              - integer
+                              - 'null'
+                              format: int32
+                              example: 70
+                              description: Latency amount of the network connection, in milliseconds.
+                            packetLoss:
+                              type:
+                              - number
+                              - 'null'
+                              format: double
+                              description: Packet loss amount of the network connection.
+              examples:
+                example:
+                  value:
+                    defaultDeviceId: '1'
+                    devices:
+                    - id: 1
+                      label: iPhone
+                      networkConnection:
+                        description: Mobile LTE
+                        downloadBandwidth: 12000
+                        latency: 70
+                        packetLoss: null
+                        uploadBandwidth: 12000
+                      viewportHeight: 844
+                      viewportWidth: 375
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics devices
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.

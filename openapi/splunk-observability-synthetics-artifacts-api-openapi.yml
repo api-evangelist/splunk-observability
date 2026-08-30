@@ -1,0 +1,283 @@
+openapi: 3.2.0
+info:
+  title: Splunk Observability Cloud Synthetics artifacts API
+  version: 1.0.1
+  description: 'API for retrieving artifacts used in Splunk Synthetic Monitoring tests.
+
+    Requirements
+
+
+    You must have an organization access token with the API permission or a session token endpoint.
+
+    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the GET /tests/{id}/artifacts/ and GET /tests/{id}/artifacts/{locationId}/{timestamp}/{runId}/{filename} operations.'
+  x-provenance:
+    method: reconstructed
+    authored_by: Splunk (content) / API Evangelist (assembly)
+    reconstructed_by: API Evangelist
+    reconstructed_on: '2026-08-19'
+    first_party: false
+    provider_published: false
+    note: Splunk's own OpenAPI objects, extracted from the React Server Component payload embedded in each of the 48 API reference pages at dev.splunk.com. The operations and schemas are Splunk's; the assembly into standalone documents is API Evangelist's. Splunk serves no fetchable spec file — dev.splunk.com answers 200 with an identical 6,638-byte shell for every asset path, including invented control paths — so this is NOT first-party publication and is not graded as such.
+  x-evidence:
+  - type: source
+    url: https://dev.splunk.com/observability/reference/
+  - type: source
+    url: https://dev.splunk.com/observability/docs/apibasics/api_list/
+servers:
+- url: https://api.{REALM}.observability.splunkcloud.com/v2/synthetics
+  description: Endpoint URL
+  variables:
+    REALM:
+      default: us0
+      description: Splunk Observability Cloud realm the organization is provisioned in (for example us0, us1, eu0, jp0, au0).
+security:
+- SessionToken: []
+tags:
+- name: Synthetics artifacts
+paths:
+  /tests/{id}/artifacts:
+    get:
+      summary: getArtifactsByTestId
+      description: 'Retrieves artifacts for a given test.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin, power, or read_only role.'
+      parameters:
+      - name: id
+        in: path
+        description: Test ID to retrieve artifacts.
+        required: true
+        schema:
+          type: string
+      - name: locationId
+        in: query
+        description: Location ID of where the test was run.
+        required: true
+        schema:
+          type: string
+      - name: timestamp
+        in: query
+        description: A string timestamp since epoch, in milliseconds for persisted runs. For Try Now runs, you can also use "now".
+        required: true
+        schema:
+          type: string
+      - name: runId
+        in: query
+        description: Run ID
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  artifacts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          enum:
+                          - debug_info
+                          - network_diagnostics
+                          - page_source
+                          - results
+                          - har
+                          - screen_captures
+                          - failure_capture_screenshot
+                          - failure_capture_page_source
+                          example: har
+                        url:
+                          type: string
+                          example: /api/v1/tests/1/artifact/aws-us-west-2/1664745615/d3ada1f7-1ddb-49a5-8107-c793f69abee5/har
+                      title: Artifact
+                title: ArtifactsResponse
+              examples:
+                example:
+                  value:
+                    artifacts:
+                    - type: har
+                      url: /api/v1/tests/1/artifact/aws-us-west-2/1664745615/d3ada1f7-1ddb-49a5-8107-c793f69abee5/har
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics artifacts
+  /tests/{id}/artifacts/{locationId}/{timestamp}/{runId}/{filename}:
+    get:
+      summary: getArtifactByTestIdLocationIdTimestampRunIdFilename
+      description: 'Retrieves a single artifact for a given test ID, location ID, timestamp, run ID, and filename.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin, power, or read_only role.'
+      parameters:
+      - name: id
+        in: path
+        description: Test ID to retrieve artifacts.
+        required: true
+        schema:
+          type: string
+      - name: locationId
+        in: path
+        description: Location ID of where the test was run.
+        required: true
+        schema:
+          type: string
+      - name: timestamp
+        in: path
+        description: A string timestamp since epoch, in milliseconds for persisted runs. For Try Now runs, you can also use "now".
+        required: true
+        schema:
+          type: string
+      - name: runId
+        in: path
+        description: Run ID
+        required: true
+        schema:
+          type: string
+      - name: filename
+        in: path
+        description: Filename of the artifact.
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: ''
+                  details:
+                    type: object
+                    example: '{}'
+                title: NotFound
+                description: Not Found
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: ''
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics artifacts
+  /tests/{id}/artifacts/{locationId}/{timestamp}/{runId}/{filename}/download:
+    get:
+      summary: getArtifactByTestIdLocationIdTimestampRunIdFilename
+      description: 'Retrieves a single artifact for a given test ID, location ID, timestamp, run ID, and filename for download in browser.
+
+        Requirements
+
+
+        You must have an organization access token with the API permission or a session token to use the API.
+
+        You need the Splunk Observability Cloud admin, power, or read_only role.'
+      parameters:
+      - name: id
+        in: path
+        description: Test ID to retrieve artifacts.
+        required: true
+        schema:
+          type: string
+      - name: locationId
+        in: path
+        description: Location ID of where the test was run.
+        required: true
+        schema:
+          type: string
+      - name: timestamp
+        in: path
+        description: A string timestamp since epoch, in milliseconds for persisted runs. For Try Now runs, you can also use "now".
+        required: true
+        schema:
+          type: string
+      - name: runId
+        in: path
+        description: Run ID
+        required: true
+        schema:
+          type: string
+      - name: filename
+        in: path
+        description: Filename of the artifact.
+        required: true
+        schema:
+          type: string
+      - name: X-SF-TOKEN
+        in: header
+        description: Authentication token.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: HTTP 200 response
+        '404':
+          description: HTTP 404 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: ''
+                  details:
+                    type: object
+                    example: '{}'
+                title: NotFound
+                description: Not Found
+              examples:
+                example:
+                  value:
+                    code: not_found
+                    details: '{}'
+                    message: ''
+      security:
+      - SessionToken: []
+      tags:
+      - Synthetics artifacts
+components:
+  securitySchemes:
+    SessionToken:
+      type: apiKey
+      in: header
+      name: X-SF-Token
+      description: Splunk Observability Cloud session token or org access token.
