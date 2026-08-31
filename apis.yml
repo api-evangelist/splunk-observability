@@ -1419,6 +1419,8 @@ apis:
   humanURL: https://dev.splunk.com/observability/reference/api/apm_service_topology/latest/
   baseURL: https://api.{REALM}.observability.splunkcloud.com/v2
   tags:
+  - Integration
+  tags_raw:
   - Integrations
   properties:
   - type: OpenAPI
@@ -1977,6 +1979,8 @@ apis:
   humanURL: https://dev.splunk.com/observability/reference/api/apm_service_topology/latest/
   baseURL: https://api.{REALM}.observability.splunkcloud.com/v2
   tags:
+  - Organization
+  tags_raw:
   - Organizations
   properties:
   - type: OpenAPI
@@ -2761,6 +2765,8 @@ apis:
   humanURL: https://dev.splunk.com/observability/reference/api/apm_service_topology/latest/
   baseURL: https://api.{REALM}.observability.splunkcloud.com/v2
   tags:
+  - Session Tokens
+  tags_raw:
   - Session tokens
   properties:
   - type: OpenAPI
@@ -2983,6 +2989,8 @@ apis:
   humanURL: https://dev.splunk.com/observability/reference/api/apm_service_topology/latest/
   baseURL: https://api.{REALM}.observability.splunkcloud.com/v2
   tags:
+  - SLO
+  tags_raw:
   - SLOs
   properties:
   - type: OpenAPI
@@ -5347,6 +5355,8 @@ apis:
   humanURL: https://dev.splunk.com/observability/reference/api/apm_service_topology/latest/
   baseURL: https://api.{REALM}.observability.splunkcloud.com/v2
   tags:
+  - Team
+  tags_raw:
   - Teams
   properties:
   - type: OpenAPI
