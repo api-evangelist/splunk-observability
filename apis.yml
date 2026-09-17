@@ -2999,119 +2999,6 @@ apis:
     url: https://dev.splunk.com/observability/reference/api/teams/latest/
   - type: APIReference
     url: https://dev.splunk.com/observability/reference/api/trace_id/latest/
-- aid: splunk-observability:splunk-observability-slos-api
-  name: Splunk Observability Cloud SL Os API
-  description: The SLOs API from Splunk Observability Cloud — 4 operation(s) for slos.
-  humanURL: https://dev.splunk.com/observability/reference/api/apm_service_topology/latest/
-  baseURL: https://api.{REALM}.observability.splunkcloud.com/v2
-  tags:
-  - SLO
-  tags_raw:
-  - SLOs
-  properties:
-  - type: OpenAPI
-    url: openapi/splunk-observability-slos-api-openapi.yml
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/apm_service_topology/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/apm_visibility_filters/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/audit_events/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/automatedarchival/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/backfill/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/charts/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/client_inventory/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/dashboard_groups/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/dashboards/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/datalinks/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/detectors/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/incidents/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/ingest_data/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/integrations/latest/
-  - type: Webhooks
-    url: asyncapi/splunk-observability-webhooks.yml
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/metric_ruleset/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/metrics_metadata/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/navigator/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/org_tokens/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/organizations/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/passwords/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/retrieve_events_v1/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/retrieve_events_v2/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/retrieve_timeserieswindow/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/roles/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/sessiontokens/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/signalflow/latest/
-  - type: AsyncAPI
-    url: asyncapi/splunk-observability-signalflow-asyncapi.yml
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/slo/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/synthetics_api_tests/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/synthetics_api_tests_v2/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/synthetics_artifacts/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/synthetics_audits/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/synthetics_browser/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/synthetics_browser_v2/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/synthetics_ca_certs/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/synthetics_certificates/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/synthetics_chrome_flags/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/synthetics_devices/latest/
-  - type: APIReference
-    url: >-
-      https://dev.splunk.com/observability/reference/api/synthetics_downtime_configurations/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/synthetics_excluded_files/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/synthetics_global_variables/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/synthetics_http_tests/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/synthetics_locations/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/synthetics_ports_tests/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/synthetics_runs/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/synthetics_ssl_tests/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/synthetics_tests/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/teams/latest/
-  - type: APIReference
-    url: https://dev.splunk.com/observability/reference/api/trace_id/latest/
 - aid: splunk-observability:splunk-observability-splunk-observability-cloud-audit-events-api
   name: Splunk Observability Cloud Splunk Observability Cloud Audit Events API
   description: >-
@@ -5377,6 +5264,118 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/splunk-observability-teams-api-openapi.yml
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/apm_service_topology/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/apm_visibility_filters/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/audit_events/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/automatedarchival/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/backfill/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/charts/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/client_inventory/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/dashboard_groups/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/dashboards/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/datalinks/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/detectors/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/incidents/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/ingest_data/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/integrations/latest/
+  - type: Webhooks
+    url: asyncapi/splunk-observability-webhooks.yml
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/metric_ruleset/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/metrics_metadata/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/navigator/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/org_tokens/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/organizations/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/passwords/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/retrieve_events_v1/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/retrieve_events_v2/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/retrieve_timeserieswindow/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/roles/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/sessiontokens/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/signalflow/latest/
+  - type: AsyncAPI
+    url: asyncapi/splunk-observability-signalflow-asyncapi.yml
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/slo/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/synthetics_api_tests/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/synthetics_api_tests_v2/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/synthetics_artifacts/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/synthetics_audits/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/synthetics_browser/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/synthetics_browser_v2/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/synthetics_ca_certs/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/synthetics_certificates/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/synthetics_chrome_flags/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/synthetics_devices/latest/
+  - type: APIReference
+    url: >-
+      https://dev.splunk.com/observability/reference/api/synthetics_downtime_configurations/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/synthetics_excluded_files/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/synthetics_global_variables/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/synthetics_http_tests/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/synthetics_locations/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/synthetics_ports_tests/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/synthetics_runs/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/synthetics_ssl_tests/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/synthetics_tests/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/teams/latest/
+  - type: APIReference
+    url: https://dev.splunk.com/observability/reference/api/trace_id/latest/
+- aid: splunk-observability:splunk-observability-slos-api
+  name: Splunk Observability Cloud SL Os API
+  description: The SLOs API from Splunk Observability Cloud — 4 operation(s) for slos.
+  humanURL: >-
+    https://help.splunk.com/en/splunk-observability-cloud/splunk-ai-assistant/interact-with-your-observability-data-using-the-splunk-mcp-server
+  baseURL: https://region-pdx10.api.scs.splunk.com/system/mcp-gateway/v1/
+  tags:
+  - SLOs
+  properties:
+  - type: OpenAPI
+    url: openapi/splunk-observability-slos-api-openapi.yml
   - type: APIReference
     url: https://dev.splunk.com/observability/reference/api/apm_service_topology/latest/
   - type: APIReference
