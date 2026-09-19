@@ -767,6 +767,8 @@ apis:
   humanURL: https://dev.splunk.com/observability/reference/api/apm_service_topology/latest/
   baseURL: https://api.{REALM}.observability.splunkcloud.com/v2
   tags:
+  - Dashboard Groups
+  tags_raw:
   - Dashboard groups
   properties:
   - type: OpenAPI
@@ -5372,6 +5374,8 @@ apis:
     https://help.splunk.com/en/splunk-observability-cloud/splunk-ai-assistant/interact-with-your-observability-data-using-the-splunk-mcp-server
   baseURL: https://region-pdx10.api.scs.splunk.com/system/mcp-gateway/v1/
   tags:
+  - SLO
+  tags_raw:
   - SLOs
   properties:
   - type: OpenAPI
