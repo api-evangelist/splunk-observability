@@ -2,16 +2,7 @@ openapi: 3.2.0
 info:
   title: Splunk Observability Cloud Synthetics Port tests API
   version: 1.0.1
-  description: 'API for creating, updating, retrieving, and deleting Port tests in Splunk Synthetic Monitoring.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token to use the API.
-
-    You have to have the Splunk Observability Cloud admin or power role to use the POST /tests/port/try_now, POST /tests/port/validate, PUT /tests/port/{id}/validate, POST /tests/port, PUT /tests/port/{id}, and DELETE /tests/port/{id} operations.
-
-    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the GET /tests/port/{id} operation.'
+  description: API for creating, updating, retrieving, and deleting Port tests in Splunk Synthetic Monitoring.
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -339,6 +330,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Port tests
+      operationId: postTestsPort
+      x-operation-id-source: derived
   /tests/port/{id}:
     get:
       summary: getSinglePortTest
@@ -545,6 +538,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Port tests
+      operationId: getTestsPortById
+      x-operation-id-source: derived
     put:
       summary: updateSinglePortTest
       description: 'Update an existing Port test.
@@ -729,6 +724,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Port tests
+      operationId: putTestsPortById
+      x-operation-id-source: derived
     delete:
       summary: deletePortTest
       description: 'Deletes a Port test.
@@ -759,6 +756,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Port tests
+      operationId: deleteTestsPortById
+      x-operation-id-source: derived
   /tests/port/{id}/validate:
     put:
       summary: validateSinglePortTest
@@ -946,6 +945,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Port tests
+      operationId: putTestsPortByIdValidate
+      x-operation-id-source: derived
   /tests/port/try_now:
     post:
       summary: createTryNowPortTest
@@ -1143,6 +1144,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Port tests
+      operationId: postTestsPortTryNow
+      x-operation-id-source: derived
   /tests/port/validate:
     post:
       summary: validatePortTest
@@ -1299,6 +1302,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Port tests
+      operationId: postTestsPortValidate
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

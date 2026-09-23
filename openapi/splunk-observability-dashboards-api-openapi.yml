@@ -2,16 +2,7 @@ openapi: 3.2.0
 info:
   title: Splunk Observability Cloud Dashboards API
   version: 3.3.0
-  description: 'API for creating, retrieving, updating, and deleting dashboards.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token to use the API.
-
-    You must have the Splunk Observability Cloud admin or power role to use the POST /dashboard, POST /dashboard/simple, PUT /dashboard/{id}, and DELETE /dashboard/{id} endpoints.
-
-    You must have the Splunk Observability Cloud admin, power, read-only, or usage role to use the GET /dashboard and GET /dashboard/{id} endpoints.'
+  description: API for creating, retrieving, updating, and deleting dashboards.
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -1041,6 +1032,8 @@ paths:
       - SessionToken: []
       tags:
       - Dashboards
+      operationId: getDashboard
+      x-operation-id-source: derived
     post:
       summary: Create Single Dashboard
       description: 'Creates a dashboard using the properties specified in the request body.
@@ -2772,6 +2765,8 @@ paths:
       - SessionToken: []
       tags:
       - Dashboards
+      operationId: postDashboard
+      x-operation-id-source: derived
   /dashboard/{id}:
     get:
       summary: Retrieve Single Dashboard Using ID
@@ -3676,6 +3671,8 @@ paths:
       - SessionToken: []
       tags:
       - Dashboards
+      operationId: getDashboardById
+      x-operation-id-source: derived
     put:
       summary: Update Single Dashboard
       description: 'Updates the properties of the dashboard specified by the ID in the
@@ -5422,6 +5419,8 @@ paths:
       - SessionToken: []
       tags:
       - Dashboards
+      operationId: putDashboardById
+      x-operation-id-source: derived
     delete:
       summary: Delete Single Dashboard
       description: 'Deletes the dashboard that has the ID specified in the
@@ -5453,12 +5452,14 @@ paths:
       - SessionToken: []
       tags:
       - Dashboards
+      operationId: deleteDashboardById
+      x-operation-id-source: derived
   /dashboard/simple:
     post:
       summary: Create Simple Dashboard
       description: 'Creates a dashboard containing the new and existing charts you specify
 
-        in the request body.  For this dashboard, you can only specify the following values:
+        in the request body. For this dashboard, you can only specify the following values:
 
 
         Dashboard group: To add the new dashboard to an existing dashboard group, use the groupId query parameter.
@@ -7917,6 +7918,8 @@ paths:
       - SessionToken: []
       tags:
       - Dashboards
+      operationId: postDashboardSimple
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

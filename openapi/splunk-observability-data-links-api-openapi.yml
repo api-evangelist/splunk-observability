@@ -445,6 +445,8 @@ paths:
       - SessionToken: []
       tags:
       - Data links
+      operationId: getCrosslink
+      x-operation-id-source: derived
     post:
       summary: Create Data Link
       description: 'Creates one or more data link targets based on the properties specified in the
@@ -1065,6 +1067,8 @@ paths:
       - SessionToken: []
       tags:
       - Data links
+      operationId: postCrosslink
+      x-operation-id-source: derived
   /crosslink/{id}:
     get:
       summary: Retrieve Data Link ID
@@ -1391,6 +1395,8 @@ paths:
       - SessionToken: []
       tags:
       - Data links
+      operationId: getCrosslinkById
+      x-operation-id-source: derived
     put:
       summary: Update Data Link ID
       description: 'Updates the properties of the data link specified by the {id} path
@@ -2019,6 +2025,8 @@ paths:
       - SessionToken: []
       tags:
       - Data links
+      operationId: putCrosslinkById
+      x-operation-id-source: derived
     delete:
       description: 'Deletes the data link specified by the {id} path parameter. This
 
@@ -2072,6 +2080,10 @@ paths:
       - SessionToken: []
       tags:
       - Data links
+      summary: Delete crosslink by id
+      x-summary-source: derived
+      operationId: deleteCrosslinkById
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

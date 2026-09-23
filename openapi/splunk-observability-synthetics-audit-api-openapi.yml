@@ -451,6 +451,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics audit
+      operationId: getAudits
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

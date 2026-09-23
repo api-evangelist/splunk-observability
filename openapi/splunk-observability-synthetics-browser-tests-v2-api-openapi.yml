@@ -2,18 +2,7 @@ openapi: 3.2.0
 info:
   title: Splunk Observability Cloud Synthetics Browser tests V2 API
   version: 1.0.0
-  description: 'V2 API for creating, updating, retrieving, and deleting Splunk Synthetic Monitoring Browser tests.
-
-    Browser steps that target DOM elements use a selectors array. Each entry has type and value keys (for example, [{"type":"css","value":".btn"}]). The legacy selectorType and selector fields are not accepted on this API; use selectors instead.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token endpoint.
-
-    You have to have the Splunk Observability Cloud admin or power role to use the POST /v2/tests/browser/try_now, POST /v2/tests/browser/validate, PUT /v2/tests/browser/{id}/validate, POST /v2/tests/browser, PUT /v2/tests/browser/{id}, and DELETE /v2/tests/browser/{id}` operations.
-
-    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the GET /v2/tests/browser/{id} operation.'
+  description: V2 API for creating, updating, retrieving, and deleting Splunk Synthetic Monitoring Browser tests.
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -1476,6 +1465,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Browser tests V2
+      operationId: postV2TestsBrowser
+      x-operation-id-source: derived
   /v2/tests/browser/{id}:
     get:
       summary: getSingleBrowserTest
@@ -2228,6 +2219,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Browser tests V2
+      operationId: getV2TestsBrowserById
+      x-operation-id-source: derived
     put:
       summary: updateSingleBrowserTest
       description: Update an existing Browser test.
@@ -2991,6 +2984,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Browser tests V2
+      operationId: putV2TestsBrowserById
+      x-operation-id-source: derived
     delete:
       summary: deleteBrowserTest
       description: Deletes a Browser test.
@@ -3014,6 +3009,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Browser tests V2
+      operationId: deleteV2TestsBrowserById
+      x-operation-id-source: derived
   /v2/tests/browser/{id}/validate:
     put:
       summary: validateSingleBrowserTest
@@ -3813,6 +3810,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Browser tests V2
+      operationId: putV2TestsBrowserByIdValidate
+      x-operation-id-source: derived
   /v2/tests/browser/try_now:
     post:
       summary: createTryNowBrowserTest
@@ -4589,6 +4588,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Browser tests V2
+      operationId: postV2TestsBrowserTryNow
+      x-operation-id-source: derived
   /v2/tests/browser/validate:
     post:
       summary: validateBrowserTest
@@ -5357,6 +5358,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Browser tests V2
+      operationId: postV2TestsBrowserValidate
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

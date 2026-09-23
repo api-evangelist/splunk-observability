@@ -2260,6 +2260,8 @@ paths:
       - SessionToken: []
       tags:
       - SLOs
+      operationId: postSlo
+      x-operation-id-source: derived
   /slo/{id}:
     get:
       summary: Retrieve SLO ID
@@ -3427,6 +3429,8 @@ paths:
       - SessionToken: []
       tags:
       - SLOs
+      operationId: getSloById
+      x-operation-id-source: derived
     put:
       summary: Update Existing SLO
       description: 'Updates the SLO for the ID specified in the {id} path parameter.
@@ -5686,6 +5690,8 @@ paths:
       - SessionToken: []
       tags:
       - SLOs
+      operationId: putSloById
+      x-operation-id-source: derived
     delete:
       summary: Delete SLO ID
       description: Deletes the SLO that has the ID specified in the {id} path parameter.
@@ -5763,6 +5769,8 @@ paths:
       - SessionToken: []
       tags:
       - SLOs
+      operationId: deleteSloById
+      x-operation-id-source: derived
   /slo/search:
     post:
       summary: Search SLO
@@ -7061,6 +7069,8 @@ paths:
       - SessionToken: []
       tags:
       - SLOs
+      operationId: postSloSearch
+      x-operation-id-source: derived
   /slo/validate:
     post:
       summary: Validate SLO Definition
@@ -8160,6 +8170,8 @@ paths:
       - SessionToken: []
       tags:
       - SLOs
+      operationId: postSloValidate
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

@@ -370,6 +370,8 @@ paths:
       - SessionToken: []
       tags:
       - Retrieve events V2
+      operationId: getEventFind
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

@@ -2,18 +2,7 @@ openapi: 3.2.0
 info:
   title: Splunk Observability Cloud Teams API
   version: 4.0.3
-  description: 'API for creating, updating, deleting, adding members, and removing members from teams.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token to use the API.
-
-    You need the Splunk Observability Cloud admin role to use the POST /team, PUT /team/{tid}, and DELETE /team/{tid} operations.
-
-    You need the Splunk Observability Cloud admin or power role to use the PUT /team/{tid}/members, DELETE /team/{tid}/members, PUT /team/{tid}/members/{uid}, and DELETE /team/{tid}/members/{uid} operations.
-
-    You need the Splunk Observability Cloud admin, power, or read_only role to use the GET /team and GET /team/{tid} opaerations.'
+  description: API for creating, updating, deleting, adding members, and removing members from teams.
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -2665,6 +2654,8 @@ paths:
       - SessionToken: []
       tags:
       - Teams
+      operationId: getTeam
+      x-operation-id-source: derived
     post:
       summary: Create Single Team
       description: Creates the team specified by the properties in the request body
@@ -7650,6 +7641,8 @@ paths:
       - SessionToken: []
       tags:
       - Teams
+      operationId: postTeam
+      x-operation-id-source: derived
   /team/{tid}:
     get:
       summary: Retrieve Team Using ID
@@ -10181,6 +10174,8 @@ paths:
       - SessionToken: []
       tags:
       - Teams
+      operationId: getTeamByTid
+      x-operation-id-source: derived
     put:
       summary: Update Team
       description: Updates the team object specified by the {tid} path parameter
@@ -15172,6 +15167,8 @@ paths:
       - SessionToken: []
       tags:
       - Teams
+      operationId: putTeamByTid
+      x-operation-id-source: derived
     delete:
       summary: Delete Team
       description: 'Deletes a team from the organization, based on the team''s ID specified
@@ -15199,6 +15196,8 @@ paths:
       - SessionToken: []
       tags:
       - Teams
+      operationId: deleteTeamByTid
+      x-operation-id-source: derived
   /team/{tid}/member/{uid}:
     put:
       summary: Update Team Membership User Id
@@ -15246,6 +15245,8 @@ paths:
       - SessionToken: []
       tags:
       - Teams
+      operationId: putTeamByTidMemberByUid
+      x-operation-id-source: derived
     delete:
       summary: Delete Team User User Id
       description: 'Deletes the user specifed by the {uid} path parameter from the
@@ -15283,6 +15284,8 @@ paths:
       - SessionToken: []
       tags:
       - Teams
+      operationId: deleteTeamByTidMemberByUid
+      x-operation-id-source: derived
   /team/{tid}/members:
     put:
       summary: Add Team Member List
@@ -15343,6 +15346,8 @@ paths:
       - SessionToken: []
       tags:
       - Teams
+      operationId: putTeamByTidMembers
+      x-operation-id-source: derived
     delete:
       summary: Delete Team Members List
       description: 'Deletes one or more team members from the team specified by the {tid} path parameter
@@ -15405,6 +15410,8 @@ paths:
       - SessionToken: []
       tags:
       - Teams
+      operationId: deleteTeamByTidMembers
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

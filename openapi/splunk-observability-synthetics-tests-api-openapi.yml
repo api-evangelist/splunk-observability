@@ -395,6 +395,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics tests
+      operationId: getTests
+      x-operation-id-source: derived
   /tests/{id}:
     delete:
       summary: deleteTest
@@ -450,6 +452,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics tests
+      operationId: deleteTestsById
+      x-operation-id-source: derived
   /tests/{id}/run_now:
     post:
       summary: runTestNow
@@ -562,6 +566,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics tests
+      operationId: postTestsByIdRunNow
+      x-operation-id-source: derived
   /tests/{id}/runs:
     get:
       summary: retrieveRunsForTest
@@ -784,6 +790,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics tests
+      operationId: getTestsByIdRuns
+      x-operation-id-source: derived
   /tests/bulk_delete:
     post:
       summary: deleteMultipleTests
@@ -895,6 +903,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics tests
+      operationId: postTestsBulkDelete
+      x-operation-id-source: derived
   /tests/pause:
     put:
       summary: pauseMultipleTests
@@ -1006,6 +1016,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics tests
+      operationId: putTestsPause
+      x-operation-id-source: derived
   /tests/play:
     put:
       summary: playMultipleTests
@@ -1117,6 +1129,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics tests
+      operationId: putTestsPlay
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

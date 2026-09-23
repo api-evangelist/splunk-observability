@@ -1,19 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Splunk Observability Cloud — Synthetics Browser tests (V1) Synthetics Browser tests (V1) API
+  title: Splunk Observability Cloud — Synthetics Browser tests (V1)…
   version: 1.0.7
-  description: 'API for creating, updating, retrieving, and deleting Splunk Synthetic Monitoring Browser tests using the legacy service routes (/tests/browser). Requests use the legacy step shape (selectorType and selector on navigation-related steps).
-
-    Note: This API is deprecated. For new integrations, use the Synthetics Browser tests V2 API instead. V2 endpoints are available under /v2/tests/browser.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token endpoint.
-
-    You have to have the Splunk Observability Cloud admin or power role to use the POST /tests/browser/try_now, POST /tests/browser/validate, PUT /tests/browser/{id}/validate, POST /tests/browser, PUT /tests/browser/{id}, and DELETE /tests/browser/{id}` operations.
-
-    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the GET /tests/browser/{id} operation.'
+  description: API for creating, updating, retrieving, and deleting Splunk Synthetic Monitoring Browser tests using the legacy service routes (/tests/browser).
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -1415,6 +1404,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Browser tests (V1)
+      operationId: postTestsBrowser
+      x-operation-id-source: derived
   /tests/browser/{id}:
     get:
       summary: getSingleBrowserTest
@@ -2171,6 +2162,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Browser tests (V1)
+      operationId: getTestsBrowserById
+      x-operation-id-source: derived
     put:
       summary: updateSingleBrowserTest
       description: Update an existing Browser test.
@@ -2869,6 +2862,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Browser tests (V1)
+      operationId: putTestsBrowserById
+      x-operation-id-source: derived
     delete:
       summary: deleteBrowserTest
       description: Deletes a Browser test.
@@ -2892,6 +2887,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Browser tests (V1)
+      operationId: deleteTestsBrowserById
+      x-operation-id-source: derived
   /tests/browser/{id}/validate:
     put:
       summary: validateSingleBrowserTest
@@ -3627,6 +3624,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Browser tests (V1)
+      operationId: putTestsBrowserByIdValidate
+      x-operation-id-source: derived
   /tests/browser/try_now:
     post:
       summary: createTryNowBrowserTest
@@ -4338,6 +4337,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Browser tests (V1)
+      operationId: postTestsBrowserTryNow
+      x-operation-id-source: derived
   /tests/browser/validate:
     post:
       summary: validateBrowserTest
@@ -5042,6 +5043,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Browser tests (V1)
+      operationId: postTestsBrowserValidate
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

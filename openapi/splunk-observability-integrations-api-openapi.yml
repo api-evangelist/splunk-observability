@@ -5094,6 +5094,8 @@ paths:
       - SessionToken: []
       tags:
       - Integrations
+      operationId: getIntegration
+      x-operation-id-source: derived
     post:
       summary: Create Integration
       description: 'Creates an integration object that Splunk Observability Cloud uses to connect with a
@@ -16450,6 +16452,8 @@ paths:
       - SessionToken: []
       tags:
       - Integrations
+      operationId: postIntegration
+      x-operation-id-source: derived
   /integration/{id}:
     get:
       summary: Retrieve Single Integration
@@ -21847,6 +21851,8 @@ paths:
       - SessionToken: []
       tags:
       - Integrations
+      operationId: getIntegrationById
+      x-operation-id-source: derived
     put:
       summary: Update Single Integration
       description: 'Updates the integration object specified by the id path parameter.
@@ -32836,6 +32842,8 @@ paths:
       - SessionToken: []
       tags:
       - Integrations
+      operationId: putIntegrationById
+      x-operation-id-source: derived
     delete:
       summary: Delete Single Integration
       description: 'Deletes the integration object specified by the id path parameter.
@@ -32900,6 +32908,8 @@ paths:
       - SessionToken: []
       tags:
       - Integrations
+      operationId: deleteIntegrationById
+      x-operation-id-source: derived
   /integration/validate/{id}:
     get:
       summary: Validate Integration
@@ -32936,6 +32946,8 @@ paths:
       - SessionToken: []
       tags:
       - Integrations
+      operationId: getIntegrationValidateById
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

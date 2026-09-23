@@ -1,17 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Splunk Observability Cloud Synthetics downtime configurations API
+  title: Splunk Observability Cloud Synthetics downtime…
   version: 1.0.1
-  description: 'API for creating, updating, ending, and deleting downtime configurations.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token to use the API.
-
-    You need the Splunk Observability Cloud admin role to use the POST /downtime_configurations, PUT /downtime_configurations/{id}, DELETE /downtime_configurations/{id}, and PUT /downtime_configurations/{id}/end operations.
-
-    You need the Splunk Observability Cloud admin, power, or read_only role to use the GET /downtime_configurations and GET /downtime_configurations/{id} operations.'
+  description: API for creating, updating, ending, and deleting downtime configurations.
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -308,6 +299,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics downtime configurations
+      operationId: getDowntimeConfigurations
+      x-operation-id-source: derived
     post:
       summary: createDowntimeConfiguration
       description: 'Creates a new downtime configuration, based on the specifications in the request body.
@@ -674,6 +667,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics downtime configurations
+      operationId: postDowntimeConfigurations
+      x-operation-id-source: derived
   /downtime_configurations/{id}:
     get:
       summary: getSingleDowntimeConfiguration
@@ -890,6 +885,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics downtime configurations
+      operationId: getDowntimeConfigurationsById
+      x-operation-id-source: derived
     put:
       summary: updateSingleDowntimeConfiguration
       description: 'Update an existing downtime configuration.
@@ -1118,6 +1115,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics downtime configurations
+      operationId: putDowntimeConfigurationsById
+      x-operation-id-source: derived
     delete:
       summary: deleteDowntimeConfiguration
       description: 'Deletes a downtime configuration
@@ -1145,6 +1144,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics downtime configurations
+      operationId: deleteDowntimeConfigurationsById
+      x-operation-id-source: derived
   /downtime_configurations/{id}/end:
     put:
       summary: endDowntimeConfiguration
@@ -1374,6 +1375,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics downtime configurations
+      operationId: putDowntimeConfigurationsByIdEnd
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

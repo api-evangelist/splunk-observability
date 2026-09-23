@@ -150,6 +150,8 @@ paths:
       - SessionToken: []
       tags:
       - Automated archival
+      operationId: getAutomatedArchivalExemptMetrics
+      x-operation-id-source: derived
     post:
       summary: addExemptMetrics
       description: Adds a list of exempt metrics to the current version of the pipeline automation rule.
@@ -306,6 +308,8 @@ paths:
       - SessionToken: []
       tags:
       - Automated archival
+      operationId: postAutomatedArchivalExemptMetrics
+      x-operation-id-source: derived
     delete:
       summary: removeExemptMetrics
       description: Removes exempt metrics from the current version of the pipeline automation rule.
@@ -426,6 +430,8 @@ paths:
       - SessionToken: []
       tags:
       - Automated archival
+      operationId: deleteAutomatedArchivalExemptMetrics
+      x-operation-id-source: derived
   /automated-archival/preview:
     get:
       summary: previewMetricUsage
@@ -524,6 +530,8 @@ paths:
       - SessionToken: []
       tags:
       - Automated archival
+      operationId: getAutomatedArchivalPreview
+      x-operation-id-source: derived
   /automated-archival/settings:
     get:
       summary: createCurrentConfig
@@ -695,6 +703,8 @@ paths:
       - SessionToken: []
       tags:
       - Automated archival
+      operationId: getAutomatedArchivalSettings
+      x-operation-id-source: derived
     put:
       summary: createNewConfig
       description: Creates a new configuration for the pipeline automation rule associated with your org.
@@ -926,6 +936,8 @@ paths:
       - SessionToken: []
       tags:
       - Automated archival
+      operationId: putAutomatedArchivalSettings
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

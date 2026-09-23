@@ -2,16 +2,7 @@ openapi: 3.2.0
 info:
   title: Splunk Observability Cloud Navigators API
   version: 3.0.1
-  description: 'API for creating, updating, retrieving, and deleting custom navigators.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token to use the API.
-
-    You have to have the Splunk Observability Cloud admin role to use the POST /navigator, PUT /navigator/{id}, DELETE /navigator/{id}, POST /navigator/{id}/navigatorcustomization, PUT /navigator/{id}/navigatorcustomization/{customizationId}, and DELETE /navigator/{id}/navigatorcustomization/{customizationId} operations.
-
-    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the GET /navigator, GET /navigator/{id}, GET /navigator/{id}/dashboards, GET /navigator/{id}/navigatorcustomization, and GET /navigator/{id}/navigatorcustomization/{customizationId} operations.'
+  description: API for creating, updating, retrieving, and deleting custom navigators.
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -686,6 +677,8 @@ paths:
       - SessionToken: []
       tags:
       - Navigators
+      operationId: getNavigator
+      x-operation-id-source: derived
     post:
       summary: Create Single Navigator
       description: 'Creates a new navigator object.
@@ -1819,6 +1812,8 @@ paths:
       - SessionToken: []
       tags:
       - Navigators
+      operationId: postNavigator
+      x-operation-id-source: derived
   /navigator/{id}:
     get:
       summary: Retrieve Navigator ID
@@ -2441,6 +2436,8 @@ paths:
       - SessionToken: []
       tags:
       - Navigators
+      operationId: getNavigatorById
+      x-operation-id-source: derived
     put:
       summary: Update Single Navigator
       description: 'Updates the properties of the navigator with the ID specified in the {id} path parameter.
@@ -3592,6 +3589,8 @@ paths:
       - SessionToken: []
       tags:
       - Navigators
+      operationId: putNavigatorById
+      x-operation-id-source: derived
     delete:
       summary: Delete Single Navigator
       parameters:
@@ -3654,6 +3653,8 @@ paths:
       - SessionToken: []
       tags:
       - Navigators
+      operationId: deleteNavigatorById
+      x-operation-id-source: derived
   /navigator/{id}/dashboards:
     get:
       summary: Retrieve Single Navigator Dashboards
@@ -5472,6 +5473,8 @@ paths:
       - SessionToken: []
       tags:
       - Navigators
+      operationId: getNavigatorByIdDashboards
+      x-operation-id-source: derived
   /navigator/{id}/navigatorcustomization:
     get:
       summary: Retrieve All Navigator Customizations
@@ -5671,6 +5674,8 @@ paths:
       - SessionToken: []
       tags:
       - Navigators
+      operationId: getNavigatorByIdNavigatorcustomization
+      x-operation-id-source: derived
     post:
       summary: Create Navigator Customization
       description: 'Creates a navigator customization object, which customizes the dashboards for a built-in navigator. You can customize dashboards to:
@@ -5959,6 +5964,8 @@ paths:
       - SessionToken: []
       tags:
       - Navigators
+      operationId: postNavigatorByIdNavigatorcustomization
+      x-operation-id-source: derived
   /navigator/{id}/navigatorcustomization/{customizationId}:
     get:
       summary: Retrieve A Navigator Customizations
@@ -6139,6 +6146,8 @@ paths:
       - SessionToken: []
       tags:
       - Navigators
+      operationId: getNavigatorByIdNavigatorcustomizationByCustomizationId
+      x-operation-id-source: derived
     put:
       summary: Update Single Navigator Customization
       description: 'Updates the properties of the navigator customization with the IDs specified in the {id} and {customizationId} path parameters.
@@ -6446,6 +6455,8 @@ paths:
       - SessionToken: []
       tags:
       - Navigators
+      operationId: putNavigatorByIdNavigatorcustomizationByCustomizationId
+      x-operation-id-source: derived
     delete:
       summary: Delete Single Navigator Customization
       description: 'Deletes the navigator customization specified by the {customizationId} path parameter.
@@ -6522,6 +6533,8 @@ paths:
       - SessionToken: []
       tags:
       - Navigators
+      operationId: deleteNavigatorByIdNavigatorcustomizationByCustomizationId
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

@@ -2,14 +2,7 @@ openapi: 3.2.0
 info:
   title: Splunk Observability Cloud APM service topology API
   version: 3.0.1
-  description: 'APIs to retrieve the upstream and downstream dependencies for a given service, as well as to retrieve the complete graph-based topology of all services in a given environment and time window. You can also use tagFilters to filter this topology by indexed span tags.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token to use the API.
-
-    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the APM Service Topology endpoints.'
+  description: APIs to retrieve the upstream and downstream dependencies for a given service, as well as to retrieve the complete graph-based topology of all services in a given environment and time window.
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -398,6 +391,8 @@ paths:
       - SessionToken: []
       tags:
       - APM service topology
+      operationId: postApmTopology
+      x-operation-id-source: derived
   /apm/topology/{serviceName}:
     post:
       summary: Retrieve Dependencies by Service Name
@@ -759,6 +754,8 @@ paths:
       - SessionToken: []
       tags:
       - APM service topology
+      operationId: postApmTopologyByServiceName
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

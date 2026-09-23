@@ -174,6 +174,8 @@ paths:
       - SessionToken: []
       tags:
       - Download APM traces
+      operationId: getApmTraceByTraceIdBySegmentTimestamp
+      x-operation-id-source: derived
   /apm/trace/{traceId}/latest:
     get:
       summary: getLatestSegment
@@ -298,6 +300,8 @@ paths:
       - SessionToken: []
       tags:
       - Download APM traces
+      operationId: getApmTraceByTraceIdLatest
+      x-operation-id-source: derived
   /apm/trace/{traceId}/segments:
     get:
       summary: getTraceSegmentTimestamps
@@ -349,6 +353,8 @@ paths:
       - SessionToken: []
       tags:
       - Download APM traces
+      operationId: getApmTraceByTraceIdSegments
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

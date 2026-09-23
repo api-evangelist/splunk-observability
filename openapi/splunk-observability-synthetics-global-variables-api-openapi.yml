@@ -135,6 +135,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics global variables
+      operationId: getVariables
+      x-operation-id-source: derived
     post:
       summary: createVariableTest
       description: 'Creates a new global variable, based on the specifications in the request body.
@@ -311,6 +313,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics global variables
+      operationId: postVariables
+      x-operation-id-source: derived
   /variables/{id}:
     get:
       summary: getSingleVariable
@@ -431,6 +435,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics global variables
+      operationId: getVariablesById
+      x-operation-id-source: derived
     put:
       summary: updateSingleVariable
       description: 'Update an existing global variable
@@ -562,6 +568,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics global variables
+      operationId: putVariablesById
+      x-operation-id-source: derived
     delete:
       summary: deleteVariable
       description: 'Deletes a global variable
@@ -592,6 +600,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics global variables
+      operationId: deleteVariablesById
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

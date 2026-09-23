@@ -6,103 +6,7 @@ info:
 
     enabling you to retrieve, filter, and analyze system activities and user actions within
 
-    Splunk Observability Cloud.
-
-    Supported Event Types
-
-
-    Audit events - Gateway-level audit logs capturing API calls, DetectorLog and SessionLog.
-
-    Customer Audit Events - Configuration changes to dashboards, detectors, etc.
-
-
-    Audit events are organized into two categories: AUDIT and CUSTOMER_AUDIT. Each category contains multiple event types, and each event type defines its own set of properties.
-
-    When querying audit events, you can filter by any property defined for that event type. Following are examples of event types, their categories, and lists of their properties. You can filter any of the event types by any of the fields listed as their properties.
-
-    The event type HttpRequest is in the AUDIT category and supports the following filterable properties:
-
-
-    sf_actorId
-
-    sf_email
-
-    sf_requestUri
-
-    sf_resourceType
-
-    sf_organizationId
-
-    sf_sessionId
-
-    sf_responseStatus
-
-    sf_clientIp
-
-    sf_actorType
-
-    sf_resourceId
-
-    sf_requestMethod
-
-
-    You can use any of the fields in the preceding list as query parameters to filter HttpRequest audit events.
-
-    The event type DetectorLog is in the AUDIT category and supports the following filterable properties:
-
-
-    jobId
-
-    detectorId
-
-    action
-
-    principalId
-
-    orgId
-
-
-    You can use any of the fields in the preceding list as query parameters to filter DetectorLogs audit events.
-
-    The event type SessionLog is in the AUDIT category and supports the following filterable properties:
-
-
-    action
-
-    authMethod
-
-    userId
-
-    email
-
-
-    You can use any of the fields in the preceding list as query parameters to filter SessionLog audit events.
-
-    The event type INTEGRATION is in the CUSTOMER_AUDIT category and supports the following filterable properties:
-
-
-    principal
-
-    principalName
-
-    newResource
-
-    operation
-
-    srn
-
-
-    You can use any of the fields in the preceding list as query parameters to filter INTEGRATION audit events.
-
-    Authentication
-
-    User require READ_AUDIT_EVENTS capability to access /v2/audit/events endpoint.
-
-    Rate Limiting
-
-    API requests are rate-limited per user and per organization. Exceeding limits
-
-    returns a 429 response with a Retry-After header.'
+    Splunk Observability Cloud.'
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -687,6 +591,8 @@ paths:
                     code: 503
       tags:
       - Splunk Observability Cloud Audit Events
+      operationId: getV2AuditEvents
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

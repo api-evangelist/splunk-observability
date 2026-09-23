@@ -146,6 +146,8 @@ paths:
       - SessionToken: []
       tags:
       - Role
+      operationId: getRole
+      x-operation-id-source: derived
   /role/{roleId}:
     get:
       summary: Retrieve role information
@@ -247,6 +249,8 @@ paths:
       - SessionToken: []
       tags:
       - Role
+      operationId: getRoleByRoleId
+      x-operation-id-source: derived
   /role/assign:
     patch:
       summary: Assign Roles
@@ -332,6 +336,8 @@ paths:
       - SessionToken: []
       tags:
       - Role
+      operationId: patchRoleAssign
+      x-operation-id-source: derived
   /role/dismiss:
     patch:
       summary: Remove Roles
@@ -421,6 +427,8 @@ paths:
       - SessionToken: []
       tags:
       - Role
+      operationId: patchRoleDismiss
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

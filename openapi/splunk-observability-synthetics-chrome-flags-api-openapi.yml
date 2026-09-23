@@ -93,6 +93,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics Chrome flags
+      operationId: getChromeFlags
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

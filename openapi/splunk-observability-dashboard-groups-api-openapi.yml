@@ -2,16 +2,7 @@ openapi: 3.2.0
 info:
   title: Splunk Observability Cloud Dashboard groups API
   version: 3.5.0
-  description: 'API for creating a new dashboard group, retrieving the properties of one or more dashboard groups, updating the properties of a single dashboard group, making a clone of a dashboard to a group, adding a mirrored dashboard to a group, and deleting a dashboard group.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token to use the API.
-
-    You must have the Splunk Observability Cloud admin or power role to use the POST /dashboardgroup POST /dashboardgroup/{id}/dashboard, PUT /dashboardgroup/{id}, and DELETE /dashboardgroup/{id} endpoints.
-
-    You must have the Splunk Observability Cloud admin, power, or read_only role to use the GET /dashboardgroup and GET /dashboardgroup/{id} endpoints.'
+  description: API for creating a new dashboard group, retrieving the properties of one or more dashboard groups, updating the properties of a single dashboard group, making a clone of a dashboard to a group, adding a mirrored dashboard to a group, and deleting a dashboard group.
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -35,7 +26,7 @@ servers:
 security:
 - SessionToken: []
 tags:
-- name: Dashboard groups
+- name: Dashboard Groups
 paths:
   /dashboardgroup:
     get:
@@ -602,7 +593,9 @@ paths:
       security:
       - SessionToken: []
       tags:
-      - Dashboard groups
+      - Dashboard Groups
+      operationId: getDashboardgroup
+      x-operation-id-source: derived
     post:
       summary: Create Single Dashboard Group
       description: 'Creates a dashboard group using the properties specified in the request
@@ -1429,7 +1422,9 @@ paths:
       security:
       - SessionToken: []
       tags:
-      - Dashboard groups
+      - Dashboard Groups
+      operationId: postDashboardgroup
+      x-operation-id-source: derived
   /dashboardgroup/{id}:
     get:
       summary: Retrieve Dashboard Group Using ID
@@ -1868,7 +1863,9 @@ paths:
       security:
       - SessionToken: []
       tags:
-      - Dashboard groups
+      - Dashboard Groups
+      operationId: getDashboardgroupById
+      x-operation-id-source: derived
     put:
       summary: Update Single Dashboard Group
       description: 'Updates the dashboard group specified by the {id} path parameter,
@@ -2724,7 +2721,9 @@ paths:
       security:
       - SessionToken: []
       tags:
-      - Dashboard groups
+      - Dashboard Groups
+      operationId: putDashboardgroupById
+      x-operation-id-source: derived
     delete:
       summary: Delete Single Dashboard Group
       description: 'Deletes the dashboard group specified by the {id} path parameter.
@@ -2775,7 +2774,9 @@ paths:
       security:
       - SessionToken: []
       tags:
-      - Dashboard groups
+      - Dashboard Groups
+      operationId: deleteDashboardgroupById
+      x-operation-id-source: derived
   /dashboardgroup/{id}/dashboard:
     post:
       summary: Clone Dashboard to Group
@@ -3126,7 +3127,9 @@ paths:
       security:
       - SessionToken: []
       tags:
-      - Dashboard groups
+      - Dashboard Groups
+      operationId: postDashboardgroupByIdDashboard
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

@@ -2,18 +2,7 @@ openapi: 3.2.0
 info:
   title: Splunk Observability Cloud Charts API
   version: 1.0.0
-  description: 'API for creating, retrieving, updating, and deleting charts.
-
-    Some chart API property names differ from the option labels in the UI. These differences are noted for each property name.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token to use the API.
-
-    You must have the Splunk Observability Cloud admin or power role to use the POST /chart, PUT /chart/{id}, and DELETE /chart/{id} endpoints.
-
-    You must have the Splunk Observability Cloud admin, power, or read_only role to use the GET /chart and GET /chart/{id} endpoints.'
+  description: API for creating, retrieving, updating, and deleting charts.
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -1715,6 +1704,8 @@ paths:
       - SessionToken: []
       tags:
       - Charts
+      operationId: getChart
+      x-operation-id-source: derived
     post:
       summary: Create Single Chart
       description: 'Creates a new chart. After you create the chart, add it to a
@@ -4872,6 +4863,8 @@ paths:
       - SessionToken: []
       tags:
       - Charts
+      operationId: postChart
+      x-operation-id-source: derived
   /chart/{id}:
     get:
       summary: Get Chart Using Chart ID
@@ -6488,6 +6481,8 @@ paths:
       - SessionToken: []
       tags:
       - Charts
+      operationId: getChartById
+      x-operation-id-source: derived
     put:
       summary: Update Single Chart
       description: 'Updates the chart identified by the chart ID in the id path parameter.
@@ -9657,6 +9652,8 @@ paths:
       - SessionToken: []
       tags:
       - Charts
+      operationId: putChartById
+      x-operation-id-source: derived
     delete:
       summary: Delete Single Chart
       description: Deletes the chart identified by the chart ID in the id path parameter.
@@ -9680,6 +9677,8 @@ paths:
       - SessionToken: []
       tags:
       - Charts
+      operationId: deleteChartById
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

@@ -1,19 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Splunk Observability Cloud — Synthetics API tests (V1) Synthetics API tests (V1) API
+  title: Splunk Observability Cloud — Synthetics API tests (V1)…
   version: 1.0.2
-  description: 'API for creating, updating, retrieving, and deleting Splunk Synthetic Monitoring API tests using the legacy service routes (/tests/api).
-
-    Note: This API is deprecated. For new integrations, use the Synthetics API tests V2 API instead. V2 endpoints are available under /v2/tests/api.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token endpoint.
-
-    You have to have the Splunk Observability Cloud admin or power role to use the POST /tests/api/try_now, POST /tests/api/validate, PUT /tests/api/{id}/validate, PUT /tests/api/{id}, DELETE /tests/api/{id}, and POST /tests/api operations.
-
-    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the GET /tests/api/{id} operation.'
+  description: API for creating, updating, retrieving, and deleting Splunk Synthetic Monitoring API tests using the legacy service routes (/tests/api).
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -1223,6 +1212,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics API tests (V1)
+      operationId: postTestsApi
+      x-operation-id-source: derived
   /tests/api/{id}:
     get:
       summary: getSingleApiTest
@@ -1896,6 +1887,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics API tests (V1)
+      operationId: getTestsApiById
+      x-operation-id-source: derived
     put:
       summary: updateSingleApiTest
       description: 'Update an existing API test.
@@ -2492,6 +2485,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics API tests (V1)
+      operationId: putTestsApiById
+      x-operation-id-source: derived
     delete:
       summary: deleteApiTest
       description: 'Deletes an API test.
@@ -2522,6 +2517,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics API tests (V1)
+      operationId: deleteTestsApiById
+      x-operation-id-source: derived
   /tests/api/{id}/validate:
     put:
       summary: validateSingleApiTest
@@ -3123,6 +3120,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics API tests (V1)
+      operationId: putTestsApiByIdValidate
+      x-operation-id-source: derived
   /tests/api/try_now:
     post:
       summary: createTryNowAPITest
@@ -3732,6 +3731,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics API tests (V1)
+      operationId: postTestsApiTryNow
+      x-operation-id-source: derived
   /tests/api/validate:
     post:
       summary: validateApiTest
@@ -4302,6 +4303,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics API tests (V1)
+      operationId: postTestsApiValidate
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

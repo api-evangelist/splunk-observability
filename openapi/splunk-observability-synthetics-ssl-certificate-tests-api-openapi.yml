@@ -1,6 +1,6 @@
 openapi: 3.2.0
 info:
-  title: Splunk Observability Cloud Synthetics SSL Certificate Tests API
+  title: Splunk Observability Cloud Synthetics SSL Certificate Tests…
   version: 1.0.0
   description: 'API for creating, updating, and deleting SSL Certificate Tests.
 
@@ -638,6 +638,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics SSL Certificate Tests
+      operationId: postTestsSsl
+      x-operation-id-source: derived
   /tests/ssl/{id}:
     get:
       summary: getSingleSslTest
@@ -985,6 +987,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics SSL Certificate Tests
+      operationId: getTestsSslById
+      x-operation-id-source: derived
     put:
       summary: updateSingleSslTest
       description: 'Update an existing SSL Certificate Test
@@ -1326,6 +1330,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics SSL Certificate Tests
+      operationId: putTestsSslById
+      x-operation-id-source: derived
     delete:
       summary: deleteSslTest
       description: 'Deletes a SSL Certificate Test
@@ -1380,6 +1386,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics SSL Certificate Tests
+      operationId: deleteTestsSslById
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

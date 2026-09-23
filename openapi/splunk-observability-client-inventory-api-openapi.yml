@@ -2,35 +2,7 @@ openapi: 3.2.0
 info:
   title: Splunk Observability Cloud Client Inventory API
   version: 1.0.0
-  description: 'REST API for managing OpAMP client inventory.
-
-    Use this API to browse registered clients, inspect individual client records, and retrieve the effective configuration currently associated with a client.
-
-    Deployment
-
-    This API is shared by multiple products. Public server URLs and authentication requirements are supplied by product-specific publication overlays. All endpoints are relative to /fm-service/v1.
-
-    Endpoints
-
-
-    GET /clients List clients
-
-    GET /clients/metadata/values List distinct client metadata values
-
-    GET /clients/{id} Get client by ID
-
-    GET /clients/{id}/config Get client effective configuration
-
-    POST /clients/configs:batch Batch get client effective configurations
-
-
-    Splunk Observability Cloud
-
-    Replace {REALM} with your Splunk Observability Cloud realm.
-
-    Send an access token in the X-SF-TOKEN header.
-
-    Example: X-SF-TOKEN: <X-SF-TOKEN>'
+  description: REST API for managing OpAMP client inventory.
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -901,6 +873,8 @@ paths:
                       message: Authentication service unavailable
       tags:
       - Client Inventory
+      operationId: getClients
+      x-operation-id-source: derived
   /clients/{id}:
     get:
       summary: getClient
@@ -1633,6 +1607,8 @@ paths:
                       message: Authentication service unavailable
       tags:
       - Client Inventory
+      operationId: getClientsById
+      x-operation-id-source: derived
   /clients/{id}/config:
     get:
       summary: getClientConfig
@@ -1962,6 +1938,8 @@ paths:
                       message: Authentication service unavailable
       tags:
       - Client Inventory
+      operationId: getClientsByIdConfig
+      x-operation-id-source: derived
   /clients/configs:batch:
     post:
       summary: batchGetConfigs
@@ -2282,6 +2260,8 @@ paths:
                       message: Authentication service unavailable
       tags:
       - Client Inventory
+      operationId: postClientsConfigs:batch
+      x-operation-id-source: derived
   /clients/metadata/values:
     get:
       summary: listClientMetadataValues
@@ -2635,6 +2615,8 @@ paths:
                       message: Authentication service unavailable
       tags:
       - Client Inventory
+      operationId: getClientsMetadataValues
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

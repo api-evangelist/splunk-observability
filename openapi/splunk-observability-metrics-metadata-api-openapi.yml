@@ -2,22 +2,7 @@ openapi: 3.2.0
 info:
   title: Splunk Observability Cloud Metrics metadata API
   version: 3.4.0
-  description: 'API for creating, retrieving, updating, and deleting metric metadata and MTS metadata.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token to use the API.
-
-    You must have the Splunk Observability Cloud admin or power role to use the PUT /dimension/{key}/{value}
-
-    and PUT /tag/{name} endpoints.
-
-    You must have the Splunk Observability Cloud admin, power, or read_only roles to use the GET /tag
-
-    and GET /tag/{name} endpoints.
-
-    You must have the Splunk Observability Cloud admin role to use the DELETE /tag/{name} endpoint.'
+  description: API for creating, retrieving, updating, and deleting metric metadata and MTS metadata.
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -316,6 +301,8 @@ paths:
       - SessionToken: []
       tags:
       - Metrics metadata
+      operationId: getDimension
+      x-operation-id-source: derived
   /dimension/{key}/{value}:
     get:
       summary: Retrieve Dimension Metadata Name Value
@@ -488,6 +475,8 @@ paths:
       - SessionToken: []
       tags:
       - Metrics metadata
+      operationId: getDimensionByKeyByValue
+      x-operation-id-source: derived
     put:
       summary: Update Dimension Metadata
       description: 'Overwrites metadata for the dimension specified by the name and value
@@ -667,6 +656,8 @@ paths:
       - SessionToken: []
       tags:
       - Metrics metadata
+      operationId: putDimensionByKeyByValue
+      x-operation-id-source: derived
   /metric:
     get:
       summary: Retrieve Metadata MetricsQuery
@@ -867,6 +858,8 @@ paths:
       - SessionToken: []
       tags:
       - Metrics metadata
+      operationId: getMetric
+      x-operation-id-source: derived
   /metric/{name}:
     get:
       summary: Retrieve Metadata Metric Name
@@ -987,6 +980,8 @@ paths:
       - SessionToken: []
       tags:
       - Metrics metadata
+      operationId: getMetricByName
+      x-operation-id-source: derived
   /metrictimeseries:
     get:
       summary: Retrieve Metric Timeseries Metadata
@@ -1208,6 +1203,8 @@ paths:
       - SessionToken: []
       tags:
       - Metrics metadata
+      operationId: getMetrictimeseries
+      x-operation-id-source: derived
   /metrictimeseries/{id}:
     get:
       summary: Retrieve MTS Metadata Using ID
@@ -1338,6 +1335,8 @@ paths:
       - SessionToken: []
       tags:
       - Metrics metadata
+      operationId: getMetrictimeseriesById
+      x-operation-id-source: derived
   /tag:
     get:
       summary: Retrieve Tag Metadata Using Query
@@ -1518,6 +1517,8 @@ paths:
       - SessionToken: []
       tags:
       - Metrics metadata
+      operationId: getTag
+      x-operation-id-source: derived
   /tag/{name}:
     get:
       summary: Retrieve Tag Metadata Using Name
@@ -1625,6 +1626,8 @@ paths:
       - SessionToken: []
       tags:
       - Metrics metadata
+      operationId: getTagByName
+      x-operation-id-source: derived
     put:
       summary: Create Update Tag
       description: Creates or updates the tag specified in the {name} path parameter.
@@ -1753,6 +1756,8 @@ paths:
       - SessionToken: []
       tags:
       - Metrics metadata
+      operationId: putTagByName
+      x-operation-id-source: derived
     delete:
       summary: Delete Single Tag
       description: Deletes the tag specified in the {name} path parameter
@@ -1778,6 +1783,8 @@ paths:
       - SessionToken: []
       tags:
       - Metrics metadata
+      operationId: deleteTagByName
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

@@ -2,16 +2,7 @@ openapi: 3.2.0
 info:
   title: Splunk Observability Cloud APM visibility filters API
   version: 3.0.1
-  description: 'APIs to manage visibility filters on indexed and unindexed span tags in Splunk APM. These filters identify and hide span tag values that might contain sensitive data from everywhere in Splunk APM. Note that the tags are hidden rather than purged; information is not purged from Splunk APM until it expires after the 8-day default retention period.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token to use the API.
-
-    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the GET /apm/visibility/filter and GET /apm/visibility-filter/{FilterId} operations.
-
-    You have to have the Splunk Observability Cloud admin role to use the POST /apm/visibility-filter, DELETE /apm/visibility-filter/{FilterId}, and PUT /apm/visibility-filter/{FilterId}/enabled operations.'
+  description: APIs to manage visibility filters on indexed and unindexed span tags in Splunk APM.
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -216,6 +207,8 @@ paths:
       - SessionToken: []
       tags:
       - APM visibility filters
+      operationId: getApmVisibilityFilter
+      x-operation-id-source: derived
     post:
       summary: createVisibilityFilter
       description: 'Creates a filter and returns the filter ID.
@@ -498,6 +491,8 @@ paths:
       - SessionToken: []
       tags:
       - APM visibility filters
+      operationId: postApmVisibilityFilter
+      x-operation-id-source: derived
   /apm/visibility-filter/{FilterId}:
     get:
       summary: getIndividualVisibilityFilter
@@ -613,6 +608,8 @@ paths:
       - SessionToken: []
       tags:
       - APM visibility filters
+      operationId: getApmVisibilityFilterByFilterId
+      x-operation-id-source: derived
     delete:
       summary: deleteVisibilityFilter
       description: 'Performs a hard delete on the filter associated with the filter ID.
@@ -644,6 +641,8 @@ paths:
       - SessionToken: []
       tags:
       - APM visibility filters
+      operationId: deleteApmVisibilityFilterByFilterId
+      x-operation-id-source: derived
   /apm/visibility-filter/{FilterId}/enabled:
     put:
       summary: enableVisibilityFilter
@@ -772,6 +771,8 @@ paths:
       - SessionToken: []
       tags:
       - APM visibility filters
+      operationId: putApmVisibilityFilterByFilterIdEnabled
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

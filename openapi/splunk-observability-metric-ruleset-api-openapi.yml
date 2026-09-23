@@ -545,6 +545,8 @@ paths:
       - SessionToken: []
       tags:
       - Metric ruleset
+      operationId: getMetricruleset
+      x-operation-id-source: derived
     post:
       summary: Create New Metric Ruleset
       description: Creates a metric ruleset.
@@ -1409,6 +1411,8 @@ paths:
       - SessionToken: []
       tags:
       - Metric ruleset
+      operationId: postMetricruleset
+      x-operation-id-source: derived
   /metricruleset/{id}:
     get:
       summary: Retrieve Metric Ruleset ID
@@ -1885,6 +1889,8 @@ paths:
       - SessionToken: []
       tags:
       - Metric ruleset
+      operationId: getMetricrulesetById
+      x-operation-id-source: derived
     put:
       summary: Update Existing Metric Ruleset
       description: 'Updates the metric ruleset for the ID specified in the {id} path parameter.
@@ -2782,6 +2788,8 @@ paths:
       - SessionToken: []
       tags:
       - Metric ruleset
+      operationId: putMetricrulesetById
+      x-operation-id-source: derived
     delete:
       summary: Delete Metric Ruleset ID
       description: 'Deletes the ruleset that has the ID specified in the {id} path parameter.
@@ -2835,6 +2843,8 @@ paths:
       - SessionToken: []
       tags:
       - Metric ruleset
+      operationId: deleteMetricrulesetById
+      x-operation-id-source: derived
   /metricruleset/generateAggregationMetricName:
     post:
       summary: Generate Aggregated Metric Name
@@ -2937,6 +2947,8 @@ paths:
       - SessionToken: []
       tags:
       - Metric ruleset
+      operationId: postMetricrulesetGenerateAggregationMetricName
+      x-operation-id-source: derived
   /metricruleset/restoration/{id}:
     get:
       summary: Retrieve Restoration Job Using ID
@@ -3072,6 +3084,8 @@ paths:
       - SessionToken: []
       tags:
       - Metric ruleset
+      operationId: getMetricrulesetRestorationById
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

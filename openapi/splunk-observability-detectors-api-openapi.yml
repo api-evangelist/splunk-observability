@@ -2,16 +2,7 @@ openapi: 3.2.0
 info:
   title: Splunk Observability Cloud Detectors API
   version: 3.10.0
-  description: 'API for creating, retrieving, updating, and deleting detectors.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token to use the API.
-
-    You must have the Splunk Observability Cloud admin or power role to use the POST /detector endpoint, PUT /detector/{id}, PUT /detector/{id}/enable, PUT /detector/{id}/disable, and DELETE /detector/{id} operations.
-
-    You must have the Splunk Observability Cloud admin, power, or read_only role to use the GET /detector, GET /detector/{id},GET /detector/{id}/events, GET /detector/{id}/incidents, and POST /detector/validate operations.'
+  description: API for creating, retrieving, updating, and deleting detectors.
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -1641,6 +1632,8 @@ paths:
       - SessionToken: []
       tags:
       - Detectors
+      operationId: getDetector
+      x-operation-id-source: derived
     post:
       summary: Create Single Detector
       description: 'Creates a new detector object. Detectors define rules for identifying
@@ -4458,6 +4451,8 @@ paths:
       - SessionToken: []
       tags:
       - Detectors
+      operationId: postDetector
+      x-operation-id-source: derived
   /detector/{id}:
     get:
       summary: Retrieve Detector ID
@@ -5902,6 +5897,8 @@ paths:
       - SessionToken: []
       tags:
       - Detectors
+      operationId: getDetectorById
+      x-operation-id-source: derived
     put:
       summary: Update Single Detector
       description: 'Updates the properties of the detector with the ID
@@ -8750,6 +8747,8 @@ paths:
       - SessionToken: []
       tags:
       - Detectors
+      operationId: putDetectorById
+      x-operation-id-source: derived
     delete:
       summary: Delete Single Detector
       description: 'Deletes the detector specified by the {id} path parameter.
@@ -8810,6 +8809,8 @@ paths:
       - SessionToken: []
       tags:
       - Detectors
+      operationId: deleteDetectorById
+      x-operation-id-source: derived
   /detector/{id}/disable:
     put:
       summary: Disable Detect Blocks
@@ -8885,6 +8886,8 @@ paths:
       - SessionToken: []
       tags:
       - Detectors
+      operationId: putDetectorByIdDisable
+      x-operation-id-source: derived
   /detector/{id}/enable:
     put:
       summary: Enable Detect Blocks
@@ -8985,6 +8988,8 @@ paths:
       - SessionToken: []
       tags:
       - Detectors
+      operationId: putDetectorByIdEnable
+      x-operation-id-source: derived
   /detector/{id}/events:
     get:
       summary: Retrieve Events Single Detector
@@ -9234,6 +9239,8 @@ paths:
       - SessionToken: []
       tags:
       - Detectors
+      operationId: getDetectorByIdEvents
+      x-operation-id-source: derived
   /detector/{id}/incidents:
     get:
       summary: Retrieve Incidents Single Detector
@@ -9615,6 +9622,8 @@ paths:
       - SessionToken: []
       tags:
       - Detectors
+      operationId: getDetectorByIdIncidents
+      x-operation-id-source: derived
   /detector/validate:
     post:
       summary: Validate Detector Definition
@@ -10923,6 +10932,8 @@ paths:
       - SessionToken: []
       tags:
       - Detectors
+      operationId: postDetectorValidate
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

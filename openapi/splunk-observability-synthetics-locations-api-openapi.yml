@@ -2,16 +2,7 @@ openapi: 3.2.0
 info:
   title: Splunk Observability Cloud Synthetics locations API
   version: 1.0.1
-  description: 'API for managing locations used in Splunk Synthetic Monitoring tests.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token to use the API.
-
-    You have to have the Splunk Observability Cloud admin role to use the POST /locations, DELETE /locations/{id}, GET /locations/{location_id}/runner_tokens, POST /locations/{location_id}/runner_tokens, GET /locations/{location_id}/runner_tokens/{id} and DELETE /locations/{location_id}/runner_tokens/{id} operations.
-
-    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the  GET /locations and GET /locations/{id} operations.'
+  description: API for managing locations used in Splunk Synthetic Monitoring tests.
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -124,6 +115,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics locations
+      operationId: getLocations
+      x-operation-id-source: derived
     post:
       summary: postLocations
       description: 'Creates a Synthetics Private Location.
@@ -267,6 +260,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics locations
+      operationId: postLocations
+      x-operation-id-source: derived
   /locations/{id}:
     get:
       summary: getSingleLocation
@@ -389,6 +384,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics locations
+      operationId: getLocationsById
+      x-operation-id-source: derived
     delete:
       summary: deletePrivateLocation
       description: 'Synthetics Locations.
@@ -420,6 +417,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics locations
+      operationId: deleteLocationsById
+      x-operation-id-source: derived
   /locations/{location_id}/runner_tokens:
     get:
       summary: listPrivateLocationsRunnerTokens
@@ -490,6 +489,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics locations
+      operationId: getLocationsByLocationIdRunnerTokens
+      x-operation-id-source: derived
     post:
       summary: listPrivateLocationRunnerTokens
       description: 'Synthetics Locations
@@ -558,6 +559,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics locations
+      operationId: postLocationsByLocationIdRunnerTokens
+      x-operation-id-source: derived
   /locations/{location_id}/runner_tokens/{id}:
     get:
       summary: showPrivateLocationRunnerToken
@@ -636,6 +639,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics locations
+      operationId: getLocationsByLocationIdRunnerTokensById
+      x-operation-id-source: derived
     delete:
       summary: deletePrivateLocationRunnerToken
       description: 'Synthetics Locations
@@ -675,6 +680,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics locations
+      operationId: deleteLocationsByLocationIdRunnerTokensById
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

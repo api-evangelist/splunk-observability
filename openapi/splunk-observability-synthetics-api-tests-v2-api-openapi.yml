@@ -2,18 +2,7 @@ openapi: 3.2.0
 info:
   title: Splunk Observability Cloud Synthetics API tests V2 API
   version: 1.0.0
-  description: 'V2 API for creating, updating, retrieving, and deleting Splunk Synthetic Monitoring API tests.
-
-    Request bodies follow the same JSON conventions as other Synthetics test APIs in this reference. Successful GET and create responses include deviceId on test.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token endpoint.
-
-    You have to have the Splunk Observability Cloud admin or power role to use the POST /v2/tests/api/try_now, POST /v2/tests/api/validate, PUT /v2/tests/api/{id}/validate, PUT /v2/tests/api/{id}, DELETE /v2/tests/api/{id}, and POST /v2/tests/api operations.
-
-    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the GET /v2/tests/api/{id} operation.'
+  description: V2 API for creating, updating, retrieving, and deleting Splunk Synthetic Monitoring API tests.
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -1159,6 +1148,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics API tests V2
+      operationId: postV2TestsApi
+      x-operation-id-source: derived
   /v2/tests/api/{id}:
     get:
       summary: getSingleApiTest
@@ -1767,6 +1758,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics API tests V2
+      operationId: getV2TestsApiById
+      x-operation-id-source: derived
     put:
       summary: updateSingleApiTest
       description: 'Update an existing API test.
@@ -2364,6 +2357,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics API tests V2
+      operationId: putV2TestsApiById
+      x-operation-id-source: derived
     delete:
       summary: deleteApiTest
       description: 'Deletes an API test.
@@ -2394,6 +2389,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics API tests V2
+      operationId: deleteV2TestsApiById
+      x-operation-id-source: derived
   /v2/tests/api/{id}/validate:
     put:
       summary: validateSingleApiTest
@@ -2995,6 +2992,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics API tests V2
+      operationId: putV2TestsApiByIdValidate
+      x-operation-id-source: derived
   /v2/tests/api/try_now:
     post:
       summary: createTryNowAPITest
@@ -3605,6 +3604,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics API tests V2
+      operationId: postV2TestsApiTryNow
+      x-operation-id-source: derived
   /v2/tests/api/validate:
     post:
       summary: validateApiTest
@@ -4175,6 +4176,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics API tests V2
+      operationId: postV2TestsApiValidate
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

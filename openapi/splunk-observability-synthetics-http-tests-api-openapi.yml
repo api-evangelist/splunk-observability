@@ -2,16 +2,7 @@ openapi: 3.2.0
 info:
   title: Splunk Observability Cloud Synthetics HTTP tests API
   version: 1.0.1
-  description: 'API for creating, updating, retrieving, and deleting Synthetics HTTP tests.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token to use the API.
-
-    You have to have the Splunk Observability Cloud admin or power role to use the POST /tests/http/try_now, POST /tests/http/validate, PUT /tests/http/{id}/validate, POST /tests/http, PUT /tests/http/{id}, and DELETE /tests/http/{id} operations.
-
-    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the GET /tests/http/{id} operation.'
+  description: API for creating, updating, retrieving, and deleting Synthetics HTTP tests.
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -661,6 +652,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics HTTP tests
+      operationId: postTestsHttp
+      x-operation-id-source: derived
   /tests/http/{id}:
     get:
       summary: getSingleHttpTest
@@ -1027,6 +1020,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics HTTP tests
+      operationId: getTestsHttpById
+      x-operation-id-source: derived
     put:
       summary: updateSingleHttpTest
       description: 'Update an existing HTTP test.
@@ -1373,6 +1368,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics HTTP tests
+      operationId: putTestsHttpById
+      x-operation-id-source: derived
     delete:
       summary: deleteHttpTest
       description: 'Deletes an HTTP test
@@ -1403,6 +1400,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics HTTP tests
+      operationId: deleteTestsHttpById
+      x-operation-id-source: derived
   /tests/http/{id}/validate:
     put:
       summary: validateSingleHttpTest
@@ -1752,6 +1751,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics HTTP tests
+      operationId: putTestsHttpByIdValidate
+      x-operation-id-source: derived
   /tests/http/try_now:
     post:
       summary: createTryNowHTTPTest
@@ -2111,6 +2112,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics HTTP tests
+      operationId: postTestsHttpTryNow
+      x-operation-id-source: derived
   /tests/http/validate:
     post:
       summary: validateHttpTest
@@ -2429,6 +2432,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics HTTP tests
+      operationId: postTestsHttpValidate
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

@@ -1092,6 +1092,8 @@ paths:
       - SessionToken: []
       tags:
       - Org tokens
+      operationId: getToken
+      x-operation-id-source: derived
     post:
       summary: Create Single Token
       description: 'Creates an org token from the properties specified in the request
@@ -3040,6 +3042,8 @@ paths:
       - SessionToken: []
       tags:
       - Org tokens
+      operationId: postToken
+      x-operation-id-source: derived
   /token/{name}:
     get:
       summary: Retrieve Token Using Name
@@ -4047,6 +4051,8 @@ paths:
       - SessionToken: []
       tags:
       - Org tokens
+      operationId: getTokenByName
+      x-operation-id-source: derived
     put:
       summary: Update Single Token
       description: 'Updates properties of an org token you specify in the name path
@@ -6003,6 +6009,8 @@ paths:
       - SessionToken: []
       tags:
       - Org tokens
+      operationId: putTokenByName
+      x-operation-id-source: derived
     delete:
       summary: Delete Single Token
       description: 'Deletes the org token you specify in the name path parameter
@@ -6028,6 +6036,8 @@ paths:
       - SessionToken: []
       tags:
       - Org tokens
+      operationId: deleteTokenByName
+      x-operation-id-source: derived
   /token/{name}/rotate:
     post:
       summary: Rotate Token Secret
@@ -7077,6 +7087,8 @@ paths:
       - SessionToken: []
       tags:
       - Org tokens
+      operationId: postTokenByNameRotate
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

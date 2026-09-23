@@ -2,16 +2,7 @@ openapi: 3.2.0
 info:
   title: Splunk Observability Cloud Organizations API
   version: 3.5.0
-  description: 'API for creating, updating, retrieving, and deleting organizations.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token to use the API.
-
-    You have to have the Splunk Observability Cloud admin role to use the PATCH /organization/custom-categories, POST /organization/member/, POST /organization/members, POST /organization/orgMembers, PUT /organization/member/{id}, and DELETE /organization/member/{id} operations.
-
-    You have to have the Splunk Observability Cloud admin or power role to use the GET /organization/custom-categories operation.'
+  description: API for creating, updating, retrieving, and deleting organizations.
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -222,6 +213,8 @@ paths:
       - SessionToken: []
       tags:
       - Organizations
+      operationId: getOrganization
+      x-operation-id-source: derived
   /organization/custom-categories:
     get:
       summary: Retrieve Custom Categories
@@ -304,6 +297,8 @@ paths:
       - SessionToken: []
       tags:
       - Organizations
+      operationId: getOrganizationCustomCategories
+      x-operation-id-source: derived
     patch:
       summary: Manage Custom Category
       description: 'Creates, updates, or deletes one or more custom categories for your
@@ -587,6 +582,8 @@ paths:
       - SessionToken: []
       tags:
       - Organizations
+      operationId: patchOrganizationCustomCategories
+      x-operation-id-source: derived
   /organization/member:
     get:
       summary: Retrieve Organization Members
@@ -900,6 +897,8 @@ paths:
       - SessionToken: []
       tags:
       - Organizations
+      operationId: getOrganizationMember
+      x-operation-id-source: derived
     post:
       summary: Invite Member
       description: 'Invites a user to the organization. To make this request, you
@@ -1144,6 +1143,8 @@ paths:
       - SessionToken: []
       tags:
       - Organizations
+      operationId: postOrganizationMember
+      x-operation-id-source: derived
   /organization/member/{id}:
     get:
       summary: Retrieve Member Using Member ID
@@ -1273,6 +1274,8 @@ paths:
       - SessionToken: []
       tags:
       - Organizations
+      operationId: getOrganizationMemberById
+      x-operation-id-source: derived
     put:
       summary: Update Member Admin Access Using ID
       description: 'Update the administrative access flag for a member of the
@@ -1420,6 +1423,8 @@ paths:
       - SessionToken: []
       tags:
       - Organizations
+      operationId: putOrganizationMemberById
+      x-operation-id-source: derived
     delete:
       summary: Delete Member Using ID
       description: 'Deletes a member from the organization. The user retains access to
@@ -1453,6 +1458,8 @@ paths:
       - SessionToken: []
       tags:
       - Organizations
+      operationId: deleteOrganizationMemberById
+      x-operation-id-source: derived
   /organization/members:
     post:
       summary: Invite Members
@@ -1703,6 +1710,8 @@ paths:
       - SessionToken: []
       tags:
       - Organizations
+      operationId: postOrganizationMembers
+      x-operation-id-source: derived
   /organization/orgMembers:
     post:
       summary: Invite Org Members
@@ -2113,6 +2122,8 @@ paths:
       - SessionToken: []
       tags:
       - Organizations
+      operationId: postOrganizationOrgMembers
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

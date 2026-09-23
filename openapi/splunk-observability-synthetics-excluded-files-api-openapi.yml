@@ -86,6 +86,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics excluded files
+      operationId: getExcludedFileTypes
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

@@ -1,6 +1,6 @@
 openapi: 3.2.0
 info:
-  title: Splunk Observability Cloud — Retrieve metric time series (MTS) Retrieve metric time series (MTS) API
+  title: Splunk Observability Cloud — Retrieve metric time series…
   version: 4.0.0
   description: 'API for retrieving data points from a metric times series (MTS) for a given time window
 
@@ -320,6 +320,8 @@ paths:
       - SessionToken: []
       tags:
       - Retrieve metric time series (MTS)
+      operationId: getTimeserieswindow
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

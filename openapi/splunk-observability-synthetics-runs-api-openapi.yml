@@ -170,6 +170,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics runs
+      operationId: getRunsById
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

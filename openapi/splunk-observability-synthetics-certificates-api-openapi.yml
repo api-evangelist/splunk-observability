@@ -307,6 +307,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics certificates
+      operationId: getCertificates
+      x-operation-id-source: derived
     post:
       summary: createClientCertificate
       description: 'Creates a new client certificate, based on the specifications in the request body.
@@ -748,6 +750,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics certificates
+      operationId: postCertificates
+      x-operation-id-source: derived
   /certificates/{id}:
     get:
       summary: getSingleClientCertificate
@@ -1040,6 +1044,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics certificates
+      operationId: getCertificatesById
+      x-operation-id-source: derived
     put:
       summary: updateSingleClientCertificate
       description: 'Update an existing client certificate
@@ -1266,6 +1272,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics certificates
+      operationId: putCertificatesById
+      x-operation-id-source: derived
     delete:
       summary: deleteClientCertificate
       description: 'Deletes a client certificate
@@ -1296,6 +1304,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics certificates
+      operationId: deleteCertificatesById
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

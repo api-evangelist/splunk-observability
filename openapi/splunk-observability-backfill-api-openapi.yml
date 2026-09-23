@@ -171,6 +171,8 @@ paths:
       - SessionToken: []
       tags:
       - Backfill
+      operationId: postBackfill
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

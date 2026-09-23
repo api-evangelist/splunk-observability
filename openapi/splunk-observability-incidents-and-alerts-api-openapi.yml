@@ -2,16 +2,7 @@ openapi: 3.2.0
 info:
   title: Splunk Observability Cloud Incidents and alerts API
   version: 3.7.1
-  description: 'API for retrieving or clearing incidents and muting "critical-notifications".
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token to use the API.
-
-    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the GET /incident, GET /incident/{id}, GET /alertmuting, and GET /alertmuting/{id} operations.
-
-    You have to have the Splunk Observability Cloud admin or power role to use the PUT /incident/clear, PUT /incident/{id}/clear, POST /alertmuting,  PUT /alertmuting/{id}, DELETE /alertmuting/{id}, and PUT /alertmuting/{id}/unmute operations.'
+  description: API for retrieving or clearing incidents and muting "critical-notifications".
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -428,6 +419,8 @@ paths:
       - SessionToken: []
       tags:
       - Incidents and alerts
+      operationId: getAlertmuting
+      x-operation-id-source: derived
     post:
       summary: Create Single Muting Rule
       description: 'Creates a new muting rule, based on the
@@ -1000,6 +993,8 @@ paths:
       - SessionToken: []
       tags:
       - Incidents and alerts
+      operationId: postAlertmuting
+      x-operation-id-source: derived
   /alertmuting/{id}:
     get:
       summary: Retrieve Muting Rule ID
@@ -1289,6 +1284,8 @@ paths:
       - SessionToken: []
       tags:
       - Incidents and alerts
+      operationId: getAlertmutingById
+      x-operation-id-source: derived
     put:
       summary: Update Single Muting Rule
       description: 'Updates the muting rule specified in the {id} path parameter,
@@ -1867,6 +1864,8 @@ paths:
       - SessionToken: []
       tags:
       - Incidents and alerts
+      operationId: putAlertmutingById
+      x-operation-id-source: derived
     delete:
       summary: Delete Single Muting Rule
       description: 'Deletes a muting rule, specified by the rule ID in the {id}
@@ -1904,6 +1903,8 @@ paths:
       - SessionToken: []
       tags:
       - Incidents and alerts
+      operationId: deleteAlertmutingById
+      x-operation-id-source: derived
   /alertmuting/{id}/unmute:
     put:
       summary: Unmute Single Muting Rule
@@ -2203,6 +2204,8 @@ paths:
       - SessionToken: []
       tags:
       - Incidents and alerts
+      operationId: putAlertmutingByIdUnmute
+      x-operation-id-source: derived
   /incident:
     get:
       summary: Retrieve Incidents
@@ -2547,6 +2550,8 @@ paths:
       - SessionToken: []
       tags:
       - Incidents and alerts
+      operationId: getIncident
+      x-operation-id-source: derived
   /incident/{id}:
     get:
       summary: Retrieve Incident ID
@@ -2848,6 +2853,8 @@ paths:
       - SessionToken: []
       tags:
       - Incidents and alerts
+      operationId: getIncidentById
+      x-operation-id-source: derived
   /incident/{id}/clear:
     put:
       summary: Clear Single Incident
@@ -2882,6 +2889,8 @@ paths:
       - SessionToken: []
       tags:
       - Incidents and alerts
+      operationId: putIncidentByIdClear
+      x-operation-id-source: derived
   /incident/clear:
     put:
       summary: Clear Incidents
@@ -2999,6 +3008,8 @@ paths:
       - SessionToken: []
       tags:
       - Incidents and alerts
+      operationId: putIncidentClear
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

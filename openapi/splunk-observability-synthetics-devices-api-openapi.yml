@@ -147,6 +147,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics devices
+      operationId: getDevices
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

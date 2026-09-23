@@ -175,6 +175,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics CA certificates
+      operationId: getCacerts
+      x-operation-id-source: derived
     post:
       summary: createCaCertificate
       description: 'Creates a new CA certificate, based on the specifications in the request body.
@@ -438,6 +440,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics CA certificates
+      operationId: postCacerts
+      x-operation-id-source: derived
   /cacerts/{id}:
     get:
       summary: getSingleCaCertificate
@@ -600,6 +604,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics CA certificates
+      operationId: getCacertsById
+      x-operation-id-source: derived
     put:
       summary: updateSingleCaCertificate
       description: 'Update an existing CA certificate
@@ -789,6 +795,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics CA certificates
+      operationId: putCacertsById
+      x-operation-id-source: derived
     delete:
       summary: deleteCaCertificate
       description: 'Deletes a CA certificate
@@ -843,6 +851,8 @@ paths:
       - SessionToken: []
       tags:
       - Synthetics CA certificates
+      operationId: deleteCacertsById
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

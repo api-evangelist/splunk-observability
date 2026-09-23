@@ -33,12 +33,12 @@ servers:
 security:
 - SessionToken: []
 tags:
-- name: Session tokens
+- name: Session Tokens
 paths:
   /session:
     post:
       summary: Create Session Token
-      description: 'Creates a session token (referred to as an User API Access Token  in
+      description: 'Creates a session token (referred to as an User API Access Token in
 
         the UI) that provides authentication for other API
 
@@ -252,12 +252,14 @@ paths:
 
                         '
       tags:
-      - Session tokens
+      - Session Tokens
+      operationId: postSession
+      x-operation-id-source: derived
     delete:
       summary: Delete Session Token
       description: 'Invalidates an existing session token (referred to as an User API
 
-        Access Tokenin the UI). If the invalidation succeeds, you  receive
+        Access Tokenin the UI). If the invalidation succeeds, you receive
 
         the HTTP status code ''204''. This means that the API successfully
 
@@ -304,7 +306,9 @@ paths:
       security:
       - SessionToken: []
       tags:
-      - Session tokens
+      - Session Tokens
+      operationId: deleteSession
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:

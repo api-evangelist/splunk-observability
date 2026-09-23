@@ -1,17 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Splunk Observability Cloud Send traces, metrics and events API
+  title: Splunk Observability Cloud Send traces, metrics and events…
   version: 4.0.1
-  description: 'API for ingesting traces, datapoints, and event data.
-
-    Requirements
-
-
-    You must have an organization access token with the API permission or a session token to use the API.
-
-    You have to have the Splunk Observability Cloud admin, power, or read_only role to use the GET /incident, GET /incident/{id}, GET /alertmuting, and GET /alertmuting/{id} operations.
-
-    You have to have the Splunk Observability Cloud admin or power role to use the PUT /incident/clear, PUT /incident/{id}/clear, POST /alertmuting,  PUT /alertmuting/{id}, DELETE /alertmuting/{id}, and PUT /alertmuting/{id}/unmute operations.'
+  description: API for ingesting traces, datapoints, and event data.
   x-provenance:
     method: reconstructed
     authored_by: Splunk (content) / API Evangelist (assembly)
@@ -365,6 +356,8 @@ paths:
       - SessionToken: []
       tags:
       - Send traces, metrics and events
+      operationId: postDatapoint
+      x-operation-id-source: derived
   /datapoint/otlp:
     post:
       summary: Send OTLP Metrics
@@ -407,6 +400,8 @@ paths:
       - SessionToken: []
       tags:
       - Send traces, metrics and events
+      operationId: postDatapointOtlp
+      x-operation-id-source: derived
   /event:
     post:
       summary: Send Events
@@ -545,6 +540,8 @@ paths:
       - SessionToken: []
       tags:
       - Send traces, metrics and events
+      operationId: postEvent
+      x-operation-id-source: derived
   /trace:
     post:
       summary: SendTraces
@@ -637,6 +634,8 @@ paths:
       - SessionToken: []
       tags:
       - Send traces, metrics and events
+      operationId: postTrace
+      x-operation-id-source: derived
   /trace/otlp:
     post:
       summary: SendOTLPTraces
@@ -717,6 +716,8 @@ paths:
       - SessionToken: []
       tags:
       - Send traces, metrics and events
+      operationId: postTraceOtlp
+      x-operation-id-source: derived
 components:
   securitySchemes:
     SessionToken:
