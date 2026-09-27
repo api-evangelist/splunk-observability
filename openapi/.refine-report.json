@@ -100,9 +100,7 @@
     "splunk-observability-teams-api-openapi.yml",
     "splunk-observability-download-apm-traces-api-openapi.yml"
   ],
-  "archived": [
-    "deleted 1 superseded output(s) from the previous generation"
-  ],
+  "archived": [],
   "errors": [],
   "warnings": [],
   "notes": [
@@ -203,8 +201,7 @@
     "splunk-observability-teams-openapi.yml: declared missing tag: Teams",
     "splunk-observability-trace-id-openapi.yml: upgraded openapi 3.0.3 -> OpenAPI 3.2.0",
     "splunk-observability-trace-id-openapi.yml: declared missing tag: Download APM traces",
-    "superseded outputs removed: splunk-observability-sl-os-api-openapi.yml",
-    "apis.yml register: written (+1 apis, 49 total)"
+    "apis.yml register: already-registered"
   ],
   "skipped": [
     "splunk-observability-apm-service-topology-api-openapi.yml: previously refined output, superseded by openapi/_original/",
@@ -233,7 +230,7 @@
     "splunk-observability-send-traces-metrics-and-events-api-openapi.yml: previously refined output, superseded by openapi/_original/",
     "splunk-observability-session-tokens-api-openapi.yml: previously refined output, superseded by openapi/_original/",
     "splunk-observability-signalflow-api-openapi.yml: previously refined output, superseded by openapi/_original/",
-    "splunk-observability-sl-os-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "splunk-observability-slos-api-openapi.yml: previously refined output, superseded by openapi/_original/",
     "splunk-observability-splunk-observability-cloud-audit-events-api-openapi.yml: previously refined output, superseded by openapi/_original/",
     "splunk-observability-synthetics-api-tests-v1-api-openapi.yml: previously refined output, superseded by openapi/_original/",
     "splunk-observability-synthetics-api-tests-v2-api-openapi.yml: previously refined output, superseded by openapi/_original/",

@@ -68,6 +68,7 @@ tags:
 - Logging
 - SignalFlow
 - MCP
+- Real-Time
 apis:
 - aid: splunk-observability:splunk-observability-mcp
   name: Splunk Observability Cloud MCP Server
@@ -5671,6 +5672,8 @@ common:
   url: llms/splunk-observability-llms.txt
 - type: HelpCenter
   url: https://help.splunk.com/en/splunk-observability-cloud
+- type: GitHubOrganization
+  url: https://github.com/signalfx
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com

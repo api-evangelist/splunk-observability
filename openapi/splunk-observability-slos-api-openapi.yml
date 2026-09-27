@@ -1,6 +1,6 @@
 openapi: 3.2.0
 info:
-  title: Splunk Observability Cloud SL Os API
+  title: Splunk Observability Cloud SLOs API
   version: 1.0.0
   description: 'API for creating, retrieiving, and managing service level objectives (SLOs).
 
