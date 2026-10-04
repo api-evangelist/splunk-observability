@@ -69,6 +69,7 @@ tags:
 - SignalFlow
 - MCP
 - Real-Time
+- Incident Management
 apis:
 - aid: splunk-observability:splunk-observability-mcp
   name: Splunk Observability Cloud MCP Server
