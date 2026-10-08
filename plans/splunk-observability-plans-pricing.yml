@@ -97,3 +97,84 @@ excluded:
     note: Priced per vCPU on the same page but a separate product line, not Splunk Observability Cloud.
   - name: Splunk IT Service Intelligence
     note: Contact-sales, workload or ingest pricing; a Splunk platform product, not Observability Cloud.
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - hybrid
+  - seat
+  - subscription
+  units:
+  - request
+  - seat
+  plans:
+  - name: Infrastructure
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods: []
+  - name: App & Infrastructure
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods: []
+  - name: End-to-End
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods: []
+  - name: Infrastructure Monitoring
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods: []
+  - name: Application Performance Monitoring (APM)
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods: []
+  - name: Real User Monitoring (RUM)
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods: []
+  - name: Synthetic Monitoring
+    access: other
+    model: hybrid
+    model_how: derived
+    units:
+    - request
+    periods: []
+  - name: Database Monitoring
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods: []
+  - name: Secure Application
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods: []
+  - name: Splunk On-Call
+    access: other
+    model: seat
+    model_how: derived
+    units:
+    - seat
+    periods: []
